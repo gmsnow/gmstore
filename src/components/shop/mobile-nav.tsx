@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Store, ShoppingBag, LayoutDashboard, LogIn, UserPlus, LogOut, Search, Package } from "lucide-react";
+import { Store, ShoppingBag, LayoutDashboard, LogIn, UserPlus, LogOut, Search, Package, Heart } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
 export function MobileNav({ session, role }: { session: any; role: string | undefined }) {
@@ -60,6 +60,9 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
           </Link>
           <Link href="/categories" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted transition-colors" onClick={() => setOpen(false)}>
             <ShoppingBag className="h-4 w-4" /> {t("nav.categories")}
+          </Link>
+          <Link href="/favorites" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted transition-colors" onClick={() => setOpen(false)}>
+            <Heart className="h-4 w-4 text-rose-500" /> {t("nav.favorites")}
           </Link>
           <Link href="/track" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted transition-colors" onClick={() => setOpen(false)}>
             <Package className="h-4 w-4" /> {t("track.nav_link")}

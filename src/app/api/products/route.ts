@@ -2,6 +2,24 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
+export const GET = async (req: Request) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const ids = searchParams.get("ids");
+    if (ids) {
+      const idList = ids.split(",").filter(Boolean);
+      const products = await prisma.product.findMany({
+        where: { id: { in: idList } },
+        include: { category: true, reviews: { select: { rating: true } } },
+      });
+      return NextResponse.json(products);
+    }
+    return NextResponse.json([]);
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message }, { status: 500 });
+  }
+};
+
 export const POST = auth(async (req) => {
   try {
     const role = (req.auth?.user as any)?.role;

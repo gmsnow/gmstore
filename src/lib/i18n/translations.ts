@@ -12,6 +12,7 @@ export const ar = {
   "nav.store_name": "GM Store",
   "nav.mobile_menu": "القائمة",
   "nav.search": "بحث عن منتجات...",
+  "nav.favorites": "المفضلة",
 
   /* Home */
   "home.hero_title": "تسوق بأفضل الأسعار",
@@ -193,6 +194,12 @@ export const ar = {
   "auth.no_account": "ليس لديك حساب؟",
   "auth.login_link": "تسجيل الدخول",
 
+  /* Favorites */
+  "favorites.title": "المفضلة",
+  "favorites.empty": "لا توجد منتجات في المفضلة",
+  "favorites.browse": "تصفح المنتجات",
+  "favorites.remove": "إزالة",
+
   /* General */
   "general.submit": "إرسال",
   "general.save": "حفظ",
@@ -227,6 +234,7 @@ export const en: Record<string, string> = {
   "nav.store_name": "GM Store",
   "nav.mobile_menu": "Menu",
   "nav.search": "Search products...",
+  "nav.favorites": "Favorites",
 
   "home.hero_title": "Shop at the Best Prices",
   "home.hero_desc": "Discover our curated collection of premium products with high quality and competitive prices",
@@ -396,6 +404,11 @@ export const en: Record<string, string> = {
   "auth.have_account": "Already have an account?",
   "auth.no_account": "Don't have an account?",
   "auth.login_link": "Login",
+
+  "favorites.title": "Favorites",
+  "favorites.empty": "No favorites yet",
+  "favorites.browse": "Browse Products",
+  "favorites.remove": "Remove",
 
   "general.submit": "Submit",
   "general.save": "Save",

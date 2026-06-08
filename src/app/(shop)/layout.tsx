@@ -3,7 +3,7 @@ import { auth, signOut } from "@/lib/auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
 import { T } from "@/components/translate";
-import { ShoppingCart, Store, LogIn, LayoutDashboard, UserPlus, LogOut } from "lucide-react";
+import { ShoppingCart, Store, LogIn, LayoutDashboard, UserPlus, LogOut, Heart } from "lucide-react";
 import { MobileNav } from "@/components/shop/mobile-nav";
 import { SearchInput } from "@/components/shop/search-input";
 
@@ -35,6 +35,10 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
           <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
             <Link href="/products" className="hover:text-primary transition-colors"><T k="nav.products" /></Link>
             <Link href="/categories" className="hover:text-primary transition-colors"><T k="nav.categories" /></Link>
+            <Link href="/favorites" className="hover:text-primary transition-colors flex items-center gap-1">
+              <Heart className="h-4 w-4 text-rose-500" />
+              <T k="nav.favorites" />
+            </Link>
             <div className="border-e border-border h-5" />
             <SearchInput />
           </nav>
