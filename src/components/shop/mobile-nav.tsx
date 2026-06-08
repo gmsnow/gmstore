@@ -28,7 +28,6 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
       <button className="md:hidden p-2 hover:text-primary transition-colors" onClick={() => setOpen(true)}>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg>
       </button>
-      {open && <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setOpen(false)} />}
       <div
         style={{ backgroundColor: "#ffffff" }}
         className={`fixed inset-y-0 z-50 w-72 border-border p-6 transition-transform duration-300 md:hidden ${isRtl ? "right-0 border-r" : "left-0 border-l"} ${open ? "translate-x-0" : isRtl ? "translate-x-full" : "-translate-x-full"}`}
