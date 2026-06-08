@@ -85,15 +85,6 @@ export function SwipeableProductCard({ product }: { product: any }) {
         transition={{ duration: 0.4 }}
       />
       <div className="relative overflow-hidden rounded-2xl bg-card shadow-sm hover:shadow-xl transition-all duration-300">
-        <div className="absolute inset-0 flex pointer-events-none z-10 rounded-2xl overflow-hidden">
-          <div className="flex-1 flex items-center justify-center bg-rose-500/90 text-white text-sm font-bold gap-1.5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-[0s] group-hover:delay-[3000ms]">
-            <Heart className={`h-4 w-4 ${isFav ? "fill-white" : ""}`} />
-            {isFav ? "✓" : null}
-          </div>
-          <div className="flex-1 flex items-center justify-center bg-emerald-500/90 text-white text-sm font-bold gap-1.5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-[0s] group-hover:delay-[3000ms]">
-            <ShoppingCart className="h-4 w-4" />
-          </div>
-        </div>
 
         <motion.div
           drag="x"
@@ -106,6 +97,15 @@ export function SwipeableProductCard({ product }: { product: any }) {
         >
           <Link href={`/products/${product.slug}`} className="block">
             <div className="relative overflow-hidden">
+              <div className="absolute inset-0 flex pointer-events-none z-10 rounded-2xl overflow-hidden">
+                <div className="flex-1 flex items-center justify-center bg-rose-500/90 text-white text-sm font-bold gap-1.5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-[0s] group-hover:delay-[3000ms]">
+                  <Heart className={`h-4 w-4 ${isFav ? "fill-white" : ""}`} />
+                  {isFav ? "✓" : null}
+                </div>
+                <div className="flex-1 flex items-center justify-center bg-emerald-500/90 text-white text-sm font-bold gap-1.5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-[0s] group-hover:delay-[3000ms]">
+                  <ShoppingCart className="h-4 w-4" />
+                </div>
+              </div>
               <motion.div className="aspect-square bg-muted overflow-hidden">
                 {product.images[0] ? (
                   <motion.img
