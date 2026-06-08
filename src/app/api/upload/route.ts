@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { UTApi } from "uploadthing/server";
+
+const utapi = new UTApi();
 
 export const POST = auth(async (req) => {
   const role = (req.auth?.user as any)?.role;
@@ -11,11 +14,10 @@ export const POST = auth(async (req) => {
   const file = formData.get("file") as File;
   if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const base64 = buffer.toString("base64");
-  const mime = file.type || "image/jpeg";
-  const dataUrl = `data:${mime};base64,${base64}`;
+  const res = await utapi.uploadFiles(file);
+  if (res.error) {
+    return NextResponse.json({ error: res.error.message }, { status: 500 });
+  }
 
-  return NextResponse.json({ url: dataUrl });
+  return NextResponse.json({ url: res.data.url });
 });
