@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 function img(text: string, bg = "1a1a2e", fg = "ffffff"): string[] {
-  return [`https://placehold.co/600x600/${bg}/${fg}?text=${encodeURIComponent(text)}&font=source-sans-pro`];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="600" height="600" fill="#${bg}"/><text x="300" y="300" text-anchor="middle" dominant-baseline="central" fill="#${fg}" font-family="sans-serif" font-size="24">${text.replace(/"/g, "'")}</text></svg>`;
+  return [`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`];
 }
 
 const CATEGORIES = [
