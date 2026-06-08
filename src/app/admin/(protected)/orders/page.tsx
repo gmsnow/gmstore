@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, CheckCheck } from "lucide-react";
+import { MobileOrderCards } from "@/components/admin/mobile-order-cards";
 
 const statusLabels: Record<string, string> = {
   PENDING: "قيد الانتظار",
@@ -95,25 +96,8 @@ export default async function AdminOrdersPage() {
         </Table>
       </div>
 
-      <div className="md:hidden space-y-3">
-        {orders.length === 0 && <div className="text-center text-muted-foreground py-8">لا توجد طلبات بعد</div>}
-        {orders.map((o) => (
-          <Link key={o.id} href={`/admin/orders/${o.id}`} className="block rounded-lg border border-border bg-card p-4 hover:bg-muted/50 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-mono text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
-              <Badge variant={statusVariant[o.status] || "default"}>{statusLabels[o.status] || o.status}</Badge>
-            </div>
-            <div className="flex items-center gap-3 mb-2">
-              <OrderThumbs items={o.items} />
-              <span className="text-sm font-medium">{o.items.length} منتج</span>
-            </div>
-            <div className="text-sm mb-1"><span className="text-muted-foreground">العميل: </span>{o.customerName}</div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{o.createdAt.toLocaleDateString("ar-SA")}</span>
-              <span className="text-sm font-semibold">{Number(o.total).toFixed(2)} ريال</span>
-            </div>
-          </Link>
-        ))}
+      <div className="md:hidden">
+        <MobileOrderCards orders={orders} />
       </div>
     </div>
   );
