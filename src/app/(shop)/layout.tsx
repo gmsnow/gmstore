@@ -32,7 +32,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
             <Store className="h-6 w-6 text-primary" />
             <T k="nav.store_name" />
           </Link>
-          <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
+          <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
             <Link href="/products" className="hover:text-primary transition-colors"><T k="nav.products" /></Link>
             <Link href="/categories" className="hover:text-primary transition-colors"><T k="nav.categories" /></Link>
             <div className="border-e border-border h-5" />
