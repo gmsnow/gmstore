@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star } from "lucide-react";
-import { FadeIn, FadeInUp, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion-wrappers";
+import { ArrowLeft } from "lucide-react";
+import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
-import { LocalizedName, LocalizedDesc } from "@/components/localized";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 
 function serialize(obj: any): any {
