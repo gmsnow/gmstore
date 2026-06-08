@@ -30,7 +30,8 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
       </button>
       {open && <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setOpen(false)} />}
       <div
-        className={`fixed inset-y-0 z-50 w-72 sidebar-solid border-border p-6 transition-transform duration-300 md:hidden ${isRtl ? "right-0 border-r" : "left-0 border-l"} ${open ? "translate-x-0" : isRtl ? "translate-x-full" : "-translate-x-full"}`}
+        style={{ backgroundColor: "#ffffff" }}
+        className={`fixed inset-y-0 z-50 w-72 border-border p-6 transition-transform duration-300 md:hidden ${isRtl ? "right-0 border-r" : "left-0 border-l"} ${open ? "translate-x-0" : isRtl ? "translate-x-full" : "-translate-x-full"}`}
         dir={direction}
       >
         <div className="flex items-center justify-between mb-6">
