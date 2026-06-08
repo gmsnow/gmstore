@@ -9,6 +9,7 @@ import { LocalizedName } from "@/components/localized";
 import { getServerLocale } from "@/lib/i18n/server";
 import { localizedName } from "@/lib/i18n/localized";
 import { ProductFilters } from "@/components/shop/product-filters";
+import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 
 function serialize(obj: any): any {
   return JSON.parse(JSON.stringify(obj, (_, v) => (typeof v === "bigint" ? Number(v) : v)));
@@ -144,40 +145,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((p: any) => (
             <StaggerItem key={p.id}>
-              <Link href={`/products/${p.slug}`}>
-                <HoverCard>
-                  <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
-                    <div className="aspect-square bg-muted">
-                      {p.images[0] ? (
-                        <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-muted-foreground text-sm"><T k="product.no_image" /></div>
-                      )}
-                    </div>
-                    <CardContent className="p-4 space-y-2">
-                      <Badge variant="outline"><LocalizedName item={p.category} /></Badge>
-                      <h3 className="font-semibold truncate"><LocalizedName item={p} /></h3>
-                      {p.reviews?.length > 0 && (
-                        <div className="flex items-center gap-1 text-sm">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} className={`h-3.5 w-3.5 ${s <= Math.round(p.reviews.reduce((a: number, r: any) => a + r.rating, 0) / p.reviews.length) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`} />
-                          ))}
-                          <span className="text-xs text-muted-foreground">({p.reviews.length})</span>
-                        </div>
-                      )}
-                      {p.colors?.length > 0 && (
-                        <div className="flex gap-1">
-                          {p.colors.slice(0, 5).map((c: string) => (
-                            <div key={c} className="h-3.5 w-3.5 rounded-full border border-border" style={{ backgroundColor: c }} />
-                          ))}
-                          {p.colors.length > 5 && <span className="text-[10px] text-muted-foreground self-center">+{p.colors.length - 5}</span>}
-                        </div>
-                      )}
-                      <p className="text-lg font-bold text-primary">{Number(p.price).toFixed(2)} ريال</p>
-                    </CardContent>
-                  </Card>
-                </HoverCard>
-              </Link>
+              <SwipeableProductCard product={p} />
             </StaggerItem>
           ))}
           {products.length === 0 && (
