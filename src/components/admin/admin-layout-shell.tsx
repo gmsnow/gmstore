@@ -24,7 +24,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen w-full max-w-full overflow-x-hidden" dir={direction}>
       {open && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setOpen(false)} />}
 
-      <aside className={`fixed inset-y-0 right-0 z-40 flex w-64 flex-col border-l border-border bg-card p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:z-auto ${open ? "translate-x-0" : "translate-x-full"}`}>
+      <aside style={{ backgroundColor: "var(--card)" }} className={`fixed inset-y-0 right-0 z-40 flex w-64 flex-col border-l border-border bg-card p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:z-auto ${open ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex items-center justify-between mb-8">
           <Link href="/admin" className="flex items-center gap-2 text-lg font-bold" onClick={() => setOpen(false)}>
             <LayoutDashboard className="h-5 w-5 text-primary" />
