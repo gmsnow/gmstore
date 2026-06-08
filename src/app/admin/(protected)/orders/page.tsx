@@ -56,7 +56,7 @@ export default async function AdminOrdersPage() {
         </div>
       </div>
 
-      <div className="hidden md:block">
+      <div className="max-md:hidden">
         <Table>
           <TableHeader>
             <TableRow>
