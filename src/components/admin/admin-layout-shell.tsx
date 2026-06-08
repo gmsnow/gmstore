@@ -21,10 +21,10 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="flex min-h-screen" dir={direction}>
+    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden" dir={direction}>
       {open && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setOpen(false)} />}
 
-      <aside className={`fixed inset-y-0 right-0 z-40 flex w-64 flex-col border-l border-border bg-card p-6 transition-transform duration-300 lg:static lg:translate-x-0 ${open ? "translate-x-0" : "translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 right-0 z-40 flex w-64 flex-col border-l border-border bg-card p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:z-auto ${open ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex items-center justify-between mb-8">
           <Link href="/admin" className="flex items-center gap-2 text-lg font-bold" onClick={() => setOpen(false)}>
             <LayoutDashboard className="h-5 w-5 text-primary" />
@@ -65,8 +65,8 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1">
         <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
-          <button onClick={() => setOpen(true)}>
-            <Menu className="h-5 w-5" />
+          <button onClick={() => setOpen(true)} className="lg:hidden p-2 hover:text-primary transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg>
           </button>
           <Link href="/admin" className="flex items-center gap-2 text-lg font-bold">
             <LayoutDashboard className="h-5 w-5 text-primary" />
