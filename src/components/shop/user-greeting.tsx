@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { T } from "@/components/translate";
@@ -13,43 +13,23 @@ export function UserGreeting({ userName: propName }: { userName?: string | null 
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (name) {
+    if (name && !show) {
       setShow(true);
-      const timer = setTimeout(() => setShow(false), 5000);
-      return () => clearTimeout(timer);
-    } else {
-      setShow(false);
     }
-  }, [name, pathname]);
+  }, [name, show]);
+
+  if (!name || !show) return null;
 
   return (
-    <AnimatePresence>
-      {show && name && (
-        <motion.div
-          key={pathname}
-          initial={{ x: -80, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -80, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="fixed top-20 left-4 z-50 flex items-center gap-2.5 bg-primary text-primary-foreground px-4 py-2.5 rounded-xl shadow-lg"
-        >
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.15 }}
-          >
-            <User className="h-4 w-4" />
-          </motion.div>
-          <motion.span
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-sm font-medium whitespace-nowrap"
-          >
-            <T k="nav.greeting" />, {name}
-          </motion.span>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <motion.div
+      key={pathname}
+      initial={{ x: -60, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 150, damping: 18 }}
+      className="fixed top-20 left-4 z-50 flex items-center gap-2 bg-primary/90 text-primary-foreground text-xs px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm"
+    >
+      <User className="h-3 w-3" />
+      <span className="font-medium"><T k="nav.greeting" />, {name}</span>
+    </motion.div>
   );
 }
