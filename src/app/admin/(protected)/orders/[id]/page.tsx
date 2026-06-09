@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MapPin, Package } from "lucide-react";
 import { T } from "@/components/translate";
 import { OrderMap } from "@/components/admin/order-map";
 import { useI18n } from "@/lib/i18n/provider";
@@ -31,6 +31,10 @@ const statusVariant: Record<string, "warning" | "success" | "danger" | "default"
 };
 
 const statusOptions = itemStatuses.map((s) => ({ value: s, label: statusLabels[s] }));
+
+function StatusBadge({ status }: { status: string }) {
+  return <Badge variant={statusVariant[status] || "default"}>{statusLabels[status] || status}</Badge>;
+}
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
@@ -68,27 +72,32 @@ export default function AdminOrderDetailPage() {
   const lng = address.lng ? Number(address.lng) : null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-3 flex-wrap">
         <Link href="/admin/orders">
           <Button variant="outline" size="sm"><ArrowRight className="h-4 w-4" /></Button>
         </Link>
-        <h1 className="text-2xl font-bold">{t("admin.order_detail") || "تفاصيل الطلب"}</h1>
-        <span className="mr-auto font-mono text-xs text-muted-foreground">{order.id}</span>
+        <h1 className="text-xl md:text-2xl font-bold">{t("admin.order_detail") || "تفاصيل الطلب"}</h1>
+        <span className="mr-auto font-mono text-[10px] md:text-xs text-muted-foreground break-all max-w-[120px] md:max-w-none">{order.id}</span>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle><T k="checkout.shipping_details" /></CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardHeader><CardTitle className="text-sm md:text-base"><T k="checkout.shipping_details" /></CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-xs md:text-sm">
             <p><span className="font-medium text-muted-foreground"><T k="checkout.city" />:</span> {address.city || "—"}</p>
             <p><span className="font-medium text-muted-foreground"><T k="checkout.street" />:</span> {address.street || "—"}</p>
             {address.notes && <p><span className="font-medium text-muted-foreground"><T k="checkout.notes" />:</span> {address.notes}</p>}
+            {lat && lng && (
+              <a href={`https://www.google.com/maps?q=${lat},${lng}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary text-xs mt-2">
+                <MapPin className="h-3.5 w-3.5" /> عرض على الخريطة
+              </a>
+            )}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle><T k="checkout.customer" /></CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardHeader><CardTitle className="text-sm md:text-base"><T k="checkout.customer" /></CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-xs md:text-sm">
             <p><span className="font-medium text-muted-foreground"><T k="checkout.full_name" />:</span> {order.customerName}</p>
             <p><span className="font-medium text-muted-foreground"><T k="checkout.email" />:</span> {order.customerEmail}</p>
             <p><span className="font-medium text-muted-foreground"><T k="checkout.phone_label" />:</span> {order.customerPhone}</p>
@@ -98,68 +107,108 @@ export default function AdminOrderDetailPage() {
 
       {lat && lng && (
         <Card>
-          <CardHeader><CardTitle>موقع العميل</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-sm md:text-base">موقع العميل</CardTitle></CardHeader>
           <CardContent>
             <OrderMap lat={lat} lng={lng} />
           </CardContent>
         </Card>
       )}
 
-      <Card>
-        <CardHeader><CardTitle><T k="checkout.items" /></CardTitle></CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>المنتج</TableHead>
-                <TableHead><T k="checkout.qty" /></TableHead>
-                <TableHead><T k="admin.price" /></TableHead>
-                <TableHead>المجموع</TableHead>
-                <TableHead>حالة المنتج</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {order.items.map((item: any) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {item.product?.images?.[0] ? (
-                        <div className="relative">
-                          <img src={item.product.images[0]} alt="" className="h-10 w-10 rounded-lg object-cover bg-muted shrink-0" />
-                          {item.color && <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border border-background" style={{ backgroundColor: item.color }} />}
-                        </div>
-                      ) : (
-                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-[10px] text-muted-foreground">—</div>
-                      )}
-                      <div>
-                        <p className="text-sm font-medium">{item.product?.name || "—"}</p>
-                        {item.color && <p className="text-[10px] text-muted-foreground">{item.color}</p>}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>{Number(item.price).toFixed(2)} ريال</TableCell>
-                  <TableCell>{(Number(item.price) * item.quantity).toFixed(2)} ريال</TableCell>
-                  <TableCell>
-                    <Select
-                      value={itemUpdating === item.id ? t("general.loading") : item.status}
-                      onChange={(e) => updateItemStatus(item.id, e.target.value)}
-                      options={statusOptions}
-                      className="w-36"
-                    />
-                  </TableCell>
+      <div className="hidden md:block">
+        <Card>
+          <CardHeader><CardTitle className="text-sm md:text-base"><T k="checkout.items" /></CardTitle></CardHeader>
+          <CardContent className="p-0 md:p-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead><T k="checkout.qty" /></TableHead>
+                  <TableHead><T k="admin.price" /></TableHead>
+                  <TableHead>المجموع</TableHead>
+                  <TableHead>حالة المنتج</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {order.items.map((item: any) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {item.product?.images?.[0] ? (
+                          <div className="relative shrink-0">
+                            <img src={item.product.images[0]} alt="" className="h-10 w-10 rounded-lg object-cover bg-muted" />
+                            {item.color && <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border border-background" style={{ backgroundColor: item.color }} />}
+                          </div>
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0"><Package className="h-4 w-4 text-muted-foreground" /></div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{item.product?.name || "—"}</p>
+                          {item.color && <p className="text-[10px] text-muted-foreground">{item.color}</p>}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell className="whitespace-nowrap">{Number(item.price).toFixed(2)} ريال</TableCell>
+                    <TableCell className="whitespace-nowrap">{(Number(item.price) * item.quantity).toFixed(2)} ريال</TableCell>
+                    <TableCell>
+                      <Select
+                        value={itemUpdating === item.id ? t("general.loading") : item.status}
+                        onChange={(e) => updateItemStatus(item.id, e.target.value)}
+                        options={statusOptions}
+                        className="w-36"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="md:hidden space-y-3">
+        {order.items.map((item: any) => (
+          <Card key={item.id}>
+            <CardContent className="p-3 space-y-2">
+              <div className="flex items-center gap-3">
+                {item.product?.images?.[0] ? (
+                  <div className="relative shrink-0">
+                    <img src={item.product.images[0]} alt="" className="h-14 w-14 rounded-lg object-cover bg-muted" />
+                    {item.color && <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background" style={{ backgroundColor: item.color }} />}
+                  </div>
+                ) : (
+                  <div className="h-14 w-14 rounded-lg bg-muted flex items-center justify-center shrink-0"><Package className="h-5 w-5 text-muted-foreground" /></div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate">{item.product?.name || "—"}</p>
+                  {item.color && (
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                      اللون: <span className="h-3 w-3 rounded-full inline-block border border-border" style={{ backgroundColor: item.color }} />
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.quantity} × {Number(item.price).toFixed(2)} ريال</p>
+                </div>
+                <p className="text-sm font-semibold">{(Number(item.price) * item.quantity).toFixed(2)} ريال</p>
+              </div>
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <StatusBadge status={item.status} />
+                <Select
+                  value={itemUpdating === item.id ? t("general.loading") : item.status}
+                  onChange={(e) => updateItemStatus(item.id, e.target.value)}
+                  options={statusOptions}
+                  className="w-28 text-xs"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <div className="text-left">
-        <p className="text-xl font-bold">
+        <p className="text-lg md:text-xl font-bold">
           المجموع الكلي: {Number(order.total).toFixed(2)} ريال
         </p>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-[11px] md:text-xs text-muted-foreground mt-1">
           تاريخ الطلب: {new Date(order.createdAt).toLocaleDateString("ar-SA")}
         </p>
       </div>

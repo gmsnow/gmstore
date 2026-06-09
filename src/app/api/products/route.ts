@@ -6,30 +6,49 @@ export const GET = async (req: Request) => {
   try {
     const { searchParams } = new URL(req.url);
     const ids = searchParams.get("ids");
-    if (ids) {
-      const idList = ids.split(",").filter(Boolean);
+    const search = searchParams.get("search");
+    const limit = parseInt(searchParams.get("limit") || "50");
+
+    if (search) {
       const products = await prisma.product.findMany({
-        where: { id: { in: idList } },
+        where: {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { nameEn: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+            { descriptionEn: { contains: search, mode: "insensitive" } },
+          ],
+        },
         include: { category: true },
+        take: Math.min(limit, 50),
       });
-      const reviewStats = idList.length > 0
-        ? await prisma.review.groupBy({
-            by: ["productId"],
-            where: { productId: { in: idList } },
-            _avg: { rating: true },
-            _count: true,
-          })
-        : [];
-      const statsMap = new Map(reviewStats.map((s) => [s.productId, { avg: s._avg.rating || 0, count: s._count }]));
-      const result = products.map((p: any) => ({
-        ...p,
-        _avgRating: statsMap.get(p.id)?.avg || 0,
-        _reviewCount: statsMap.get(p.id)?.count || 0,
-        price: Number(p.price),
-      }));
-      return NextResponse.json(result);
+      return NextResponse.json(products.map((p: any) => ({ ...p, price: Number(p.price) })));
     }
-    return NextResponse.json([]);
+
+    const products = await prisma.product.findMany({
+      where: ids ? { id: { in: ids.split(",").filter(Boolean) } } : undefined,
+      include: { category: true },
+      take: 200,
+      orderBy: { createdAt: "desc" },
+    });
+
+    const allIds = products.map((p) => p.id);
+    const reviewStats = allIds.length > 0
+      ? await prisma.review.groupBy({
+          by: ["productId"],
+          where: { productId: { in: allIds } },
+          _avg: { rating: true },
+          _count: true,
+        })
+      : [];
+    const statsMap = new Map(reviewStats.map((s) => [s.productId, { avg: s._avg.rating || 0, count: s._count }]));
+    const result = products.map((p: any) => ({
+      ...p,
+      _avgRating: statsMap.get(p.id)?.avg || 0,
+      _reviewCount: statsMap.get(p.id)?.count || 0,
+      price: Number(p.price),
+    }));
+    return NextResponse.json(result);
   } catch (error: any) {
     return NextResponse.json({ error: error?.message }, { status: 500 });
   }

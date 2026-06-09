@@ -7,6 +7,7 @@ import { ShoppingCart, Store, LogIn, LayoutDashboard, UserPlus, LogOut, Heart } 
 import { MobileNav } from "@/components/shop/mobile-nav";
 import { SearchInput } from "@/components/shop/search-input";
 import { UserGreeting } from "@/components/shop/user-greeting";
+import { AIAssistant } from "@/components/shop/ai-assistant";
 
 function SignOutForm() {
   return (
@@ -83,13 +84,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         </div>
       </header>
       <main className="flex-1">{children}</main>
-      <Link
-        href="/track"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-105"
-        title="تتبع الطلب"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16.5 9.4 7.55 4.24a1 1 0 0 0-1.1 0L2 6.5v11l4.45 2.26a1 1 0 0 0 1.1 0L16.5 14.6a1 1 0 0 0 .5-.87V10.3a1 1 0 0 0-.5-.9Z"/><path d="m2 6.5 4.45 2.26a1 1 0 0 0 1.1 0L16.5 6.5"/><path d="M7.55 18.26V10.76"/></svg>
-      </Link>
+      <AIAssistant />
       <footer className="border-t border-border bg-muted py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
           &copy; {new Date().getFullYear()} <T k="nav.store_name" />. <T k="footer.rights" />

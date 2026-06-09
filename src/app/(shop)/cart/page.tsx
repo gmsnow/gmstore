@@ -55,6 +55,22 @@ export default function CartPage() {
     );
   }
 
+  function changeColor(productId: string, oldColor: string | undefined, newColor: string) {
+    const target = items.find((i) => i.productId === productId && i.color === oldColor);
+    if (!target) return;
+    const existing = items.find((i) => i.productId === productId && i.color === newColor && i.color !== oldColor);
+    let next: CartItem[];
+    if (existing) {
+      existing.quantity += target.quantity;
+      next = items.filter((i) => !(i.productId === productId && i.color === oldColor));
+    } else {
+      next = items.map((i) =>
+        i.productId === productId && i.color === oldColor ? { ...i, color: newColor } : i
+      );
+    }
+    updateCart(next);
+  }
+
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   if (!mounted) return null;
@@ -100,7 +116,29 @@ export default function CartPage() {
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold truncate">{item.name}</h3>
                             <p className="text-sm text-muted-foreground">{item.price.toFixed(2)} {t("merchant.currency")}</p>
-                            {item.color && <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">اللون: <span className="h-3.5 w-3.5 rounded-full border border-border inline-block" style={{ backgroundColor: item.color }} /></p>}
+                            {item.color || item.colors?.length ? (
+                              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                {item.colors?.length ? (
+                                  <>
+                                    <span className="text-xs text-muted-foreground">اللون:</span>
+                                    {item.colors.map((c) => (
+                                      <button
+                                        key={c}
+                                        type="button"
+                                        onClick={() => changeColor(item.productId, item.color, c)}
+                                        className={`h-5 w-5 rounded-full border-2 transition-all ${item.color === c ? "border-foreground scale-110" : "border-border hover:scale-105"}`}
+                                        style={{ backgroundColor: c }}
+                                        title={c}
+                                      />
+                                    ))}
+                                  </>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                    اللون: <span className="h-3.5 w-3.5 rounded-full border border-border inline-block" style={{ backgroundColor: item.color }} />
+                                  </span>
+                                )}
+                              </div>
+                            ) : null}
                           <div className="flex items-center gap-3 mt-2">
                             <div className="flex items-center gap-1">
                               <Button size="sm" variant="outline" onClick={() => updateQuantity(item.productId, item.color, -1)}>-</Button>

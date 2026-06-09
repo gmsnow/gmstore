@@ -26,7 +26,7 @@ export function ProductActions({ product, colors }: { product: { id: string; nam
           </div>
         </div>
       )}
-      <AddToCartButton product={product} color={selectedColor} />
+      <AddToCartButton product={product} color={selectedColor || undefined} colors={colors} />
     </div>
   );
 }

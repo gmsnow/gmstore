@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Tags, ShoppingBag, DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { Package, Tags, ShoppingBag, DollarSign, TrendingUp, Calendar, CheckCircle } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
 
@@ -66,10 +66,11 @@ export default async function AdminDashboard() {
   }
   const maxIncome = Math.max(...monthlyData.map((d) => d.income), 1);
 
-  const [productCount, categoryCount, orderCount, dailyIncome, weeklyIncome, monthlyIncome] = await Promise.all([
+  const [productCount, categoryCount, orderCount, deliveredCount, dailyIncome, weeklyIncome, monthlyIncome] = await Promise.all([
     prisma.product.count(),
     prisma.category.count(),
-    prisma.order.count(),
+    prisma.order.count({ where: { status: { not: "DELIVERED" } } }),
+    prisma.order.count({ where: { status: "DELIVERED" } }),
     getIncome(startOfDay),
     getIncome(startOfWeek),
     getIncome(startOfMonth),
@@ -79,6 +80,7 @@ export default async function AdminDashboard() {
     { titleKey: "admin.products", value: productCount, icon: Package, color: "text-blue-600" },
     { titleKey: "admin.categories", value: categoryCount, icon: Tags, color: "text-green-600" },
     { titleKey: "admin.orders", value: orderCount, icon: ShoppingBag, color: "text-purple-600" },
+    { titleKey: "admin.delivered_orders", value: deliveredCount, icon: CheckCircle, color: "text-emerald-600" },
   ];
 
   const incomeStats = [
@@ -91,7 +93,7 @@ export default async function AdminDashboard() {
     <FadeIn>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold"><T k="admin.dashboard" /></h1>
-        <StaggerContainer className="grid gap-4 md:grid-cols-3">
+        <StaggerContainer className="grid gap-4 grid-cols-2 md:grid-cols-4">
           {stats.map((s) => (
             <StaggerItem key={s.titleKey}>
               <Card>

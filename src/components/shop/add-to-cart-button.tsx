@@ -5,20 +5,19 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Check } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
-export function AddToCartButton({ product, color: selectedColor }: { product: { id: string; name: string; price: number; images: string[]; stock: number }; color?: string }) {
+export function AddToCartButton({ product, color: selectedColor, colors }: { product: { id: string; name: string; price: number; images: string[]; stock: number }; color?: string; colors?: string[] }) {
   const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
 
   async function handleAdd() {
-    if (!selectedColor) return;
     setLoading(true);
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existing = cart.find((i: any) => i.productId === product.id && i.color === selectedColor);
+    const existing = cart.find((i: any) => i.productId === product.id && i.color === (selectedColor || undefined));
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ productId: product.id, name: product.name, price: Number(product.price), image: product.images[0] || "", quantity: 1, color: selectedColor });
+      cart.push({ productId: product.id, name: product.name, price: Number(product.price), image: product.images[0] || "", quantity: 1, color: selectedColor || undefined, colors });
     }
     localStorage.setItem("cart", JSON.stringify(cart));
     setLoading(false);
@@ -28,7 +27,7 @@ export function AddToCartButton({ product, color: selectedColor }: { product: { 
 
   return (
     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-      <Button size="lg" className="w-full md:w-auto relative overflow-hidden" onClick={handleAdd} loading={loading} disabled={product.stock === 0 || !selectedColor}>
+      <Button size="lg" className="w-full md:w-auto relative overflow-hidden" onClick={handleAdd} loading={loading} disabled={product.stock === 0}>
         <AnimatePresence mode="wait">
           {added ? (
             <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="flex items-center gap-2">
@@ -37,7 +36,7 @@ export function AddToCartButton({ product, color: selectedColor }: { product: { 
           ) : (
             <motion.span key="cart" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              {!selectedColor ? "اختر لوناً" : product.stock === 0 ? t("product.out_of_stock") : t("detail.add_to_cart")}
+              {product.stock === 0 ? t("product.out_of_stock") : t("detail.add_to_cart")}
             </motion.span>
           )}
         </AnimatePresence>

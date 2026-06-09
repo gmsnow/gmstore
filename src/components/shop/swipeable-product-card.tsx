@@ -95,6 +95,7 @@ export function SwipeableProductCard({ product }: { product: any }) {
           price: Number(product.price),
           image: product.images[0] || "",
           quantity: 1,
+          colors: product.colors || undefined,
         });
         localStorage.setItem("cart", JSON.stringify(cart));
         window.dispatchEvent(new Event("cartUpdated"));
