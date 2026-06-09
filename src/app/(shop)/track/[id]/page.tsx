@@ -51,7 +51,7 @@ export default function TrackOrderByIdPage() {
       const res = await fetch(`/api/orders/${params.id}`, { method: "POST" });
       if (res.ok) {
         setShowConfirm(false);
-        router.refresh();
+        setTimeout(() => router.refresh(), 3000);
       } else {
         const data = await res.json().catch(() => ({}));
         alert(data.error || "فشل الإلغاء");
