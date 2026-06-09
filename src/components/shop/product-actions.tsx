@@ -12,7 +12,7 @@ export function ProductActions({ product, colors }: { product: { id: string; nam
           <p className="text-sm font-medium text-muted-foreground">
             الألوان: <span className="text-foreground font-semibold">{selectedColor}</span>
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {colors.map((c) => (
               <button
                 key={c}
