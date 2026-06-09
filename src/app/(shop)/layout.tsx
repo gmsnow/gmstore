@@ -48,7 +48,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
             <ThemeToggle />
             {session ? (
               <>
-                <UserGreeting />
+                <UserGreeting userName={(session.user as any)?.name} />
                 {role === "MERCHANT" && (
                   <Link href="/merchant" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors">
                     <LayoutDashboard className="h-4 w-4" />
