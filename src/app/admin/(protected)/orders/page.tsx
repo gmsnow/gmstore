@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, CheckCheck } from "lucide-react";
 import { MobileOrderCards } from "@/components/admin/mobile-order-cards";
+import { OrderLocationLink } from "@/components/admin/order-location-link";
 
 const statusLabels: Record<string, string> = {
   PENDING: "قيد الانتظار",
@@ -67,12 +68,13 @@ export default async function AdminOrdersPage() {
               <TableHead>المجموع</TableHead>
               <TableHead>الحالة</TableHead>
               <TableHead>التاريخ</TableHead>
+              <TableHead>الموقع</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {orders.length === 0 && (
-              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">لا توجد طلبات بعد</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground">لا توجد طلبات بعد</TableCell></TableRow>
             )}
             {orders.map((o) => (
               <TableRow key={o.id}>
@@ -85,6 +87,7 @@ export default async function AdminOrdersPage() {
                 <TableCell>{Number(o.total).toFixed(2)} ريال</TableCell>
                 <TableCell><Badge variant={statusVariant[o.status] || "default"}>{statusLabels[o.status] || o.status}</Badge></TableCell>
                 <TableCell>{o.createdAt.toLocaleDateString("ar-SA")}</TableCell>
+                <TableCell><OrderLocationLink shippingAddress={o.shippingAddress} /></TableCell>
                 <TableCell>
                   <Link href={`/admin/orders/${o.id}`}>
                     <Button variant="outline" size="sm"><Eye className="h-4 w-4" /></Button>

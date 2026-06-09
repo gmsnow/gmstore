@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { SwipeableCard } from "@/components/ui/swipeable-card";
+import { OrderLocationLink } from "@/components/admin/order-location-link";
 
 const statusLabels: Record<string, string> = {
   PENDING: "قيد الانتظار",
@@ -93,7 +94,10 @@ export function MobileOrderCards({ orders }: { orders: any[] }) {
               <div className="text-sm mb-1"><span className="text-muted-foreground">العميل: </span>{o.customerName}</div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{new Date(o.createdAt).toLocaleDateString("ar-SA")}</span>
-                <span className="text-sm font-semibold">{Number(o.total).toFixed(2)} ريال</span>
+                <div className="flex items-center gap-2">
+                  <OrderLocationLink shippingAddress={o.shippingAddress} />
+                  <span className="text-sm font-semibold">{Number(o.total).toFixed(2)} ريال</span>
+                </div>
               </div>
             </div>
           </SwipeableCard>
