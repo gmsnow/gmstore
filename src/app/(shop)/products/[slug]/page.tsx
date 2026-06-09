@@ -40,10 +40,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {canManage && (
           <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-4">
             <span className="text-sm font-medium text-muted-foreground">لوحة التحكم:</span>
-            <Link href={`/admin/products/${product.id}/edit`}>
+            <Link href={isOwner ? `/merchant/products/${product.id}/edit` : `/admin/products/${product.id}/edit`}>
               <Button variant="outline" size="sm">تعديل المنتج</Button>
             </Link>
-            <DeleteProductButton productId={product.id} redirectTo="/admin/products" />
+            <DeleteProductButton productId={product.id} redirectTo={isOwner ? "/merchant" : "/admin/products"} />
           </div>
         )}
         <div className="grid gap-8 lg:grid-cols-2">
