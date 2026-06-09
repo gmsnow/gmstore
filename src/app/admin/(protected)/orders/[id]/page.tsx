@@ -46,7 +46,11 @@ export default function AdminOrderDetailPage() {
   async function fetchOrder() {
     try {
       const res = await fetch(`/api/orders/${params.id}`);
-      if (res.ok) setOrder(await res.json());
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Order data items:", data.items?.length, data.items);
+        setOrder(data);
+      }
     } catch (err) {
       console.error("Failed to fetch order", err);
     }
@@ -68,6 +72,7 @@ export default function AdminOrderDetailPage() {
 
   if (loading) return <div className="animate-pulse h-40 bg-muted rounded" />;
   if (!order) return <p className="text-destructive">الطلب غير موجود</p>;
+  console.log("items count:", order.items?.length, "items:", order.items?.map((i: any) => ({ id: i.id?.slice(0,8), status: i.status, price: typeof i.price, qty: i.quantity })));
 
   let address: Record<string, string> = {};
   try { address = JSON.parse(order.shippingAddress || "{}"); } catch { address = { address: order.shippingAddress || "" }; }

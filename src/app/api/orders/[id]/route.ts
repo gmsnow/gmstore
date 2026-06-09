@@ -10,7 +10,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
-  return NextResponse.json(order);
+  const serialized = {
+    ...order,
+    total: Number(order.total),
+    items: order.items.map((i) => ({ ...i, price: Number(i.price) })),
+  };
+  return NextResponse.json(serialized);
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
