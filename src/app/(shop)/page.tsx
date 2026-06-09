@@ -20,8 +20,8 @@ export default async function HomePage() {
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
-  const featured = rawFeatured as any[];
-  const latest = rawLatest as any[];
+  const featured = (rawFeatured as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
+  const latest = (rawLatest as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">

@@ -49,6 +49,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
+  const productList = (products as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
 
   function filterUrl(overrides: Record<string, string | null | undefined>) {
     const p = new URLSearchParams();
@@ -104,7 +105,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               <T k="products.search_results" />: &quot;{params.q}&quot;
             </h1>
             <p className="text-sm text-muted-foreground">
-              {products.length} <T k="products.search_count" />
+              {productList.length} <T k="products.search_count" />
             </p>
           </div>
         ) : (
@@ -144,12 +145,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           ))}
         </div>
         <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map((p: any) => (
+          {productList.map((p: any) => (
             <StaggerItem key={p.id}>
               <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
             </StaggerItem>
           ))}
-          {products.length === 0 && (
+          {productList.length === 0 && (
             <p className="col-span-full text-center text-muted-foreground py-12"><T k="products.empty" /></p>
           )}
         </StaggerContainer>
