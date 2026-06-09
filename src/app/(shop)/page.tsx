@@ -1,22 +1,27 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 
-function serialize(obj: any): any {
-  return JSON.parse(JSON.stringify(obj, (_, v) => (typeof v === "bigint" ? Number(v) : v)));
-}
+const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
 export default async function HomePage() {
-  const [rawFeatured, rawLatest] = await Promise.all([
-    prisma.product.findMany({ where: { featured: true }, include: { category: true, reviews: { select: { rating: true } } }, take: 4 }),
-    prisma.product.findMany({ include: { category: true, reviews: { select: { rating: true } } }, orderBy: { createdAt: "desc" }, take: 8 }),
+  const session = await auth();
+  const sessionUserId = (session?.user as any)?.id;
+  const isLoggedIn = !!sessionUserId;
+
+  const [rawFeatured, rawLatest, userFavs] = await Promise.all([
+    prisma.product.findMany({ where: { featured: true }, select: productSelect, take: 4 }),
+    prisma.product.findMany({ select: productSelect, orderBy: { createdAt: "desc" }, take: 8 }),
+    isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
-  const featured = serialize(rawFeatured);
-  const latest = serialize(rawLatest);
+  const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
+  const featured = rawFeatured as any[];
+  const latest = rawLatest as any[];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
@@ -42,7 +47,7 @@ export default async function HomePage() {
             <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {featured.map((p: any) => (
                 <StaggerItem key={p.id}>
-                  <SwipeableProductCard product={p} />
+                  <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
                 </StaggerItem>
               ))}
             </StaggerContainer>
@@ -59,7 +64,7 @@ export default async function HomePage() {
           <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {latest.map((p: any) => (
               <StaggerItem key={p.id}>
-                <SwipeableProductCard product={p} />
+                <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
               </StaggerItem>
             ))}
           </StaggerContainer>

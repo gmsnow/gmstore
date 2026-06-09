@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { T } from "@/components/translate";
@@ -20,32 +19,25 @@ function setLocalFavs(ids: string[]) {
   window.dispatchEvent(new Event("favoritesUpdated"));
 }
 
-export function SwipeableProductCard({ product }: { product: any }) {
-  const { data: session } = useSession();
-  const userId = (session?.user as any)?.id;
-  const isLoggedIn = !!userId;
-
+export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds }: { product: any; isLoggedIn?: boolean; favoriteIds?: Set<string> }) {
   const [x, setX] = useState(0);
   const [toast, setToast] = useState<"cart" | "fav" | null>(null);
   const [isFav, setIsFav] = useState(false);
   const { direction } = useI18n();
   const isRtl = direction === "rtl";
 
-  const avgRating = product._avgRating || (product.reviews?.length
+  const avgRating = product.reviews?.length
     ? product.reviews.reduce((s: number, r: any) => s + r.rating, 0) / product.reviews.length
-    : 0);
-  const reviewCount = product._reviewCount || product.reviews?.length || 0;
+    : 0;
+  const reviewCount = product.reviews?.length || 0;
 
   useEffect(() => {
     if (isLoggedIn) {
-      fetch("/api/favorites")
-        .then((r) => r.json())
-        .then((data: any[]) => setIsFav(data.some((p: any) => p.id === product.id)))
-        .catch(() => {});
+      setIsFav(favoriteIds?.has(product.id) ?? false);
     } else {
       setIsFav(getLocalFavs().includes(product.id));
     }
-  }, [isLoggedIn, product.id]);
+  }, [isLoggedIn, favoriteIds, product.id]);
 
   useEffect(() => {
     if (isLoggedIn) return;
@@ -138,12 +130,11 @@ export function SwipeableProductCard({ product }: { product: any }) {
               </div>
               <motion.div className="aspect-square bg-muted overflow-hidden">
                 {product.images[0] ? (
-                  <motion.img
+                  <img
                     src={product.images[0]}
                     alt={product.name}
-                    className="h-full w-full object-cover"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-600 ease-out"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-muted-foreground text-sm"><T k="product.no_image" /></div>

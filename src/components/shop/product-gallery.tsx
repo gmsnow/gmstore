@@ -44,6 +44,7 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
             src={current?.src}
             alt={`${alt} ${selectedIndex}`}
             className="h-full w-full object-cover"
+            loading="lazy"
           />
         )}
       </div>
@@ -60,7 +61,7 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
                   ▶
                 </div>
               ) : (
-                <img src={item.src} alt="" className="h-full w-full object-cover" />
+                <img src={item.src} alt="" className="h-full w-full object-cover" loading="lazy" />
               )}
             </button>
           ))}

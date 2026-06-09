@@ -19,7 +19,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const session = await auth();
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { category: true },
+    select: {
+      id: true, name: true, nameEn: true, slug: true, price: true,
+      images: true, colors: true, stock: true, description: true, descriptionEn: true, videoUrl: true,
+      category: { select: { id: true, name: true, nameEn: true, slug: true } },
+    },
   });
   if (!product) notFound();
 

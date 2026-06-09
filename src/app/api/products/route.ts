@@ -9,6 +9,13 @@ export const GET = async (req: Request) => {
     const search = searchParams.get("search");
     const limit = parseInt(searchParams.get("limit") || "50");
 
+    const listSelect = {
+      id: true, name: true, nameEn: true, slug: true, price: true,
+      images: true, colors: true, stock: true, featured: true,
+      description: true, descriptionEn: true,
+      category: { select: { id: true, name: true, nameEn: true, slug: true } },
+    } as const;
+
     if (search) {
       const products = await prisma.product.findMany({
         where: {
@@ -19,7 +26,7 @@ export const GET = async (req: Request) => {
             { descriptionEn: { contains: search, mode: "insensitive" } },
           ],
         },
-        include: { category: true },
+        select: listSelect,
         take: Math.min(limit, 50),
       });
       return NextResponse.json(products.map((p: any) => ({ ...p, price: Number(p.price) })));
@@ -27,8 +34,8 @@ export const GET = async (req: Request) => {
 
     const products = await prisma.product.findMany({
       where: ids ? { id: { in: ids.split(",").filter(Boolean) } } : undefined,
-      include: { category: true },
-      take: 200,
+      select: listSelect,
+      take: 100,
       orderBy: { createdAt: "desc" },
     });
 

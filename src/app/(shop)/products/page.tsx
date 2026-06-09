@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
-import { Star, Search, X } from "lucide-react";
-import { FadeIn, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion-wrappers";
+import { Search, X } from "lucide-react";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
 import { LocalizedName } from "@/components/localized";
 import { getServerLocale } from "@/lib/i18n/server";
@@ -11,13 +11,12 @@ import { localizedName } from "@/lib/i18n/localized";
 import { ProductFilters } from "@/components/shop/product-filters";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 
-function serialize(obj: any): any {
-  return JSON.parse(JSON.stringify(obj, (_, v) => (typeof v === "bigint" ? Number(v) : v)));
-}
-
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; featured?: string; q?: string; sort?: string; minPrice?: string; maxPrice?: string; inStock?: string }> }) {
   const params = await searchParams;
   const locale = await getServerLocale();
+  const session = await auth();
+  const sessionUserId = (session?.user as any)?.id;
+  const isLoggedIn = !!sessionUserId;
   const where: any = {};
   const orderBy: any = { createdAt: "desc" };
 
@@ -42,12 +41,14 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   else if (params.sort === "price_desc") { orderBy.price = "desc"; delete orderBy.createdAt; }
   else if (params.sort === "name") { orderBy.name = "asc"; delete orderBy.createdAt; }
 
-  const [rawProducts, rawCategories] = await Promise.all([
-    prisma.product.findMany({ where, include: { category: true, reviews: { select: { rating: true } } }, orderBy }),
+  const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
+
+  const [products, categories, userFavs] = await Promise.all([
+    prisma.product.findMany({ where, select: productSelect, orderBy }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
+    isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
-  const products = serialize(rawProducts);
-  const categories = serialize(rawCategories);
+  const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
 
   function filterUrl(overrides: Record<string, string | null | undefined>) {
     const p = new URLSearchParams();
@@ -145,7 +146,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((p: any) => (
             <StaggerItem key={p.id}>
-              <SwipeableProductCard product={p} />
+              <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
             </StaggerItem>
           ))}
           {products.length === 0 && (

@@ -7,7 +7,7 @@ import { ShoppingCart, Store, LogIn, LayoutDashboard, UserPlus, LogOut, Heart } 
 import { MobileNav } from "@/components/shop/mobile-nav";
 import { SearchInput } from "@/components/shop/search-input";
 import { UserGreeting } from "@/components/shop/user-greeting";
-import { AIAssistant } from "@/components/shop/ai-assistant";
+import { AIAssistantWrapper } from "@/components/shop/ai-assistant-wrapper";
 
 function SignOutForm() {
   return (
@@ -84,7 +84,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         </div>
       </header>
       <main className="flex-1">{children}</main>
-      <AIAssistant />
+      <AIAssistantWrapper />
       <footer className="border-t border-border bg-muted py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
           &copy; {new Date().getFullYear()} <T k="nav.store_name" />. <T k="footer.rights" />

@@ -7,7 +7,15 @@ export const GET = auth(async (req) => {
   const userId = (req.auth.user as any).id;
   const favs = await prisma.favorite.findMany({
     where: { userId },
-    include: { product: { include: { category: true } } },
+    select: {
+      product: {
+        select: {
+          id: true, name: true, nameEn: true, slug: true, price: true,
+          images: true, colors: true, stock: true,
+          category: { select: { id: true, name: true, nameEn: true, slug: true } },
+        },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
   const products = favs.map((f) => f.product);

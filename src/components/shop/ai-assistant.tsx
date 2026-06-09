@@ -121,20 +121,22 @@ export function AIAssistant() {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch("/api/products")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          allProducts.current = data;
-          setReady(true);
-        }
-      })
-      .catch(() => setReady(true));
-  }, []);
-
-  useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (open) {
+      fetch("/api/products")
+        .then((r) => r.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            allProducts.current = data;
+            setReady(true);
+          }
+        })
+        .catch(() => setReady(true));
+    }
+  }, [open]);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();

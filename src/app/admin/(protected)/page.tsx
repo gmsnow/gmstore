@@ -9,23 +9,7 @@ interface MonthlyIncome {
   income: number;
 }
 
-async function getIncome(startDate: Date) {
-  const result = await prisma.order.aggregate({
-    _sum: { total: true },
-    where: { status: "DELIVERED", createdAt: { gte: startDate } },
-  });
-  return Number(result._sum.total || 0);
-}
 
-async function getMonthlyIncome(year: number, month: number) {
-  const start = new Date(year, month, 1);
-  const end = new Date(year, month + 1, 1);
-  const result = await prisma.order.aggregate({
-    _sum: { total: true },
-    where: { status: "DELIVERED", createdAt: { gte: start, lt: end } },
-  });
-  return Number(result._sum.total || 0);
-}
 
 function IncomeBarChart({ data, maxIncome }: { data: MonthlyIncome[]; maxIncome: number }) {
   return (
@@ -58,23 +42,35 @@ export default async function AdminDashboard() {
 
   const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 
-  const monthlyData: MonthlyIncome[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const m = (now.getMonth() - i + 12) % 12;
-    const y = now.getMonth() - i < 0 ? now.getFullYear() - 1 : now.getFullYear();
-    monthlyData.push({ month: monthNames[m], income: await getMonthlyIncome(y, m) });
-  }
-  const maxIncome = Math.max(...monthlyData.map((d) => d.income), 1);
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
-  const [productCount, categoryCount, orderCount, deliveredCount, dailyIncome, weeklyIncome, monthlyIncome] = await Promise.all([
+  const [productCount, categoryCount, orderCount, deliveredCount, dailyIncome, weeklyIncome, monthlyIncome, monthlyAgg] = await Promise.all([
     prisma.product.count(),
     prisma.category.count(),
     prisma.order.count({ where: { status: { not: "DELIVERED" } } }),
     prisma.order.count({ where: { status: "DELIVERED" } }),
-    getIncome(startOfDay),
-    getIncome(startOfWeek),
-    getIncome(startOfMonth),
+    prisma.order.aggregate({ _sum: { total: true }, where: { status: "DELIVERED", createdAt: { gte: startOfDay } } }),
+    prisma.order.aggregate({ _sum: { total: true }, where: { status: "DELIVERED", createdAt: { gte: startOfWeek } } }),
+    prisma.order.aggregate({ _sum: { total: true }, where: { status: "DELIVERED", createdAt: { gte: startOfMonth } } }),
+    prisma.$queryRawUnsafe<Array<{ year: number; month: number; income: number }>>(
+      `SELECT EXTRACT(YEAR FROM "createdAt")::int as year, EXTRACT(MONTH FROM "createdAt")::int as month, SUM("total")::float8 as income FROM "Order" WHERE "status" = 'DELIVERED' AND "createdAt" >= $1::timestamp GROUP BY year, month ORDER BY year, month`,
+      sixMonthsAgo.toISOString(),
+    ),
   ]);
+
+  const monthlyMap = new Map<string, number>();
+  for (const row of monthlyAgg) {
+    monthlyMap.set(`${row.year}-${String(row.month).padStart(2, "0")}`, row.income);
+  }
+
+  const monthlyData: MonthlyIncome[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const m = (now.getMonth() - i + 12) % 12;
+    const y = now.getMonth() - i < 0 ? now.getFullYear() - 1 : now.getFullYear();
+    const key = `${y}-${String(m + 1).padStart(2, "0")}`;
+    monthlyData.push({ month: monthNames[m], income: monthlyMap.get(key) || 0 });
+  }
+  const maxIncome = Math.max(...monthlyData.map((d) => d.income), 1);
 
   const stats = [
     { titleKey: "admin.products", value: productCount, icon: Package, color: "text-blue-600" },
@@ -84,9 +80,9 @@ export default async function AdminDashboard() {
   ];
 
   const incomeStats = [
-    { titleKey: "admin.income_daily", value: dailyIncome, icon: Calendar, color: "text-emerald-600" },
-    { titleKey: "admin.income_weekly", value: weeklyIncome, icon: TrendingUp, color: "text-orange-600" },
-    { titleKey: "admin.income_monthly", value: monthlyIncome, icon: DollarSign, color: "text-rose-600" },
+    { titleKey: "admin.income_daily", value: Number(dailyIncome._sum.total || 0), icon: Calendar, color: "text-emerald-600" },
+    { titleKey: "admin.income_weekly", value: Number(weeklyIncome._sum.total || 0), icon: TrendingUp, color: "text-orange-600" },
+    { titleKey: "admin.income_monthly", value: Number(monthlyIncome._sum.total || 0), icon: DollarSign, color: "text-rose-600" },
   ];
 
   return (

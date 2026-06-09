@@ -20,13 +20,14 @@ export default async function MerchantDashboard() {
   if (!session || role !== "MERCHANT") redirect("/login");
 
   const userId = (session.user as any).id;
-  const products = await prisma.product.findMany({
-    where: { userId },
-    include: { category: true },
-    orderBy: { createdAt: "desc" },
-  });
-
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+  const [products, categories] = await Promise.all([
+    prisma.product.findMany({
+      where: { userId },
+      select: { id: true, name: true, nameEn: true, slug: true, price: true, stock: true, category: { select: { id: true, name: true, nameEn: true, slug: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+  ]);
   const totalValue = products.reduce((sum, p) => sum + Number(p.price) * p.stock, 0);
   const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
 
