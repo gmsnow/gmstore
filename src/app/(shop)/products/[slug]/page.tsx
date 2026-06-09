@@ -21,7 +21,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { slug },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, stock: true, description: true, descriptionEn: true, videoUrl: true,
+      images: true, colors: true, stock: true, description: true, descriptionEn: true, videoUrl: true, userId: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
     },
   });
@@ -30,12 +30,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const cartProduct = { id: product.id, name: localizedName(product, locale), price: Number(product.price), images: product.images, stock: product.stock };
   const sessionUserId = (session?.user as any)?.id;
   const role = (session?.user as any)?.role;
-  const isAdmin = role === "ADMIN" || role === "MERCHANT";
+  const isAdmin = role === "ADMIN";
+  const isOwner = role === "MERCHANT" && product.userId === sessionUserId;
+  const canManage = isAdmin || isOwner;
 
   return (
     <FadeIn>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
-        {isAdmin && (
+        {canManage && (
           <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-4">
             <span className="text-sm font-medium text-muted-foreground">لوحة التحكم:</span>
             <Link href={`/admin/products/${product.id}/edit`}>
