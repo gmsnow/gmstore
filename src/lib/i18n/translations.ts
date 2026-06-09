@@ -13,6 +13,7 @@ export const ar = {
   "nav.mobile_menu": "القائمة",
   "nav.search": "بحث عن منتجات...",
   "nav.favorites": "المفضلة",
+  "nav.greeting": "مرحباً",
 
   /* Home */
   "home.hero_title": "تسوق بأفضل الأسعار",
@@ -235,6 +236,7 @@ export const en: Record<string, string> = {
   "nav.mobile_menu": "Menu",
   "nav.search": "Search products...",
   "nav.favorites": "Favorites",
+  "nav.greeting": "Hello",
 
   "home.hero_title": "Shop at the Best Prices",
   "home.hero_desc": "Discover our curated collection of premium products with high quality and competitive prices",

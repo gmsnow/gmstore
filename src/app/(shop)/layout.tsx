@@ -6,6 +6,7 @@ import { T } from "@/components/translate";
 import { ShoppingCart, Store, LogIn, LayoutDashboard, UserPlus, LogOut, Heart } from "lucide-react";
 import { MobileNav } from "@/components/shop/mobile-nav";
 import { SearchInput } from "@/components/shop/search-input";
+import { UserGreeting } from "@/components/shop/user-greeting";
 
 function SignOutForm() {
   return (
@@ -47,6 +48,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
             <ThemeToggle />
             {session ? (
               <>
+                <UserGreeting />
                 {role === "MERCHANT" && (
                   <Link href="/merchant" className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors">
                     <LayoutDashboard className="h-4 w-4" />
