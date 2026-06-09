@@ -1,36 +1,32 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useSession } from "next-auth/react";
-import { useI18n } from "@/lib/i18n/provider";
+import { usePathname } from "next/navigation";
 import { T } from "@/components/translate";
 import { User } from "lucide-react";
 
 export function UserGreeting() {
   const { data: session } = useSession();
+  const pathname = usePathname();
   const user = session?.user;
   const name = (user as any)?.name;
-  const { direction } = useI18n();
-  const [showWelcome, setShowWelcome] = useState(false);
-  const prevUser = useRef<typeof user>(null);
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (!prevUser.current && user) {
-      setShowWelcome(true);
-      const timer = setTimeout(() => setShowWelcome(false), 5000);
-      prevUser.current = user;
+    if (user) {
+      setShow(true);
+      const timer = setTimeout(() => setShow(false), 5000);
       return () => clearTimeout(timer);
+    } else {
+      setShow(false);
     }
-    prevUser.current = user;
-  }, [user]);
-
-  if (!user) return null;
+  }, [user, pathname]);
 
   return (
     <AnimatePresence>
-      {showWelcome && (
+      {show && user && (
         <motion.div
-          key="welcome-toast"
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -30, opacity: 0 }}
