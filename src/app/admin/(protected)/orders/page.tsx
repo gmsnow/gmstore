@@ -42,11 +42,17 @@ function OrderThumbs({ items }: { items: any[] }) {
 }
 
 export default async function AdminOrdersPage() {
-  const orders = await prisma.order.findMany({
+  const rawOrders = await prisma.order.findMany({
     where: { status: { not: "DELIVERED" } },
     include: { items: { include: { product: true } } },
     orderBy: { createdAt: "desc" },
   });
+
+  const orders = rawOrders.map((o) => ({
+    ...o,
+    total: Number(o.total),
+    items: o.items.map((i) => ({ ...i, price: Number(i.price) })),
+  }));
 
   return (
     <div className="space-y-6">
