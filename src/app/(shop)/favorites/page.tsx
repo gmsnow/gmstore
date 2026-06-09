@@ -17,75 +17,57 @@ export default function FavoritesPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchProducts = useCallback(async (favIds: string[]) => {
-    if (favIds.length === 0) { setProducts([]); setLoading(false); return; }
+  const fetchLocal = useCallback(async () => {
+    const stored: string[] = (() => { try { return JSON.parse(localStorage.getItem("favorites") || "[]"); } catch { return []; } })();
+    setIds(stored);
+    if (stored.length === 0) { setProducts([]); setLoading(false); return; }
     setLoading(true);
     try {
-      const res = await fetch(`/api/products?ids=${favIds.join(",")}`);
+      const res = await fetch(`/api/products?ids=${stored.join(",")}`);
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : []);
-    } catch {
-      setProducts([]);
-    }
+    } catch { setProducts([]); }
+    setLoading(false);
+  }, []);
+
+  const fetchServer = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/favorites");
+      const data = await res.json();
+      const favIds = (data as any[]).map((p: any) => p.id);
+      setIds(favIds);
+      setProducts(data);
+    } catch { setProducts([]); }
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn) {
-      fetch("/api/favorites")
-        .then((r) => r.json())
-        .then((data: any[]) => {
-          const favIds = data.map((p: any) => p.id);
-          setIds(favIds);
-          setProducts(data);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    } else {
-      const stored = (() => { try { return JSON.parse(localStorage.getItem("favorites") || "[]"); } catch { return []; } })();
-      setIds(stored);
-      fetchProducts(stored);
-    }
-  }, [isLoggedIn, fetchProducts]);
+    if (isLoggedIn) fetchServer();
+    else fetchLocal();
+  }, [isLoggedIn, fetchServer, fetchLocal]);
 
   useEffect(() => {
-    function sync() {
-      if (isLoggedIn) {
-        fetch("/api/favorites")
-          .then((r) => r.json())
-          .then((data: any[]) => {
-            const favIds = data.map((p: any) => p.id);
-            setIds(favIds);
-            setProducts(data);
-          });
-      } else {
-        const stored = (() => { try { return JSON.parse(localStorage.getItem("favorites") || "[]"); } catch { return []; } })();
-        setIds(stored);
-        fetchProducts(stored);
-      }
-    }
-    window.addEventListener("favoritesUpdated", sync);
-    return () => window.removeEventListener("favoritesUpdated", sync);
-  }, [isLoggedIn, fetchProducts]);
+    window.addEventListener("favoritesUpdated", isLoggedIn ? fetchServer : fetchLocal);
+    return () => window.removeEventListener("favoritesUpdated", isLoggedIn ? fetchServer : fetchLocal);
+  }, [isLoggedIn, fetchServer, fetchLocal]);
 
   async function removeAll() {
     if (isLoggedIn) {
-      for (const id of ids) {
-        await fetch("/api/favorites", {
+      await Promise.all(ids.map((id) =>
+        fetch("/api/favorites", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId: id }),
-        });
-      }
+        })
+      ));
       window.dispatchEvent(new Event("favoritesUpdated"));
-      setIds([]);
-      setProducts([]);
     } else {
       localStorage.setItem("favorites", JSON.stringify([]));
       window.dispatchEvent(new Event("favoritesUpdated"));
-      setIds([]);
-      setProducts([]);
     }
+    setIds([]);
+    setProducts([]);
   }
 
   return (

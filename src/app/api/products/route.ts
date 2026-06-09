@@ -10,9 +10,24 @@ export const GET = async (req: Request) => {
       const idList = ids.split(",").filter(Boolean);
       const products = await prisma.product.findMany({
         where: { id: { in: idList } },
-        include: { category: true, reviews: { select: { rating: true } } },
+        include: { category: true },
       });
-      return NextResponse.json(products);
+      const reviewStats = idList.length > 0
+        ? await prisma.review.groupBy({
+            by: ["productId"],
+            where: { productId: { in: idList } },
+            _avg: { rating: true },
+            _count: true,
+          })
+        : [];
+      const statsMap = new Map(reviewStats.map((s) => [s.productId, { avg: s._avg.rating || 0, count: s._count }]));
+      const result = products.map((p: any) => ({
+        ...p,
+        _avgRating: statsMap.get(p.id)?.avg || 0,
+        _reviewCount: statsMap.get(p.id)?.count || 0,
+        price: Number(p.price),
+      }));
+      return NextResponse.json(result);
     }
     return NextResponse.json([]);
   } catch (error: any) {

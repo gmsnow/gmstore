@@ -31,9 +31,10 @@ export function SwipeableProductCard({ product }: { product: any }) {
   const { direction } = useI18n();
   const isRtl = direction === "rtl";
 
-  const avgRating = product.reviews?.length
+  const avgRating = product._avgRating || (product.reviews?.length
     ? product.reviews.reduce((s: number, r: any) => s + r.rating, 0) / product.reviews.length
-    : 0;
+    : 0);
+  const reviewCount = product._reviewCount || product.reviews?.length || 0;
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -175,7 +176,7 @@ export function SwipeableProductCard({ product }: { product: any }) {
                 <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                   <span>{avgRating.toFixed(1)}</span>
-                  <span className="text-[10px] opacity-70">({product.reviews.length})</span>
+                  <span className="text-[10px] opacity-70">({reviewCount})</span>
                 </div>
               )}
             </div>
