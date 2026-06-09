@@ -86,7 +86,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
     const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
     if (res.ok) {
-      router.push("/admin/products");
+      router.push(backUrl);
       router.refresh();
       return;
     }
