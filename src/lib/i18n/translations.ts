@@ -194,6 +194,8 @@ export const ar = {
   "auth.have_account": "لديك حساب بالفعل؟",
   "auth.no_account": "ليس لديك حساب؟",
   "auth.login_link": "تسجيل الدخول",
+  "auth.google_signin": "تسجيل الدخول عبر Google",
+  "auth.or": "أو",
 
   /* Favorites */
   "favorites.title": "المفضلة",
@@ -406,6 +408,8 @@ export const en: Record<string, string> = {
   "auth.have_account": "Already have an account?",
   "auth.no_account": "Don't have an account?",
   "auth.login_link": "Login",
+  "auth.google_signin": "Sign in with Google",
+  "auth.or": "or",
 
   "favorites.title": "Favorites",
   "favorites.empty": "No favorites yet",
