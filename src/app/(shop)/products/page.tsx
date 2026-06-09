@@ -127,32 +127,32 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </div>
         )}
 
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 mb-6">
+        <div className="grid grid-flow-col grid-rows-2 gap-1.5 mb-6 overflow-x-auto pb-1 scrollbar-none auto-cols-[80px]">
           <Link
             href={filterUrl({ category: null })}
-            className={`rounded-lg border-2 transition-all ${!params.category ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+            className={`rounded-xl border transition-all ${!params.category ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
           >
-            <div className="h-12 rounded-t-lg bg-muted flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>
+            <div className="h-10 rounded-t-xl bg-muted flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>
             </div>
-            <div className="p-1 text-center text-[10px] font-medium truncate leading-tight"><T k="products.all" /></div>
+            <div className="p-0.5 text-center text-[9px] font-medium truncate leading-tight"><T k="products.all" /></div>
           </Link>
           {categories.map((c: any) => (
             <Link
               key={c.id}
               href={filterUrl({ category: c.slug })}
-              className={`rounded-lg border-2 transition-all ${params.category === c.slug ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+              className={`rounded-xl border transition-all ${params.category === c.slug ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
             >
-              <div className="h-12 rounded-t-lg bg-muted overflow-hidden">
+              <div className="h-10 rounded-t-xl bg-muted overflow-hidden">
                 {c.image ? (
                   <img src={c.image} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
                   </div>
                 )}
               </div>
-              <div className="p-1 text-center text-[10px] font-medium truncate leading-tight"><LocalizedName item={c} /></div>
+              <div className="p-0.5 text-center text-[9px] font-medium truncate leading-tight"><LocalizedName item={c} /></div>
             </Link>
           ))}
         </div>
