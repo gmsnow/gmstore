@@ -13,12 +13,15 @@ export function DeleteProductButton({ productId, redirectTo }: { productId: stri
     setLoading(true);
     try {
       const res = await fetch(`/api/products/${productId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "فشل الحذف");
+      }
       if (redirectTo) router.push(redirectTo);
       else router.refresh();
       setOpen(false);
-    } catch {
-      alert("فشل الحذف");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "فشل الحذف");
     } finally {
       setLoading(false);
     }
