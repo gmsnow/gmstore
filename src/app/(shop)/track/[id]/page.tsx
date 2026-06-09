@@ -161,7 +161,7 @@ export default function TrackOrderByIdPage() {
           </Card>
         </div>
 
-        {address.lat && address.lng && (
+        {address.lat && address.lng ? (
           <Card>
             <CardContent className="p-0 overflow-hidden rounded-lg h-64">
               <iframe
@@ -174,6 +174,12 @@ export default function TrackOrderByIdPage() {
                 referrerPolicy="no-referrer-when-downgrade"
                 title="موقع الطلب"
               />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="p-6 text-center text-xs text-muted-foreground">
+              لم يتم تحديد موقع على الخريطة
             </CardContent>
           </Card>
         )}

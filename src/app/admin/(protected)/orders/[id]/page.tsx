@@ -89,7 +89,7 @@ export default function AdminOrderDetailPage() {
             <p><span className="font-medium text-muted-foreground"><T k="checkout.street" />:</span> {address.street || "—"}</p>
             {address.notes && <p><span className="font-medium text-muted-foreground"><T k="checkout.notes" />:</span> {address.notes}</p>}
             {lat && lng && (
-              <a href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary text-xs mt-2">
+              <a href={`https://www.google.com/maps?q=${lat},${lng}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary text-xs mt-2">
                 <MapPin className="h-3.5 w-3.5" /> عرض على الخريطة
               </a>
             )}
@@ -105,14 +105,16 @@ export default function AdminOrderDetailPage() {
         </Card>
       </div>
 
-      {lat && lng && (
-        <Card>
-          <CardHeader><CardTitle className="text-sm md:text-base">موقع العميل</CardTitle></CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader><CardTitle className="text-sm md:text-base">موقع العميل</CardTitle></CardHeader>
+        <CardContent>
+          {lat && lng ? (
             <OrderMap lat={lat} lng={lng} />
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <p className="text-xs text-muted-foreground">لم يتم تحديد موقع على الخريطة</p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="hidden md:block">
         <Card>
