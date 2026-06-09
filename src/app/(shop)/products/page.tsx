@@ -127,20 +127,32 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex gap-3 pb-2 mb-6 overflow-x-auto snap-x snap-mandatory scrollbar-none">
           <Link
             href={filterUrl({ category: null })}
-            className={`rounded-full px-4 py-1.5 text-sm border border-border transition-colors ${!params.category ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"}`}
+            className={`snap-start shrink-0 w-28 sm:w-32 rounded-xl border-2 transition-all ${!params.category ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
           >
-            <T k="products.all" />
+            <div className="h-16 sm:h-20 rounded-t-xl bg-muted flex items-center justify-center text-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>
+            </div>
+            <div className="p-1.5 text-center text-[11px] font-medium truncate"><T k="products.all" /></div>
           </Link>
           {categories.map((c: any) => (
             <Link
               key={c.id}
               href={filterUrl({ category: c.slug })}
-              className={`rounded-full px-4 py-1.5 text-sm border border-border transition-colors ${params.category === c.slug ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"}`}
+              className={`snap-start shrink-0 w-28 sm:w-32 rounded-xl border-2 transition-all ${params.category === c.slug ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
             >
-              <LocalizedName item={c} />
+              <div className="h-16 sm:h-20 rounded-t-xl bg-muted overflow-hidden">
+                {c.image ? (
+                  <img src={c.image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-2xl text-muted-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+                  </div>
+                )}
+              </div>
+              <div className="p-1.5 text-center text-[11px] font-medium truncate"><LocalizedName item={c} /></div>
             </Link>
           ))}
         </div>
