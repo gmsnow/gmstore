@@ -8,7 +8,7 @@ export const POST = auth(async (req) => {
   }
   const body = await req.json();
   const category = await prisma.category.create({
-    data: { name: body.name, nameEn: body.nameEn || null, slug: body.slug, description: body.description },
+    data: { name: body.name, nameEn: body.nameEn || null, slug: body.slug, description: body.description, image: body.image || null },
   });
   return NextResponse.json(category);
 });
@@ -20,7 +20,7 @@ export const PATCH = auth(async (req) => {
   const body = await req.json();
   const category = await prisma.category.update({
     where: { id: body.id },
-    data: { name: body.name, nameEn: body.nameEn || null, slug: body.slug, description: body.description },
+    data: { name: body.name, nameEn: body.nameEn || null, slug: body.slug, description: body.description, image: body.image || null },
   });
   return NextResponse.json(category);
 });

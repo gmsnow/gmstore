@@ -10,7 +10,7 @@ export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string
   const body = await req.json();
   const category = await prisma.category.update({
     where: { id },
-    data: { name: body.name, nameEn: body.nameEn || null, slug: body.slug, description: body.description },
+    data: { name: body.name, nameEn: body.nameEn || null, slug: body.slug, description: body.description, image: body.image || null },
   });
   return NextResponse.json(category);
 });
