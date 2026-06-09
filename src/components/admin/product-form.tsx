@@ -44,13 +44,15 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
     setUploading(true);
     const urls: string[] = [];
     for (const file of files) {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (res.ok) {
-        const { url } = await res.json();
-        urls.push(url);
-      }
+      try {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        urls.push(dataUrl);
+      } catch {} 
     }
     setImages((prev) => [...prev, ...urls]);
     setUploading(false);
