@@ -125,7 +125,7 @@ export default function AdminOrderDetailPage() {
         </CardContent>
       </Card>
 
-      <div className="hidden md:block">
+      <div className="max-md:hidden">
         <Card>
           <CardHeader><CardTitle className="text-sm md:text-base"><T k="checkout.items" /></CardTitle></CardHeader>
           <CardContent className="p-0 md:p-6">
