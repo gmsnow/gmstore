@@ -48,14 +48,14 @@ export function UserGreeting() {
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: -80, opacity: 0, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3"
+            className="fixed top-4 left-4 z-50 bg-background/70 backdrop-blur-md border border-border text-foreground px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3"
           >
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.2 }}
             >
-              <User className="h-5 w-5" />
+              <User className="h-5 w-5 text-primary" />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: -10 }}
@@ -63,13 +63,13 @@ export function UserGreeting() {
               transition={{ delay: 0.3 }}
               className="text-sm font-medium"
             >
-              <T k="nav.greeting" />, {name} 👋
+              <T k="nav.greeting" />, {name}
             </motion.div>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 4, ease: "linear" }}
-              className="absolute bottom-0 left-0 h-0.5 bg-white/40 rounded-full"
+              className="absolute bottom-0 left-0 h-0.5 bg-primary/30 rounded-full"
             />
           </motion.div>
         )}
