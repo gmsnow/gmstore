@@ -25,13 +25,15 @@ export default function CartPage() {
       fetch(`/api/orders/${encodeURIComponent(orderId)}`)
         .then((r) => r.ok ? r.json() : null)
         .then((order) => {
-          if (order?.items?.every((i: any) => i.status === "DELIVERED")) {
-            localStorage.removeItem("cart");
-            localStorage.removeItem("lastOrderId");
-            setItems([]);
-            setLastOrder(null);
-          } else if (order) {
-            setLastOrder(order);
+          if (order && order.items) {
+            if (order.items.every((i: any) => i.status === "DELIVERED")) {
+              localStorage.removeItem("cart");
+              localStorage.removeItem("lastOrderId");
+              setItems([]);
+              setLastOrder(null);
+            } else if (order.status !== "CANCELLED") {
+              setLastOrder(order);
+            }
           }
         })
         .catch(() => {});

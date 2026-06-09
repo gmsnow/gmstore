@@ -44,8 +44,12 @@ export default function AdminOrderDetailPage() {
   const [itemUpdating, setItemUpdating] = useState<string | null>(null);
 
   async function fetchOrder() {
-    const res = await fetch(`/api/orders/${params.id}`);
-    if (res.ok) setOrder(await res.json());
+    try {
+      const res = await fetch(`/api/orders/${params.id}`);
+      if (res.ok) setOrder(await res.json());
+    } catch (err) {
+      console.error("Failed to fetch order", err);
+    }
     setLoading(false);
   }
 
