@@ -12,3 +12,23 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
   return NextResponse.json(order);
 }
+
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const order = await prisma.order.findUnique({ where: { id } });
+  if (!order) {
+    return NextResponse.json({ error: "الطلب غير موجود" }, { status: 404 });
+  }
+  if (order.status === "SHIPPED" || order.status === "DELIVERED" || order.status === "CANCELLED") {
+    return NextResponse.json({ error: "لا يمكن إلغاء الطلب بعد الشحن" }, { status: 400 });
+  }
+  await prisma.orderItem.updateMany({
+    where: { orderId: id, status: { not: "CANCELLED" } },
+    data: { status: "CANCELLED" },
+  });
+  await prisma.order.update({
+    where: { id },
+    data: { status: "CANCELLED" },
+  });
+  return NextResponse.json({ success: true });
+}

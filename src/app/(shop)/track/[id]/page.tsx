@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { Package, MapPin, Calendar, Check } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { Package, MapPin, Calendar, Check, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { useI18n } from "@/lib/i18n/provider";
 import { localizedName } from "@/lib/i18n/localized";
 
@@ -15,10 +17,13 @@ const statusSteps = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
 
 export default function TrackOrderByIdPage() {
   const params = useParams();
+  const router = useRouter();
   const { t, locale } = useI18n();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     const id = params.id as string;
@@ -39,6 +44,26 @@ export default function TrackOrderByIdPage() {
     const d = new Date(dateStr);
     return d.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
   }
+
+  async function handleCancel() {
+    setCancelling(true);
+    try {
+      const res = await fetch(`/api/orders/${params.id}`, { method: "POST" });
+      if (res.ok) {
+        setShowConfirm(false);
+        router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "فشل الإلغاء");
+      }
+    } catch {
+      alert("فشل الإلغاء");
+    } finally {
+      setCancelling(false);
+    }
+  }
+
+  const canCancel = order && (order.status === "PENDING" || order.status === "PROCESSING");
 
   let address: Record<string, string> = {};
   try { address = order?.shippingAddress ? JSON.parse(order.shippingAddress) : {}; } catch { address = { address: order?.shippingAddress || "" }; }
@@ -193,7 +218,23 @@ export default function TrackOrderByIdPage() {
             {t("track.total")}: {Number(order.total).toFixed(2)} {t("merchant.currency")}
           </div>
         </div>
+
+        {canCancel && (
+          <div className="text-center">
+            <Button variant="danger" onClick={() => setShowConfirm(true)}>
+              <XCircle className="h-4 w-4 ml-2" />إلغاء الطلب
+            </Button>
+          </div>
+        )}
       </div>
+
+      <Modal open={showConfirm} onClose={() => setShowConfirm(false)} title="تأكيد إلغاء الطلب">
+        <p className="mb-4 text-sm text-muted-foreground">هل أنت متأكد من إلغاء هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" onClick={() => setShowConfirm(false)}>إلغاء</Button>
+          <Button variant="danger" loading={cancelling} onClick={handleCancel}>تأكيد الإلغاء</Button>
+        </div>
+      </Modal>
     </div>
   );
 }
