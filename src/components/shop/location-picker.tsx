@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 
 function embedUrl(lat: number, lng: number) {
-  return `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+  const bbox = `${lng - 0.015},${lat - 0.015},${lng + 0.015},${lat + 0.015}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat},${lng}`;
 }
 
 interface Props {
@@ -26,7 +27,7 @@ export function LocationPicker({ value, onChange }: Props) {
   }, []);
 
   function handleMapClick() {
-    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    const url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15`;
     window.open(url, "_blank");
   }
 
@@ -46,12 +47,11 @@ export function LocationPicker({ value, onChange }: Props) {
           style={{ border: 0, pointerEvents: "none" }}
           allowFullScreen
           loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
           title="خريطة الموقع"
         />
       </div>
       <p className="text-xs text-muted-foreground">
-        اضغط على الخريطة لفتحها في Google Maps واختيار موقعك
+        اضغط على الخريطة لفتحها في OpenStreetMap واختيار موقعك
       </p>
       <div className="flex items-center gap-3 text-xs">
         <button
