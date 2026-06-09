@@ -44,7 +44,7 @@ export default async function HomePage() {
             <h2 className="text-2xl font-bold"><T k="home.featured" /></h2>
             <Link href="/products?featured=true" className="text-sm text-primary hover:underline"><T k="home.view_all" /></Link>
             </div>
-            <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
               {featured.map((p: any) => (
                 <StaggerItem key={p.id}>
                   <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
@@ -61,7 +61,7 @@ export default async function HomePage() {
             <h2 className="text-2xl font-bold"><T k="home.latest" /></h2>
           <Link href="/products" className="text-sm text-primary hover:underline"><T k="home.view_all" /></Link>
           </div>
-          <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
             {latest.map((p: any) => (
               <StaggerItem key={p.id}>
                 <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />

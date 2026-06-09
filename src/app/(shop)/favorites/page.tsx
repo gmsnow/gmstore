@@ -100,7 +100,7 @@ export default function FavoritesPage() {
       </FadeIn>
 
       {loading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="rounded-2xl bg-muted animate-pulse h-80" />
           ))}
@@ -121,7 +121,7 @@ export default function FavoritesPage() {
           </Link>
         </motion.div>
       ) : (
-        <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
           {products.map((p: any) => (
             <StaggerItem key={p.id}>
               <SwipeableProductCard product={p} />
