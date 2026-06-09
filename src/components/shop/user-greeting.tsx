@@ -24,14 +24,15 @@ export function UserGreeting() {
   }, [user, pathname]);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {show && user && (
         <motion.div
-          initial={{ y: -30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -30, opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="hidden md:flex fixed top-20 left-4 z-50 items-center gap-2 text-sm font-medium text-foreground"
+          key={pathname}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="hidden md:flex fixed top-20 left-4 z-50 items-center gap-1.5 text-sm text-muted-foreground"
         >
           <User className="h-4 w-4 text-primary" />
           <span>
