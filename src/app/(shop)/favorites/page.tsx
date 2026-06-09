@@ -1,44 +1,91 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Heart, ArrowLeft, Trash2 } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 import { T } from "@/components/translate";
 
 export default function FavoritesPage() {
+  const { data: session } = useSession();
+  const userId = (session?.user as any)?.id;
+  const isLoggedIn = !!userId;
+
   const [ids, setIds] = useState<string[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    function sync() {
-      try {
-        const stored = JSON.parse(localStorage.getItem("favorites") || "[]");
-        setIds(stored);
-      } catch {
-        setIds([]);
-      }
+  const fetchProducts = useCallback(async (favIds: string[]) => {
+    if (favIds.length === 0) { setProducts([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/products?ids=${favIds.join(",")}`);
+      const data = await res.json();
+      setProducts(Array.isArray(data) ? data : []);
+    } catch {
+      setProducts([]);
     }
-    sync();
-    window.addEventListener("favoritesUpdated", sync);
-    return () => window.removeEventListener("favoritesUpdated", sync);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (ids.length === 0) { setProducts([]); setLoading(false); return; }
-    setLoading(true);
-    fetch(`/api/products?ids=${ids.join(",")}`)
-      .then((r) => r.json())
-      .then((data) => { setProducts(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [ids]);
+    if (isLoggedIn) {
+      fetch("/api/favorites")
+        .then((r) => r.json())
+        .then((data: any[]) => {
+          const favIds = data.map((p: any) => p.id);
+          setIds(favIds);
+          setProducts(data);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    } else {
+      const stored = (() => { try { return JSON.parse(localStorage.getItem("favorites") || "[]"); } catch { return []; } })();
+      setIds(stored);
+      fetchProducts(stored);
+    }
+  }, [isLoggedIn, fetchProducts]);
 
-  function removeAll() {
-    localStorage.setItem("favorites", JSON.stringify([]));
-    window.dispatchEvent(new Event("favoritesUpdated"));
-    setIds([]);
+  useEffect(() => {
+    function sync() {
+      if (isLoggedIn) {
+        fetch("/api/favorites")
+          .then((r) => r.json())
+          .then((data: any[]) => {
+            const favIds = data.map((p: any) => p.id);
+            setIds(favIds);
+            setProducts(data);
+          });
+      } else {
+        const stored = (() => { try { return JSON.parse(localStorage.getItem("favorites") || "[]"); } catch { return []; } })();
+        setIds(stored);
+        fetchProducts(stored);
+      }
+    }
+    window.addEventListener("favoritesUpdated", sync);
+    return () => window.removeEventListener("favoritesUpdated", sync);
+  }, [isLoggedIn, fetchProducts]);
+
+  async function removeAll() {
+    if (isLoggedIn) {
+      for (const id of ids) {
+        await fetch("/api/favorites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: id }),
+        });
+      }
+      window.dispatchEvent(new Event("favoritesUpdated"));
+      setIds([]);
+      setProducts([]);
+    } else {
+      localStorage.setItem("favorites", JSON.stringify([]));
+      window.dispatchEvent(new Event("favoritesUpdated"));
+      setIds([]);
+      setProducts([]);
+    }
   }
 
   return (

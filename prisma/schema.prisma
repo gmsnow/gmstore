@@ -42,6 +42,7 @@ model User {
   orders        Order[]
   products      Product[]
   reviews       Review[]
+  favorites     Favorite[]
   createdAt     DateTime  @default(now())
 }
 
@@ -112,6 +113,7 @@ model Product {
   featured    Boolean     @default(false)
   orderItems  OrderItem[]
   reviews     Review[]
+  favorites   Favorite[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
@@ -154,4 +156,15 @@ model Review {
   createdAt DateTime @default(now())
 
   @@unique([productId, userId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
 }

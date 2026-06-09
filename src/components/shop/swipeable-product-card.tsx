@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { T } from "@/components/translate";
@@ -9,41 +10,68 @@ import { LocalizedName } from "@/components/localized";
 import { useI18n } from "@/lib/i18n/provider";
 import type { CartItem } from "@/types";
 
-function getFavorites(): string[] {
+function getLocalFavs(): string[] {
   if (typeof window === "undefined") return [];
   try { return JSON.parse(localStorage.getItem("favorites") || "[]"); } catch { return []; }
 }
 
-function toggleFavorite(productId: string) {
-  const favs = getFavorites();
-  const next = favs.includes(productId) ? favs.filter((id) => id !== productId) : [...favs, productId];
-  localStorage.setItem("favorites", JSON.stringify(next));
+function setLocalFavs(ids: string[]) {
+  localStorage.setItem("favorites", JSON.stringify(ids));
   window.dispatchEvent(new Event("favoritesUpdated"));
-  return next;
-}
-
-function useFavorites() {
-  const [ids, setIds] = useState<string[]>([]);
-  useEffect(() => {
-    setIds(getFavorites());
-    const handler = () => setIds(getFavorites());
-    window.addEventListener("favoritesUpdated", handler);
-    return () => window.removeEventListener("favoritesUpdated", handler);
-  }, []);
-  return { ids, toggle: (id: string) => setIds(toggleFavorite(id)) };
 }
 
 export function SwipeableProductCard({ product }: { product: any }) {
+  const { data: session } = useSession();
+  const userId = (session?.user as any)?.id;
+  const isLoggedIn = !!userId;
+
   const [x, setX] = useState(0);
   const [toast, setToast] = useState<"cart" | "fav" | null>(null);
-  const { ids, toggle: toggleFav } = useFavorites();
+  const [isFav, setIsFav] = useState(false);
   const { direction } = useI18n();
   const isRtl = direction === "rtl";
-  const isFav = ids.includes(product.id);
 
   const avgRating = product.reviews?.length
     ? product.reviews.reduce((s: number, r: any) => s + r.rating, 0) / product.reviews.length
     : 0;
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetch("/api/favorites")
+        .then((r) => r.json())
+        .then((data: any[]) => setIsFav(data.some((p: any) => p.id === product.id)))
+        .catch(() => {});
+    } else {
+      setIsFav(getLocalFavs().includes(product.id));
+    }
+  }, [isLoggedIn, product.id]);
+
+  useEffect(() => {
+    if (isLoggedIn) return;
+    const handler = () => setIsFav(getLocalFavs().includes(product.id));
+    window.addEventListener("favoritesUpdated", handler);
+    return () => window.removeEventListener("favoritesUpdated", handler);
+  }, [isLoggedIn, product.id]);
+
+  const toggleFav = useCallback(async () => {
+    if (isLoggedIn) {
+      try {
+        const res = await fetch("/api/favorites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: product.id }),
+        });
+        const data = await res.json();
+        setIsFav(data.favorited);
+        window.dispatchEvent(new Event("favoritesUpdated"));
+      } catch {}
+    } else {
+      const favs = getLocalFavs();
+      const next = favs.includes(product.id) ? favs.filter((id) => id !== product.id) : [...favs, product.id];
+      setLocalFavs(next);
+      setIsFav(next.includes(product.id));
+    }
+  }, [isLoggedIn, product.id]);
 
   function handleDragEnd(_: any, info: any) {
     const offset = info.offset.x;
@@ -53,7 +81,7 @@ export function SwipeableProductCard({ product }: { product: any }) {
     const isLeft = isRtl ? offset < 0 : offset > 0;
 
     if (isRight) {
-      toggleFav(product.id);
+      toggleFav();
       setToast("fav");
       setTimeout(() => setToast(null), 1500);
     } else if (isLeft) {
