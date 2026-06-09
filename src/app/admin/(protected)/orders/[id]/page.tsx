@@ -135,7 +135,7 @@ export default function AdminOrderDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {order.items.map((item: any) => (
+                {order.items?.length > 0 ? order.items.map((item: any) => (
                   <TableRow key={item.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -165,7 +165,9 @@ export default function AdminOrderDetailPage() {
                       />
                     </TableCell>
                   </TableRow>
-                ))}
+                )) : (
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-4">لا توجد منتجات في هذا الطلب</TableCell></TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -173,7 +175,7 @@ export default function AdminOrderDetailPage() {
       </div>
 
       <div className="md:hidden space-y-3">
-        {order.items.map((item: any) => (
+        {order.items?.length > 0 ? order.items.map((item: any) => (
           <Card key={item.id}>
             <CardContent className="p-3 space-y-2">
               <div className="flex items-center gap-3">
@@ -207,7 +209,9 @@ export default function AdminOrderDetailPage() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        )) : (
+          <div className="text-center text-muted-foreground py-8">لا توجد منتجات في هذا الطلب</div>
+        )}
       </div>
 
       <div className="text-left">
