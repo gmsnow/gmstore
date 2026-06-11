@@ -26,19 +26,15 @@ export default async function HomePage() {
   const latest = (rawLatest as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
-      <FadeIn>
-        <section className="text-center space-y-4 py-12">
-          <h1 className="text-4xl font-bold tracking-tight"><T k="home.hero_title" /></h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            <T k="home.hero_desc" />
-          </p>
-          <Link href="/products">
-            <Button size="lg"><ArrowLeft className="ml-2 h-4 w-4" /><T k="home.shop_now" /></Button>
-          </Link>
-        </section>
-      </FadeIn>
-
+    <>
+      <section className="w-full h-[300px] sm:h-[400px] lg:h-[500px] overflow-hidden -mt-[70px]">
+        <img
+          src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+      </section>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
       <FadeInUp>
         <PromoBanner />
       </FadeInUp>
@@ -99,5 +95,6 @@ export default async function HomePage() {
         </section>
       </FadeInUp>
     </div>
+    </>
   );
 }
