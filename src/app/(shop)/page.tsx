@@ -46,14 +46,7 @@ export default async function HomePage() {
       {categories.length > 0 && (
         <FadeInUp>
           <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card">
-            <div className="flex justify-around mb-5">
-              <button className="border-none bg-none text-lg font-bold text-black dark:text-white relative pb-2.5 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-10 after:h-1 after:bg-black dark:after:bg-white">
-                Featured
-              </button>
-              <button className="border-none bg-none text-lg font-bold text-[#777] relative pb-2.5">
-                Room Essentials
-              </button>
-            </div>
+            <h2 className="text-lg font-bold mb-5">فئات</h2>
             <div className="grid grid-cols-4 gap-[22px_10px]">
               {categories.slice(0, 12).map((cat: any) => (
                 <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">
