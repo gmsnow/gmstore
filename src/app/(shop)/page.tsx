@@ -18,7 +18,7 @@ export default async function HomePage() {
   const [rawFeatured, rawLatest, categories, userFavs] = await Promise.all([
     prisma.product.findMany({ where: { featured: true }, select: productSelect, take: 4 }),
     prisma.product.findMany({ select: productSelect, orderBy: { createdAt: "desc" }, take: 8 }),
-    prisma.category.findMany({ select: { id: true, name: true, nameEn: true, slug: true, image: true }, take: 6 }),
+    prisma.category.findMany({ select: { id: true, name: true, nameEn: true, slug: true, image: true }, take: 12 }),
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
@@ -45,27 +45,26 @@ export default async function HomePage() {
 
       {categories.length > 0 && (
         <FadeInUp>
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold"><T k="nav.categories" /></h2>
-              <Link href="/categories" className="text-sm text-primary hover:underline"><T k="home.view_all" /></Link>
+          <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card">
+            <div className="flex justify-around mb-5">
+              <button className="border-none bg-none text-lg font-bold text-black dark:text-white relative pb-2.5 after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-10 after:h-1 after:bg-black dark:after:bg-white">
+                Featured
+              </button>
+              <button className="border-none bg-none text-lg font-bold text-[#777] relative pb-2.5">
+                Room Essentials
+              </button>
             </div>
-            <div className="grid grid-cols-4 lg:grid-cols-3 gap-2">
-              {categories.map((cat: any) => (
-                <Link key={cat.id} href={`/products?category=${cat.slug}`} className="group">
-                  <div className="aspect-[4/3] overflow-hidden rounded-xl bg-muted relative">
-                    {cat.image ? (
-                      <img src={cat.image} alt={cat.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-2xl text-muted-foreground">📁</div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-2">
-                      <h3 className="text-white font-bold text-xs drop-shadow-lg truncate">
-                        {cat.name}
-                      </h3>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-4 gap-[22px_10px]">
+              {categories.slice(0, 12).map((cat: any) => (
+                <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">
+                  <img
+                    src={cat.image || ""}
+                    alt={cat.name}
+                    className="w-[88px] h-[88px] object-cover rounded-full mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[70px] max-sm:h-[70px]"
+                  />
+                  <p className="mt-2 text-sm sm:text-[15px] leading-tight text-[#222] dark:text-foreground">
+                    {cat.name}
+                  </p>
                 </Link>
               ))}
             </div>
