@@ -37,9 +37,9 @@ export function SearchInput() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t("nav.search")}
-        className="w-full rounded-full border border-border bg-muted/50 px-4 py-1.5 ps-9 text-sm outline-none focus:border-primary transition-colors"
+        className="w-full rounded-full border border-border bg-muted/50 px-4 py-1.5 ps-9 text-sm text-foreground outline-none focus:border-primary transition-colors"
       />
-      <button type="submit" className="absolute start-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">
+      <button type="submit" className="absolute start-2 top-1/2 -translate-y-1/2 text-foreground/60 hover:text-primary transition-colors">
         <Search className="h-4 w-4" />
       </button>
     </form>
