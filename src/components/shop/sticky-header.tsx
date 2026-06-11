@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShoppingCart, Store, LogIn, LayoutDashboard, UserPlus, LogOut, Heart } from "lucide-react";
 import { T } from "@/components/translate";
 import { SearchInput } from "@/components/shop/search-input";
@@ -10,6 +11,8 @@ import { LangToggle } from "@/components/lang-toggle";
 
 export function StickyHeader({ session, role, signOutForm }: { session: any; role: string | undefined; signOutForm: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     function onScroll() { setScrolled(window.scrollY > 80); }
@@ -21,9 +24,9 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
   return (
     <header
       className={`fixed top-0 left-0 w-full h-[70px] z-50 flex items-center justify-between px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 dark:bg-card/90 backdrop-blur-md text-black dark:text-white shadow-sm"
-          : "bg-transparent text-white"
+        isHome && !scrolled
+          ? "bg-transparent text-white"
+          : "bg-white/90 dark:bg-card/90 backdrop-blur-md text-black dark:text-white shadow-sm"
       }`}
     >
       <Link href="/" className="flex items-center gap-2 text-xl font-bold">
