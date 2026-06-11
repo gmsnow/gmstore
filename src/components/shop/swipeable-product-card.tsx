@@ -159,13 +159,11 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
 
-          {product.brand && (
-            <div className="absolute top-3 left-3 z-10 pointer-events-none">
-              <div className="text-2xl font-black italic drop-shadow-lg" style={{ color: product.brandColor || "#ffffff" }}>
-                {product.brand}
-              </div>
+          <div className="absolute top-3 left-3 z-10 pointer-events-none">
+            <div className="text-2xl font-black italic drop-shadow-lg" style={{ color: "#2092EB" }}>
+              Store
             </div>
-          )}
+          </div>
 
           {product.colors?.length > 0 && (
             <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5 pointer-events-none">
@@ -218,7 +216,6 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
                   <LocalizedName item={product.category} />
                 </span>
               )}
-              {product.brand && <span className="text-sm text-purple-700 font-medium">{product.brand}</span>}
             </div>
 
             <h3 className="text-base font-medium truncate">
@@ -230,7 +227,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[28px] font-bold leading-none text-[#e45b00]">{Number(product.price).toFixed(2)}</span>
+              <span className="text-[28px] font-bold leading-none text-[#2092EB]">{Number(product.price).toFixed(2)}</span>
               <span className="text-xs text-muted-foreground">ريال</span>
             </div>
 

@@ -125,10 +125,6 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
         منتج مميز
       </label>
       <Input id="videoUrl" name="videoUrl" label="رابط الفيديو (Video URL)" defaultValue={product?.videoUrl} placeholder="https://www.youtube.com/watch?v=..." />
-      <div className="grid grid-cols-2 gap-4">
-        <Input id="brand" name="brand" label="اسم الماركة (Brand)" defaultValue={product?.brand} placeholder="مثال: Maweii" />
-        <Input id="brandColor" name="brandColor" type="color" label="لون الماركة" defaultValue={product?.brandColor || "#000000"} />
-      </div>
       <Card>
         <CardContent className="p-4 space-y-3">
           <p className="text-sm font-medium">الألوان المتاحة</p>
