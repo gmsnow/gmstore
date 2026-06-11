@@ -11,7 +11,7 @@ export const GET = async (req: Request) => {
 
     const listSelect = {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, stock: true, featured: true,
+      images: true, colors: true, colorImages: true, stock: true, featured: true,
       description: true, descriptionEn: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
     } as const;
@@ -92,6 +92,7 @@ export const POST = auth(async (req) => {
         featured: body.featured ?? false,
         images: body.images ?? [],
         colors: body.colors ?? [],
+        colorImages: body.colorImages ?? undefined,
         videoUrl: body.videoUrl || null,
       },
     });
@@ -131,6 +132,7 @@ export const PATCH = auth(async (req) => {
         featured: body.featured ?? false,
         images: body.images ?? [],
         colors: body.colors ?? [],
+        colorImages: body.colorImages ?? undefined,
         videoUrl: body.videoUrl || null,
       },
     });

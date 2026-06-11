@@ -71,6 +71,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   function activeFilterTag(label: string, param: string) {
     return (
       <Link
+        key={param}
         href={filterUrl({ [param]: null })}
         className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-3 py-1 hover:bg-primary/20 transition-colors"
       >

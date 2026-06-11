@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ProductActions } from "@/components/shop/product-actions";
 import { ProductReviews } from "@/components/shop/product-reviews";
 import { ProductGallery } from "@/components/shop/product-gallery";
+import { CurrencyToggle } from "@/components/shop/currency-toggle";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { FadeIn, FadeInUp } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
@@ -52,7 +53,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="space-y-6">
               <Badge>{localizedName(product.category, locale)}</Badge>
               <h1 className="text-3xl font-bold">{localizedName(product, locale)}</h1>
-              <p className="text-3xl font-bold text-primary">{Number(product.price).toFixed(2)} ريال</p>
+              <CurrencyToggle priceYer={Number(product.price)} />
               <p className="text-muted-foreground leading-relaxed">{localizedDescription(product, locale)}</p>
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-foreground"><T k="detail.stock" /></span>

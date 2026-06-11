@@ -32,6 +32,7 @@ export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string
         featured: body.featured ?? false,
         images: body.images ?? [],
         colors: body.colors ?? [],
+        colorImages: body.colorImages ?? undefined,
         videoUrl: body.videoUrl || null,
       },
   });

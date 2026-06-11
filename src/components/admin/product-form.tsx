@@ -26,6 +26,8 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
   const [uploading, setUploading] = useState(false);
   const [colors, setColors] = useState<string[]>(product?.colors ?? []);
   const [colorInput, setColorInput] = useState("");
+  const [colorImages, setColorImages] = useState<Record<string, string>>(product?.colorImages ?? {});
+  const [uploadingColor, setUploadingColor] = useState<string | null>(null);
 
   const presetColors = [
     "#FF0000","#DC143C","#B22222","#8B0000","#FF4500","#FF6347","#FF8C00","#FFA500",
@@ -42,6 +44,21 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
 
   function removeColor(hex: string) {
     setColors((p) => p.filter((c) => c !== hex));
+    setColorImages((prev) => { const n = { ...prev }; delete n[hex]; return n; });
+  }
+
+  async function uploadColorImage(hex: string, file: File) {
+    setUploadingColor(hex);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      setColorImages((prev) => ({ ...prev, [hex]: dataUrl }));
+    } catch {}
+    setUploadingColor(null);
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -85,6 +102,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
       videoUrl: form.get("videoUrl"),
       images,
       colors,
+      colorImages,
     };
 
     const url = product ? `/api/products/${product.id}` : "/api/products";
@@ -128,11 +146,24 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
       <Card>
         <CardContent className="p-4 space-y-3">
           <p className="text-sm font-medium">الألوان المتاحة</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {colors.map((c) => (
-              <div key={c} className="relative group">
-                <div className="h-8 w-8 rounded-full border border-border" style={{ backgroundColor: c }} />
-                <button type="button" onClick={() => removeColor(c)} className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-3 w-3" /></button>
+              <div key={c} className="flex flex-col items-center gap-1">
+                <div className="relative group">
+                  <div className="h-8 w-8 rounded-full border border-border" style={{ backgroundColor: c }} />
+                  <button type="button" onClick={() => removeColor(c)} className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-3 w-3" /></button>
+                </div>
+                {colorImages[c] ? (
+                  <div className="relative h-10 w-10 overflow-hidden rounded border border-border">
+                    <img src={colorImages[c]} alt="" className="h-full w-full object-cover" />
+                    <button type="button" onClick={() => setColorImages((p) => { const n = { ...p }; delete n[c]; return n; })} className="absolute top-0 left-0 bg-black/50 text-white text-[8px] w-full h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">حذف</button>
+                  </div>
+                ) : (
+                  <label className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded border border-dashed border-border text-[10px] text-muted-foreground hover:border-primary transition-colors ${uploadingColor === c ? "opacity-50" : ""}`}>
+                    {uploadingColor === c ? "..." : "+"}
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadColorImage(c, f); }} />
+                  </label>
+                )}
               </div>
             ))}
           </div>

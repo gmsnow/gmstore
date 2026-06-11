@@ -24,6 +24,9 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
   const [toast, setToast] = useState<"cart" | "fav" | null>(null);
   const [isFav, setIsFav] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [showUsd, setShowUsd] = useState(false);
+  const USD_TO_YER = 535;
   const router = useRouter();
   const { direction } = useI18n();
   const isRtl = direction === "rtl";
@@ -166,17 +169,25 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </div>
 
           {product.colors?.length > 0 && (
-            <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5 pointer-events-none">
-              {product.colors.slice(0, 6).map((c: string, i: number) => (
-                <motion.div
-                  key={c}
-                  initial={{ x: 10, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="h-3.5 w-3.5 rounded-full border-2 border-white/80 shadow-sm"
-                  style={{ backgroundColor: c }}
-                />
-              ))}
+            <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5 p-1.5 rounded-lg bg-gray-900/40 backdrop-blur-sm">
+              {product.colors.slice(0, 6).map((c: string, i: number) => {
+                const isSelected = selectedColor === c || (!selectedColor && i === 0);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => {
+                      setSelectedColor(c);
+                      const ci = product.colorImages?.[c];
+                      const idx = ci ? product.images?.indexOf(ci) : -1;
+                      setImgIndex(idx >= 0 ? idx : (product.images?.length > i ? i : 0));
+                    }}
+                    className={`h-4 w-4 rounded-full border-2 shadow-sm transition-all shrink-0 ${isSelected ? "border-white scale-125" : "border-white/60 hover:scale-110"}`}
+                    style={{ backgroundColor: c }}
+                    aria-label={c}
+                  />
+                );
+              })}
               {product.colors.length > 6 && (
                 <span className="text-[9px] text-white font-medium text-center drop-shadow-md">+{product.colors.length - 6}</span>
               )}
@@ -227,8 +238,15 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[28px] font-bold leading-none text-[#2092EB]">{Number(product.price).toFixed(2)}</span>
-              <span className="text-xs text-muted-foreground">ريال</span>
+              <span className="text-[28px] font-bold leading-none text-[#2092EB]">{showUsd ? (Number(product.price) / USD_TO_YER).toFixed(2) : Number(product.price).toFixed(2)}</span>
+              <span className="text-xs text-muted-foreground">{showUsd ? "$" : "ريال"}</span>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowUsd((p) => !p); }}
+                className="text-[10px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded border border-border"
+              >
+                {showUsd ? "ريال" : "$"}
+              </button>
             </div>
 
             <div className="flex items-center gap-2">
