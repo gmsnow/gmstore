@@ -159,11 +159,31 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
 
-          <div className="absolute top-3 left-3 z-10 pointer-events-none">
-            <Badge className="bg-white/90 backdrop-blur-sm text-[10px] px-2.5 py-1 shadow-sm text-black dark:text-black">
-              <LocalizedName item={product.category} />
-            </Badge>
-          </div>
+          {product.brand && (
+            <div className="absolute top-3 left-3 z-10 pointer-events-none">
+              <div className="text-2xl font-black italic drop-shadow-lg" style={{ color: product.brandColor || "#ffffff" }}>
+                {product.brand}
+              </div>
+            </div>
+          )}
+
+          {product.colors?.length > 0 && (
+            <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5 pointer-events-none">
+              {product.colors.slice(0, 6).map((c: string, i: number) => (
+                <motion.div
+                  key={c}
+                  initial={{ x: 10, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="h-3.5 w-3.5 rounded-full border-2 border-white/80 shadow-sm"
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+              {product.colors.length > 6 && (
+                <span className="text-[9px] text-white font-medium text-center drop-shadow-md">+{product.colors.length - 6}</span>
+              )}
+            </div>
+          )}
 
           <AnimatePresence>
             {isFav && (
@@ -191,51 +211,42 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         </div>
 
         <Link href={`/products/${product.slug}`} className="block">
-          <div className="p-4 space-y-2.5">
-            <h3 className="font-semibold text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
+          <div className="p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              {product.category && (
+                <span className="bg-purple-600 text-white text-xs font-bold px-3 py-0.5 rounded-full">
+                  <LocalizedName item={product.category} />
+                </span>
+              )}
+              {product.brand && <span className="text-sm text-purple-700 font-medium">{product.brand}</span>}
+            </div>
+
+            <h3 className="text-base font-medium truncate">
               <LocalizedName item={product} />
             </h3>
 
-            {product.colors?.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <div className="flex -space-x-1">
-                  {product.colors.slice(0, 5).map((c: string, i: number) => (
-                    <motion.div
-                      key={c}
-                      initial={{ x: -10, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: i * 0.05 }}
-                      whileHover={{ scale: 1.4, y: -2 }}
-                      className="h-4 w-4 rounded-full border-2 border-background shadow-sm"
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
-                </div>
-                {product.colors.length > 5 && (
-                  <span className="text-[10px] text-muted-foreground">+{product.colors.length - 5}</span>
-                )}
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <span className="text-[15px] text-muted-foreground">{product.soldCount ? `${product.soldCount}+` : ""}</span>
+            </div>
 
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-primary">{Number(product.price).toFixed(2)}</span>
-                <span className="text-[11px] text-muted-foreground">ريال</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
-                  className={`p-2 rounded-full transition-colors ${isFav ? "text-rose-500 bg-rose-50 dark:bg-rose-500/10" : "text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10"}`}
-                >
-                  <Heart className={`h-4 w-4 ${isFav ? "fill-rose-500" : ""}`} />
-                </button>
-                <button
-                  onClick={(e) => { e.preventDefault(); addToCart(); }}
-                  className="p-2 rounded-full text-muted-foreground hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
-                >
-                  <ShoppingCart className="h-4 w-4" />
-                </button>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[28px] font-bold leading-none text-[#e45b00]">{Number(product.price).toFixed(2)}</span>
+              <span className="text-xs text-muted-foreground">ريال</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
+                className={`p-1.5 rounded-full transition-colors ${isFav ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"}`}
+              >
+                <Heart className={`h-4 w-4 ${isFav ? "fill-rose-500" : ""}`} />
+              </button>
+              <button
+                onClick={(e) => { e.preventDefault(); addToCart(); }}
+                className="p-1.5 rounded-full text-muted-foreground hover:text-emerald-500 transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </Link>
