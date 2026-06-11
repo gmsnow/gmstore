@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
   "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80",
-  "https://images.unsplash.com/photo-1607082350899-7e74aa90c30b?w=1600&q=80",
+  "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80",
   "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1600&q=80",
 ];
 
