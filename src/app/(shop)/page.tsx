@@ -6,7 +6,6 @@ import { ArrowLeft } from "lucide-react";
 import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
-import { PromoBanner } from "@/components/shop/promo-banner";
 
 const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
@@ -35,10 +34,7 @@ export default async function HomePage() {
         />
       </section>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
-      <FadeInUp>
-        <PromoBanner />
-      </FadeInUp>
-
+      
       {categories.length > 0 && (
         <FadeInUp>
           <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card">
