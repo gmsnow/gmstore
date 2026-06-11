@@ -27,7 +27,13 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
   const [colors, setColors] = useState<string[]>(product?.colors ?? []);
   const [colorInput, setColorInput] = useState("");
 
-  const presetColors = ["#FF0000","#FF4500","#FF8C00","#FFD700","#FFFF00","#9ACD32","#008000","#00CED1","#0000FF","#4B0082","#8B008B","#FF1493","#FF69B4","#FFFFFF","#808080","#000000"];
+  const presetColors = [
+    "#FF0000","#DC143C","#B22222","#8B0000","#FF4500","#FF6347","#FF8C00","#FFA500",
+    "#FFD700","#FFFF00","#9ACD32","#32CD32","#008000","#228B22","#006400","#2E8B57",
+    "#00CED1","#008080","#20B2AA","#0000FF","#4169E1","#1E90FF","#00008B","#191970",
+    "#4B0082","#800080","#9932CC","#9400D3","#8B008B","#FF1493","#FF69B4","#FFB6C1",
+    "#FFFFFF","#F5F5DC","#C0C0C0","#A9A9A9","#808080","#696969","#000000","#8B4513",
+  ];
 
   function addColor(hex: string) {
     if (hex && !colors.includes(hex)) setColors((p) => [...p, hex]);

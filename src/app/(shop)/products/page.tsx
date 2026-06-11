@@ -127,32 +127,20 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </div>
         )}
 
-        <div className="grid grid-flow-col grid-rows-2 gap-1.5 mb-6 overflow-x-auto pb-1 scrollbar-none auto-cols-[72px]">
+        <div className="flex flex-wrap gap-2 mb-6">
           <Link
             href={filterUrl({ category: null })}
-            className={`flex flex-col items-center gap-0.5 rounded-2xl border p-1.5 transition-all ${!params.category ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+            className={`rounded-full px-4 py-1.5 text-sm border border-border transition-colors ${!params.category ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"}`}
           >
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>
-            </div>
-            <div className="text-[9px] font-medium truncate w-full text-center leading-tight"><T k="products.all" /></div>
+            <T k="products.all" />
           </Link>
           {categories.map((c: any) => (
             <Link
               key={c.id}
               href={filterUrl({ category: c.slug })}
-              className={`flex flex-col items-center gap-0.5 rounded-2xl border p-1.5 transition-all ${params.category === c.slug ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+              className={`rounded-full px-4 py-1.5 text-sm border border-border transition-colors ${params.category === c.slug ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"}`}
             >
-              <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0">
-                {c.image ? (
-                  <img src={c.image} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-                  </div>
-                )}
-              </div>
-              <div className="text-[9px] font-medium truncate w-full text-center leading-tight"><LocalizedName item={c} /></div>
+              <LocalizedName item={c} />
             </Link>
           ))}
         </div>

@@ -6,22 +6,22 @@ import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { T } from "@/components/translate";
-import { getServerLocale } from "@/lib/i18n/server";
+import { getServerTranslations } from "@/lib/i18n/server";
 import { localizedName } from "@/lib/i18n/localized";
 
 export default async function AdminProductsPage() {
-  const locale = await getServerLocale();
+  const { locale, t } = await getServerTranslations();
   const products = await prisma.product.findMany({
     include: { category: true },
     orderBy: { createdAt: "desc" },
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold"><T k="admin.products" /></h1>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold"><T k="admin.products" /></h1>
         <Link href="/admin/products/new">
-          <Button><Plus className="ml-2 h-4 w-4" /><T k="admin.new_product" /></Button>
+          <Button size="sm" className="w-full sm:w-auto"><Plus className="ml-2 h-4 w-4" /><T k="admin.new_product" /></Button>
         </Link>
       </div>
       <Table>
@@ -38,15 +38,15 @@ export default async function AdminProductsPage() {
         <TableBody>
           {products.map((p) => (
             <TableRow key={p.id}>
-              <TableCell className="font-medium">{localizedName(p, locale)}</TableCell>
-              <TableCell>{Number(p.price).toFixed(2)} <T k="merchant.currency" /></TableCell>
-              <TableCell>{localizedName(p.category, locale)}</TableCell>
-              <TableCell>
+              <TableCell className="font-medium" data-label={t("admin.product_name")}>{localizedName(p, locale)}</TableCell>
+              <TableCell data-label={t("admin.price")}>{Number(p.price).toFixed(2)} <T k="merchant.currency" /></TableCell>
+              <TableCell data-label={t("admin.category_name")}>{localizedName(p.category, locale)}</TableCell>
+              <TableCell data-label={t("admin.stock")}>
                 <Badge variant={p.stock > 0 ? "success" : "danger"}>{p.stock}</Badge>
               </TableCell>
-              <TableCell>{p.featured ? "Yes" : "No"}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
+              <TableCell data-label={t("admin.featured")}>{p.featured ? "Yes" : "No"}</TableCell>
+              <TableCell data-label="">
+                <div className="flex gap-1">
                   <Link href={`/admin/products/${p.id}/edit`}>
                     <Button variant="outline" size="sm"><T k="admin.edit" /></Button>
                   </Link>

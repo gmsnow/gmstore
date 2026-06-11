@@ -79,11 +79,11 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
             <Link href="/cart" className="relative p-2 hover:text-primary transition-colors">
               <ShoppingCart className="h-5 w-5" />
             </Link>
-            <MobileNav session={session} role={role} />
           </div>
         </div>
       </header>
-      <main className="flex-1">{children}</main>
+      <MobileNav session={session} role={role} />
+      <main className="flex-1 pb-16 md:pb-0">{children}</main>
       <AIAssistantWrapper />
       <footer className="border-t border-border bg-muted py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">

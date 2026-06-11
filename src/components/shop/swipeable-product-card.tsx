@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { T } from "@/components/translate";
@@ -20,11 +21,14 @@ function setLocalFavs(ids: string[]) {
 }
 
 export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds }: { product: any; isLoggedIn?: boolean; favoriteIds?: Set<string> }) {
-  const [x, setX] = useState(0);
   const [toast, setToast] = useState<"cart" | "fav" | null>(null);
   const [isFav, setIsFav] = useState(false);
+  const [imgIndex, setImgIndex] = useState(0);
+  const router = useRouter();
   const { direction } = useI18n();
   const isRtl = direction === "rtl";
+  const images = product.images?.length ? product.images : [];
+  const hasMultiple = images.length > 1;
 
   const avgRating = product.reviews?.length
     ? product.reviews.reduce((s: number, r: any) => s + r.rating, 0) / product.reviews.length
@@ -66,36 +70,23 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
     }
   }, [isLoggedIn, product.id]);
 
-  function handleDragEnd(_: any, info: any) {
-    const offset = info.offset.x;
-    if (Math.abs(offset) < 80) { setX(0); return; }
-
-    const isRight = isRtl ? offset > 0 : offset < 0;
-    const isLeft = isRtl ? offset < 0 : offset > 0;
-
-    if (isRight) {
-      toggleFav();
-      setToast("fav");
+  function addToCart() {
+    const cart: CartItem[] = JSON.parse(localStorage.getItem("cart") || "[]");
+    const exists = cart.find((i) => i.productId === product.id && !i.color);
+    if (!exists) {
+      cart.push({
+        productId: product.id,
+        name: product.name,
+        price: Number(product.price),
+        image: product.images[0] || "",
+        quantity: 1,
+        colors: product.colors || undefined,
+      });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      window.dispatchEvent(new Event("cartUpdated"));
+      setToast("cart");
       setTimeout(() => setToast(null), 1500);
-    } else if (isLeft) {
-      const cart: CartItem[] = JSON.parse(localStorage.getItem("cart") || "[]");
-      const exists = cart.find((i) => i.productId === product.id && !i.color);
-      if (!exists) {
-        cart.push({
-          productId: product.id,
-          name: product.name,
-          price: Number(product.price),
-          image: product.images[0] || "",
-          quantity: 1,
-          colors: product.colors || undefined,
-        });
-        localStorage.setItem("cart", JSON.stringify(cart));
-        window.dispatchEvent(new Event("cartUpdated"));
-        setToast("cart");
-        setTimeout(() => setToast(null), 1500);
-      }
     }
-    setX(0);
   }
 
   return (
@@ -107,105 +98,147 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         transition={{ duration: 0.4 }}
       />
       <div className="relative overflow-hidden rounded-2xl bg-card shadow-sm hover:shadow-xl transition-all duration-300">
-
-        <motion.div
-          drag="x"
-          dragElastic={0.3}
-          dragMomentum={false}
-          animate={{ x }}
-          onDragEnd={handleDragEnd}
-          className="relative"
-          style={{ touchAction: "pan-y" }}
-        >
-          <Link href={`/products/${product.slug}`} className="block">
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 flex pointer-events-none z-10 rounded-2xl overflow-hidden">
-                <div className="flex-1 flex items-center justify-center bg-rose-500/70 text-white text-sm font-bold gap-1.5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-[0s] group-hover:delay-[3000ms]">
-                  <Heart className={`h-4 w-4 ${isFav ? "fill-white" : ""}`} />
-                  {isFav ? "✓" : null}
-                </div>
-                <div className="flex-1 flex items-center justify-center bg-emerald-500/70 text-white text-sm font-bold gap-1.5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-[0s] group-hover:delay-[3000ms]">
-                  <ShoppingCart className="h-4 w-4" />
-                </div>
-              </div>
-              <motion.div className="aspect-square bg-muted overflow-hidden">
-                {product.images[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-600 ease-out"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-muted-foreground text-sm"><T k="product.no_image" /></div>
-                )}
-              </motion.div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-
-              <div className="absolute top-3 left-3 z-10">
-                <Badge className="bg-white/90 backdrop-blur-sm text-[10px] px-2.5 py-1 shadow-sm text-foreground">
-                  <LocalizedName item={product.category} />
-                </Badge>
-              </div>
-
-              <AnimatePresence>
-                {isFav && (
-                  <motion.div
-                    key="fav-heart"
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 12 }}
-                    className="absolute top-3 right-3 z-10"
-                  >
-                    <div className="bg-rose-500 text-white p-2 rounded-full shadow-lg">
-                      <Heart className="h-4 w-4 fill-white" />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {avgRating > 0 && (
-                <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
-                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                  <span>{avgRating.toFixed(1)}</span>
-                  <span className="text-[10px] opacity-70">({reviewCount})</span>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 space-y-2.5">
-              <h3 className="font-semibold text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
-                <LocalizedName item={product} />
-              </h3>
-
-              {product.colors?.length > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <div className="flex -space-x-1">
-                    {product.colors.slice(0, 5).map((c: string, i: number) => (
+        <div className="relative overflow-hidden">
+          <div className="aspect-square bg-muted overflow-hidden relative">
+            {images.length > 0 ? (
+              <>
+                <div className="relative h-full w-full">
+                  <Link href={`/products/${product.slug}`} className="relative block h-full w-full">
+                    <AnimatePresence mode="wait">
                       <motion.div
-                        key={c}
-                        initial={{ x: -10, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: i * 0.05 }}
-                        whileHover={{ scale: 1.4, y: -2 }}
-                        className="h-4 w-4 rounded-full border-2 border-background shadow-sm"
-                        style={{ backgroundColor: c }}
+                        key={imgIndex}
+                        className="h-full w-full"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <img
+                          src={images[imgIndex]}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          draggable={false}
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </Link>
+                  {hasMultiple && (
+                    <motion.div
+                      className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing"
+                      drag="x"
+                      dragElastic={0}
+                      dragMomentum={false}
+                      onDragEnd={(_, info) => {
+                        if (Math.abs(info.offset.x) < 10) {
+                          router.push(`/products/${product.slug}`);
+                        } else if (info.offset.x > 50 && imgIndex < images.length - 1) {
+                          setImgIndex(i => i + 1);
+                        } else if (info.offset.x < -50 && imgIndex > 0) {
+                          setImgIndex(i => i - 1);
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+                {hasMultiple && (
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+                    {images.map((_: string, i: number) => (
+                      <button
+                        key={i}
+                        onClick={() => setImgIndex(i)}
+                        className={`w-2 h-2 rounded-full transition-all ${i === imgIndex ? "bg-white scale-125" : "bg-white/50"}`}
                       />
                     ))}
                   </div>
-                  {product.colors.length > 5 && (
-                    <span className="text-[10px] text-muted-foreground">+{product.colors.length - 5}</span>
-                  )}
-                </div>
-              )}
+                )}
+              </>
+            ) : (
+              <div className="flex h-full items-center justify-center text-muted-foreground text-sm"><T k="product.no_image" /></div>
+            )}
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
 
-              <div className="flex items-baseline gap-1 pt-1">
+          <div className="absolute top-3 left-3 z-10 pointer-events-none">
+            <Badge className="bg-white/90 backdrop-blur-sm text-[10px] px-2.5 py-1 shadow-sm text-black dark:text-black">
+              <LocalizedName item={product.category} />
+            </Badge>
+          </div>
+
+          <AnimatePresence>
+            {isFav && (
+              <motion.div
+                key="fav-heart"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 12 }}
+                className="absolute top-3 right-3 z-10 pointer-events-none"
+              >
+                <div className="bg-rose-500 text-white p-2 rounded-full shadow-lg">
+                  <Heart className="h-4 w-4 fill-white" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {avgRating > 0 && (
+            <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full pointer-events-none">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              <span>{avgRating.toFixed(1)}</span>
+              <span className="text-[10px] opacity-70">({reviewCount})</span>
+            </div>
+          )}
+        </div>
+
+        <Link href={`/products/${product.slug}`} className="block">
+          <div className="p-4 space-y-2.5">
+            <h3 className="font-semibold text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
+              <LocalizedName item={product} />
+            </h3>
+
+            {product.colors?.length > 0 && (
+              <div className="flex items-center gap-1.5">
+                <div className="flex -space-x-1">
+                  {product.colors.slice(0, 5).map((c: string, i: number) => (
+                    <motion.div
+                      key={c}
+                      initial={{ x: -10, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: i * 0.05 }}
+                      whileHover={{ scale: 1.4, y: -2 }}
+                      className="h-4 w-4 rounded-full border-2 border-background shadow-sm"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+                {product.colors.length > 5 && (
+                  <span className="text-[10px] text-muted-foreground">+{product.colors.length - 5}</span>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-baseline gap-1">
                 <span className="text-lg font-bold text-primary">{Number(product.price).toFixed(2)}</span>
                 <span className="text-[11px] text-muted-foreground">ريال</span>
               </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
+                  className={`p-2 rounded-full transition-colors ${isFav ? "text-rose-500 bg-rose-50 dark:bg-rose-500/10" : "text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10"}`}
+                >
+                  <Heart className={`h-4 w-4 ${isFav ? "fill-rose-500" : ""}`} />
+                </button>
+                <button
+                  onClick={(e) => { e.preventDefault(); addToCart(); }}
+                  className="p-2 rounded-full text-muted-foreground hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </Link>
-        </motion.div>
+          </div>
+        </Link>
 
         <AnimatePresence mode="wait">
           {toast === "cart" && (

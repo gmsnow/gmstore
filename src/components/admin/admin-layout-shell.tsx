@@ -1,16 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
-import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, LogOut, Menu, X, Store } from "lucide-react";
+import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, LogOut, Store, Menu, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
 export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { t, direction } = useI18n();
+  const navRef = useRef<HTMLElement>(null);
+  const [indicator, setIndicator] = useState({ width: 0, x: 0 });
 
   const links = [
     { href: "/admin", labelKey: "admin.home", icon: LayoutDashboard },
@@ -20,26 +21,89 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     { href: "/admin/orders/delivered", labelKey: "admin.delivered_orders", icon: CheckCheck },
   ];
 
-  return (
-    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden" dir={direction}>
-      {open && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setOpen(false)} />}
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-      <aside style={{ backgroundColor: "var(--card)" }} className={`fixed inset-y-0 right-0 z-40 flex w-64 flex-col border-l border-border bg-card p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:z-auto ${open ? "translate-x-0" : "translate-x-full"}`}>
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/admin" className="flex items-center gap-2 text-lg font-bold" onClick={() => setOpen(false)}>
-            <LayoutDashboard className="h-5 w-5 text-primary" />
-            {t("admin.dashboard")}
-          </Link>
-          <button className="lg:hidden" onClick={() => setOpen(false)}>
-            <X className="h-5 w-5" />
-          </button>
+  useEffect(() => {
+    if (!navRef.current) return;
+    const active = navRef.current.querySelector<HTMLAnchorElement>("a[data-active=true]");
+    if (!active) return;
+    const r = active.getBoundingClientRect();
+    const nr = navRef.current.getBoundingClientRect();
+    setIndicator({ width: r.width, x: r.left - nr.left });
+  }, [pathname]);
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  return (
+    <div className="flex min-h-screen w-full" dir={direction}>
+      {/* Hamburger button — mobile only */}
+      <button
+        type="button"
+        onClick={() => setDrawerOpen(true)}
+        className="fixed top-4 z-50 lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card shadow-sm text-muted-foreground hover:text-foreground transition-colors"
+        style={{ left: "1rem" }}
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {/* Drawer overlay — mobile only */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
+          <aside className={`absolute top-0 bottom-0 ${direction === "rtl" ? "right-0" : "left-0"} w-72 bg-card border-l border-border shadow-2xl flex flex-col p-6`}>
+            <div className="flex items-center justify-between mb-8">
+              <Link href="/admin" className="flex items-center gap-2 text-lg font-bold" onClick={() => setDrawerOpen(false)}>
+                <LayoutDashboard className="h-5 w-5 text-primary" />
+                {t("admin.dashboard")}
+              </Link>
+              <button type="button" onClick={() => setDrawerOpen(false)} className="p-2 -me-2 text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-2 text-sm flex-1">
+              {links.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setDrawerOpen(false)}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${pathname === l.href ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}
+                >
+                  <l.icon className="h-4 w-4" /> {t(l.labelKey)}
+                </Link>
+              ))}
+            </nav>
+            <div className="pt-8 space-y-1 border-t border-border">
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
+                <LangToggle />
+                <span className="flex-1">{t("lang.switch")}</span>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
+                <Store className="h-4 w-4" />
+                <span className="flex-1">{t("admin.night_mode")}</span>
+                <ThemeToggle />
+              </div>
+              <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors" onClick={() => setDrawerOpen(false)}>
+                <LogOut className="h-4 w-4" />
+                {t("admin.back_to_shop")}
+              </Link>
+            </div>
+          </aside>
         </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex lg:flex-col w-64 border-l border-border bg-card p-6 shrink-0">
+        <Link href="/admin" className="flex items-center gap-2 text-lg font-bold mb-8">
+          <LayoutDashboard className="h-5 w-5 text-primary" />
+          {t("admin.dashboard")}
+        </Link>
         <nav className="flex flex-col gap-2 text-sm">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              onClick={() => setOpen(false)}
               className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${pathname === l.href ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}
             >
               <l.icon className="h-4 w-4" /> {t(l.labelKey)}
@@ -63,19 +127,31 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex-1">
-        <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
-          <button onClick={() => setOpen(true)} className="lg:hidden p-2 hover:text-primary transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg>
-          </button>
-          <Link href="/admin" className="flex items-center gap-2 text-lg font-bold">
-            <LayoutDashboard className="h-5 w-5 text-primary" />
-            {t("admin.dashboard")}
-          </Link>
-          <div className="w-5" />
-        </header>
+      <div className="flex-1 pb-20 lg:pb-0">
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav ref={navRef} className="fixed bottom-4 inset-x-4 z-40 flex items-center justify-around rounded-2xl border border-border bg-card shadow-lg px-2 py-2 lg:hidden" style={{ direction: direction }}>
+        <div
+          className="absolute bottom-2 top-2 rounded-xl bg-primary/10 transition-all duration-300 ease-out"
+          style={{ width: indicator.width, left: indicator.x, opacity: indicator.width > 0 ? 1 : 0 }}
+        />
+        {links.map((l) => {
+          const isActive = pathname === l.href;
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              data-active={isActive ? "true" : undefined}
+              className={`relative z-10 flex flex-col items-center gap-0.5 px-3 py-1.5 text-[10px] transition-colors min-w-0 flex-1 ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <l.icon className={`h-5 w-5 transition-all ${isActive ? "text-primary scale-110" : ""}`} />
+              <span className="truncate font-medium">{t(l.labelKey)}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

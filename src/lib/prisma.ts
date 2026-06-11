@@ -1,9 +1,49 @@
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+const globalForPrisma = globalThis as unknown as {
+  prisma: ReturnType<typeof createPrisma>;
+};
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
-});
+const RETRY_DELAYS = [1000, 2000, 5000];
+
+function isConnectionError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false;
+  const msg = e.message;
+  return (
+    msg.includes("Can't reach database server") ||
+    msg.includes("Connection refused") ||
+    msg.includes("ETIMEDOUT") ||
+    msg.includes("ECONNREFUSED") ||
+    msg.includes("connect ECONN") ||
+    msg.includes("does not accept connections")
+  );
+}
+
+function createPrisma() {
+  const client = new PrismaClient({
+    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+  });
+
+  return client.$extends({
+    query: {
+      $allOperations({ args, query }) {
+        async function run(attempt = 0): Promise<any> {
+          try {
+            return await query(args);
+          } catch (e) {
+            if (isConnectionError(e) && attempt < RETRY_DELAYS.length) {
+              await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
+              return run(attempt + 1);
+            }
+            throw e;
+          }
+        }
+        return run();
+      },
+    },
+  });
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrisma();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

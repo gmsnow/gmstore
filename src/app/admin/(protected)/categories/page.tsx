@@ -12,14 +12,14 @@ export default async function AdminCategoriesPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">الفئات</h1>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold">الفئات</h1>
         <Link href="/admin/categories/new">
-          <Button><Plus className="ml-2 h-4 w-4" />إضافة فئة</Button>
+          <Button size="sm" className="w-full sm:w-auto"><Plus className="ml-2 h-4 w-4" />إضافة فئة</Button>
         </Link>
       </div>
-        <Table>
+      <Table>
         <TableHeader>
           <TableRow>
             <TableHead>الصورة</TableHead>
@@ -32,7 +32,7 @@ export default async function AdminCategoriesPage() {
         <TableBody>
           {categories.map((c) => (
             <TableRow key={c.id}>
-              <TableCell>
+              <TableCell data-label="الصورة">
                 {c.image ? (
                   <img src={c.image} alt="" className="h-10 w-10 rounded-lg object-cover border border-border" />
                 ) : (
@@ -41,11 +41,11 @@ export default async function AdminCategoriesPage() {
                   </div>
                 )}
               </TableCell>
-              <TableCell className="font-medium">{c.name}</TableCell>
-              <TableCell className="text-muted-foreground">{c.slug}</TableCell>
-              <TableCell>{c._count.products}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
+              <TableCell className="font-medium" data-label="الاسم">{c.name}</TableCell>
+              <TableCell className="text-muted-foreground" data-label="الرابط">{c.slug}</TableCell>
+              <TableCell data-label="عدد المنتجات">{c._count.products}</TableCell>
+              <TableCell data-label="">
+                <div className="flex gap-1">
                   <Link href={`/admin/categories/${c.id}/edit`}>
                     <Button variant="outline" size="sm">تعديل</Button>
                   </Link>

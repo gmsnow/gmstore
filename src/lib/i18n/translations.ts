@@ -1,5 +1,6 @@
 export const ar = {
   /* Navbar */
+  "nav.home": "الرئيسية",
   "nav.products": "المنتجات",
   "nav.categories": "الفئات",
   "nav.cart": "السلة",
@@ -225,6 +226,7 @@ export const ar = {
 };
 
 export const en: Record<string, string> = {
+  "nav.home": "Home",
   "nav.products": "Products",
   "nav.categories": "Categories",
   "nav.cart": "Cart",
