@@ -7,6 +7,8 @@ import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from "@/components/mo
 import { T } from "@/components/translate";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 import { HeroSlider } from "@/components/shop/hero-slider";
+import { localizedName } from "@/lib/i18n/localized";
+import { getServerLocale } from "@/lib/i18n/server";
 
 const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
@@ -14,6 +16,7 @@ export default async function HomePage() {
   const session = await auth();
   const sessionUserId = (session?.user as any)?.id;
   const isLoggedIn = !!sessionUserId;
+  const locale = await getServerLocale();
 
   const [rawFeatured, rawLatest, categories, userFavs] = await Promise.all([
     prisma.product.findMany({ where: { featured: true }, select: productSelect, take: 4 }),
@@ -42,8 +45,8 @@ export default async function HomePage() {
                     alt={cat.name}
                     className="w-[88px] h-[88px] object-cover rounded-full mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[70px] max-sm:h-[70px]"
                   />
-                  <p className="mt-2 text-sm sm:text-[15px] leading-tight text-[#222] dark:text-foreground">
-                    {cat.name}
+                    <p className="mt-2 text-sm sm:text-[15px] leading-tight text-[#222] dark:text-foreground">
+                    {localizedName(cat, locale)}
                   </p>
                 </Link>
               ))}
