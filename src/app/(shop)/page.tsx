@@ -33,7 +33,7 @@ export default async function HomePage() {
       {categories.length > 0 && (
         <FadeInUp>
           <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card">
-            <h2 className="text-lg font-bold mb-5">فئات</h2>
+            <h2 className="text-lg font-bold mb-5"><T k="home.categories_title" /></h2>
             <div className="grid grid-cols-4 gap-[22px_10px]">
               {categories.slice(0, 12).map((cat: any) => (
                 <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">

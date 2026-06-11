@@ -2,29 +2,20 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
+import { T } from "@/components/translate";
 
 const slides = [
-  {
-    image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80",
-    title: "تخفيضات تصل إلى 50%",
-    desc: "على جميع المنتجات المختارة",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80",
-    title: "شحن مجاني",
-    desc: "للطلبات فوق 5000 ريال",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1600&q=80",
-    title: "توصيل سريع",
-    desc: "استلم طلبك في 24 ساعة",
-  },
+  { image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80", titleKey: "home.slider_1_title", descKey: "home.slider_1_desc" },
+  { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80", titleKey: "home.slider_2_title", descKey: "home.slider_2_desc" },
+  { image: "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1600&q=80", titleKey: "home.slider_3_title", descKey: "home.slider_3_desc" },
 ];
 
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
+  const { direction } = useI18n();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrent((p) => (p + 1) % slides.length), 5000);
@@ -60,17 +51,17 @@ export function HeroSlider() {
       <div className="absolute inset-0 flex items-center z-10 px-6 sm:px-12 lg:px-20">
         <div className="max-w-lg">
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">
-            {s.title}
+            <T k={s.titleKey} />
           </h2>
           <p className="text-sm sm:text-lg text-white/80 mb-4 drop-shadow">
-            {s.desc}
+            <T k={s.descKey} />
           </p>
           <Link
             href="/products"
             className="inline-flex items-center gap-2 bg-[#2092EB] hover:bg-[#1A7CC8] text-white font-bold px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
           >
-            تسوق الآن
-            <ChevronLeft className="h-4 w-4" />
+            <T k="home.shop_now" />
+            <ChevronLeft className={`h-4 w-4 ${direction === "rtl" ? "" : "hidden"}`} />
           </Link>
         </div>
       </div>

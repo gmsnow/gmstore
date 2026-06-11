@@ -23,6 +23,13 @@ export const ar = {
   "home.featured": "منتجات مميزة",
   "home.view_all": "عرض الكل",
   "home.latest": "أحدث المنتجات",
+  "home.categories_title": "الفئات",
+  "home.slider_1_title": "تخفيضات تصل إلى 50%",
+  "home.slider_1_desc": "على جميع المنتجات المختارة",
+  "home.slider_2_title": "شحن مجاني",
+  "home.slider_2_desc": "للطلبات فوق 5000 ريال",
+  "home.slider_3_title": "توصيل سريع",
+  "home.slider_3_desc": "استلم طلبك في 24 ساعة",
 
   /* Product card */
   "product.no_image": "لا توجد صورة",
@@ -248,6 +255,13 @@ export const en: Record<string, string> = {
   "home.featured": "Featured Products",
   "home.view_all": "View All",
   "home.latest": "Latest Products",
+  "home.categories_title": "Categories",
+  "home.slider_1_title": "Up to 50% Off",
+  "home.slider_1_desc": "On selected products",
+  "home.slider_2_title": "Free Shipping",
+  "home.slider_2_desc": "On orders over 5000 YER",
+  "home.slider_3_title": "Fast Delivery",
+  "home.slider_3_desc": "Receive your order within 24 hours",
 
   "product.no_image": "No image",
   "product.out_of_stock": "Out of stock",
