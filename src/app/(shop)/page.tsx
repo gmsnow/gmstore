@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
+import { HeroSlider } from "@/components/shop/hero-slider";
 
 const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
@@ -26,13 +27,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="w-full h-[300px] sm:h-[400px] lg:h-[500px] overflow-hidden -mt-[70px]">
-        <img
-          src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80"
-          alt=""
-          className="w-full h-full object-cover"
-        />
-      </section>
+      <HeroSlider />
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
       
       {categories.length > 0 && (
