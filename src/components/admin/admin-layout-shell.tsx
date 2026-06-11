@@ -38,11 +38,23 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full" dir={direction}>
+      <style>{`
+        .mobile-only { display: none; }
+        .desktop-only { display: none; }
+        @media (max-width: 1023px) {
+          .mobile-only { display: flex; }
+          .mobile-only-block { display: block; }
+        }
+        @media (min-width: 1024px) {
+          .desktop-only { display: flex; }
+        }
+      `}</style>
+
       {/* Hamburger button — mobile only */}
       <button
         type="button"
         onClick={() => setDrawerOpen(true)}
-        className="fixed top-4 z-50 lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card shadow-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="mobile-only fixed top-4 z-50 h-9 w-9 items-center justify-center rounded-lg border border-border bg-card shadow-sm text-muted-foreground hover:text-foreground transition-colors"
         style={{ left: "1rem" }}
       >
         <Menu className="h-5 w-5" />
@@ -50,7 +62,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
 
       {/* Drawer overlay — mobile only */}
       {drawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="mobile-only-block fixed inset-0 z-50 hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
           <aside className={`absolute top-0 bottom-0 ${direction === "rtl" ? "right-0" : "left-0"} w-72 bg-card border-l border-border shadow-2xl flex flex-col p-6`}>
             <div className="flex items-center justify-between mb-8">
@@ -94,7 +106,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:flex-col w-64 border-l border-border bg-card p-6 shrink-0">
+      <aside className="desktop-only flex-col w-64 border-l border-border bg-card p-6 shrink-0">
         <Link href="/admin" className="flex items-center gap-2 text-lg font-bold mb-8">
           <LayoutDashboard className="h-5 w-5 text-primary" />
           {t("admin.dashboard")}
@@ -132,7 +144,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav ref={navRef} className="fixed bottom-4 inset-x-4 z-40 flex items-center justify-around rounded-2xl border border-border bg-card shadow-lg px-2 py-2 lg:hidden" style={{ direction: direction }}>
+      <nav ref={navRef} className="mobile-only fixed bottom-4 inset-x-4 z-40 items-center justify-around rounded-2xl border border-border bg-card shadow-lg px-2 py-2" style={{ direction: direction }}>
         <div
           className="absolute bottom-2 top-2 rounded-xl bg-primary/10 transition-all duration-300 ease-out"
           style={{ width: indicator.width, left: indicator.x, opacity: indicator.width > 0 ? 1 : 0 }}
