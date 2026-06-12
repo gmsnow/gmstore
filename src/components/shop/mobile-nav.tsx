@@ -18,6 +18,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
   const isRtl = direction === "rtl";
   const scrollRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<SVGSVGElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -36,29 +37,34 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
   ];
 
   function getActiveIndex() {
-    for (let i = 0; i < links.length; i++) {
+    if (pathname === "/") return 0;
+    for (let i = 1; i < links.length; i++) {
       if (pathname.startsWith(links[i].href)) return i;
     }
     return -1;
   }
 
+  function posX(li: HTMLElement) {
+    const outer = outerRef.current;
+    if (!outer) return 0;
+    const liRect = li.getBoundingClientRect();
+    const outerRect = outer.getBoundingClientRect();
+    return liRect.left + liRect.width / 2 - outerRect.left - INDICATOR_W / 2;
+  }
+
   function moveIndicator(entry: HTMLElement) {
-    const scroll = scrollRef.current;
-    if (!scroll) return;
-    const left = entry.offsetLeft + entry.offsetWidth / 2 - INDICATOR_W / 2 - scroll.scrollLeft;
-    animate(indicatorRef.current!, { x: left }, { type: "spring", stiffness: 400, damping: 28 });
+    animate(indicatorRef.current!, { x: posX(entry) }, { type: "spring", stiffness: 400, damping: 28 });
   }
 
   const activeIndex = getActiveIndex();
 
-  useEffect(() => {
-    if (activeIndex < 0 || !scrollRef.current) return;
-    const li = scrollRef.current.querySelectorAll("li")[activeIndex] as HTMLElement;
-    if (li) {
-      const left = li.offsetLeft + li.offsetWidth / 2 - INDICATOR_W / 2 - scrollRef.current.scrollLeft;
-      if (indicatorRef.current) indicatorRef.current.style.transform = `translateX(${left}px)`;
-    }
-  }, [activeIndex]);
+  function updateIndicator() {
+    if (activeIndex < 0 || !outerRef.current || !indicatorRef.current) return;
+    const li = outerRef.current.querySelectorAll("li")[activeIndex] as HTMLElement;
+    if (li) indicatorRef.current.style.transform = `translateX(${posX(li)}px)`;
+  }
+
+  useEffect(() => { updateIndicator(); }, [activeIndex]);
 
   return (
     <>
@@ -88,7 +94,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
         style={{ WebkitTapHighlightColor: "transparent" }}
         dir={direction}
       >
-        <div className="relative mx-2 rounded-t-[31px] bg-card shadow-lg border border-border">
+        <div ref={outerRef} className="relative mx-2 rounded-t-[31px] bg-card shadow-lg border border-border">
           <svg
             ref={indicatorRef}
             className="absolute z-[1] left-0 bottom-0 w-[68px] h-[72px] overflow-visible pointer-events-none"
@@ -112,6 +118,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
 
           <div
             ref={scrollRef}
+            onScroll={updateIndicator}
             className="overflow-x-auto scrollbar-none"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
