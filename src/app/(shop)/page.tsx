@@ -21,7 +21,7 @@ export default async function HomePage() {
   const [rawFeatured, rawLatest, categories, userFavs] = await Promise.all([
     prisma.product.findMany({ where: { featured: true }, select: productSelect, take: 4 }),
     prisma.product.findMany({ select: productSelect, orderBy: { createdAt: "desc" }, take: 8 }),
-    prisma.category.findMany({ select: { id: true, name: true, nameEn: true, slug: true, image: true }, take: 12 }),
+    prisma.category.findMany({ select: { id: true, name: true, nameEn: true, slug: true, image: true, _count: { select: { products: true } } } }),
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
@@ -37,15 +37,13 @@ export default async function HomePage() {
         <FadeInUp>
           <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card">
             <h2 className="text-lg font-bold mb-5">الفئات</h2>
-            <div className="grid grid-cols-4 gap-[22px_10px]">
-              {categories.slice(0, 12).map((cat: any) => (
+            <div className="grid grid-flow-col grid-rows-3 gap-x-6 gap-y-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+              {(categories as any[]).map((cat: any) => (
                 <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">
-                  <img
-                    src={cat.image || ""}
-                    alt={cat.name}
-                    className="w-[88px] h-[88px] object-cover rounded-full mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[70px] max-sm:h-[70px]"
-                  />
-                    <p className="mt-2 text-sm sm:text-[15px] leading-tight text-[#222] dark:text-foreground">
+                  <div className="w-[70px] h-[70px] rounded-[25px] overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[60px] max-sm:h-[60px]">
+                    <img src={cat.image || ""} alt={cat.name} className="w-full h-full object-cover" />
+                  </div>
+                  <p className="mt-2 text-sm leading-tight text-[#222] dark:text-foreground">
                     {localizedName(cat, locale)}
                   </p>
                 </Link>

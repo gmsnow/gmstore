@@ -9,6 +9,7 @@ function img(text: string, bg = "1a1a2e", fg = "ffffff"): string[] {
 }
 
 const CATEGORIES = [
+  { name: "اكسسوارت", nameEn: "Accessories", slug: "accessories", desc: "إكسسوارات متنوعة" },
   { name: "إلكترونيات", nameEn: "Electronics", slug: "electronics", desc: "أجهزة إلكترونية وكهربائية" },
   { name: "ملابس", nameEn: "Clothing", slug: "clothing", desc: "ملابس رجالية ونسائية" },
   { name: "منزل", nameEn: "Home", slug: "home", desc: "مستلزمات المنزل والمطبخ" },
@@ -19,6 +20,19 @@ const CATEGORIES = [
   { name: "سيارات", nameEn: "Auto", slug: "auto", desc: "إكسسوارات وقطع سيارات" },
   { name: "أطعمة ومشروبات", nameEn: "Food & Drinks", slug: "food-drinks", desc: "أطعمة ومشروبات متنوعة" },
   { name: "مجوهرات", nameEn: "Jewelry", slug: "jewelry", desc: "مجوهرات وساعات فاخرة" },
+  { name: "حيوانات أليفة", nameEn: "Pets", slug: "pets", desc: "مستلزمات الحيوانات الأليفة" },
+  { name: "أطفال", nameEn: "Baby & Kids", slug: "baby-kids", desc: "منتجات الأطفال والرضع" },
+  { name: "حديقة", nameEn: "Garden", slug: "garden", desc: "مستلزمات الحدائق والنباتات" },
+  { name: "مكتبية", nameEn: "Office", slug: "office", desc: "مستلزمات مكتبية وأدوات قرطاسية" },
+  { name: "آلات موسيقية", nameEn: "Musical Instruments", slug: "musical-instruments", desc: "آلات موسيقية وإكسسوارات" },
+  { name: "حقائب", nameEn: "Bags", slug: "bags", desc: "حقائب يد وسفر ومدرسة" },
+  { name: "أحذية", nameEn: "Shoes", slug: "shoes", desc: "أحذية رجالية ونسائية ورياضية" },
+  { name: "ساعات", nameEn: "Watches", slug: "watches", desc: "ساعات يد فاخرة ورياضية" },
+  { name: "عطور", nameEn: "Perfumes", slug: "perfumes", desc: "عطور رجالية ونسائية فاخرة" },
+  { name: "كاميرات", nameEn: "Cameras", slug: "cameras", desc: "كاميرات تصوير ومعداتها" },
+  { name: "أثاث", nameEn: "Furniture", slug: "furniture", desc: "أثاث منزلي ومكتبي" },
+  { name: "صحة", nameEn: "Health", slug: "health", desc: "منتجات صحية وطبية" },
+  { name: "هدايا", nameEn: "Gifts", slug: "gifts", desc: "هدايا متنوعة ومناسبات" },
 ];
 
 const PRODUCTS = [
@@ -143,8 +157,42 @@ const PRODUCTS = [
   { name: "محفظة جلدية فاخرة", desc: "محفظة جلد طبيعي رجالي فاخرة.", price: 109.99, cat: "jewelry", stock: 35, featured: false, bg: "4e342e" },
 ];
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  accessories: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=200&h=200&fit=crop&crop=center",
+  electronics: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=200&h=200&fit=crop&crop=center",
+  clothing: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=200&h=200&fit=crop&crop=center",
+  home: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=200&fit=crop&crop=center",
+  "personal-care": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200&h=200&fit=crop&crop=center",
+  books: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=200&h=200&fit=crop&crop=center",
+  toys: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=200&fit=crop&crop=center",
+  sports: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200&h=200&fit=crop&crop=center",
+  auto: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=200&h=200&fit=crop&crop=center",
+  "food-drinks": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=200&fit=crop&crop=center",
+  jewelry: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=200&h=200&fit=crop&crop=center",
+  pets: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=200&h=200&fit=crop&crop=center",
+  "baby-kids": "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=200&h=200&fit=crop&crop=center",
+  garden: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=200&h=200&fit=crop&crop=center",
+  office: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=200&h=200&fit=crop&crop=center",
+  "musical-instruments": "https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=200&h=200&fit=crop&crop=center",
+  bags: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=200&h=200&fit=crop&crop=center",
+  shoes: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=200&h=200&fit=crop&crop=center",
+  watches: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=200&h=200&fit=crop&crop=center",
+  perfumes: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=200&h=200&fit=crop&crop=center",
+  cameras: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&h=200&fit=crop&crop=center",
+  furniture: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop&crop=center",
+  health: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop&crop=center",
+  gifts: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=200&h=200&fit=crop&crop=center",
+};
+
 const CATEGORY_PREFIX: Record<string, string> = {
+  accessories: "acc",
   electronics: "elec",
+  pets: "pet",
+  "baby-kids": "baby",
+  garden: "grdn",
+  office: "offc",
+  "musical-instruments": "music",
+  bags: "bag",
   clothing: "cloth",
   home: "home",
   "personal-care": "care",
@@ -154,6 +202,13 @@ const CATEGORY_PREFIX: Record<string, string> = {
   auto: "auto",
   "food-drinks": "food",
   jewelry: "jewel",
+  shoes: "shoe",
+  watches: "watch",
+  perfumes: "perf",
+  cameras: "cam",
+  furniture: "furt",
+  health: "hlth",
+  gifts: "gift",
 };
 
 async function main() {
@@ -195,10 +250,16 @@ async function main() {
   const createdCategories: Record<string, string> = {};
   for (const cat of CATEGORIES) {
     const existingCat = await prisma.category.findUnique({ where: { slug: cat.slug } });
+    const image = CATEGORY_IMAGES[cat.slug] || null;
     if (existingCat) {
       createdCategories[cat.slug] = existingCat.id;
+      const updateData: any = {};
+      if (existingCat.image !== image) updateData.image = image;
+      if (Object.keys(updateData).length) {
+        await prisma.category.update({ where: { id: existingCat.id }, data: updateData });
+      }
     } else {
-      const created = await prisma.category.create({ data: { name: cat.name, nameEn: cat.nameEn, slug: cat.slug, description: cat.desc } });
+      const created = await prisma.category.create({ data: { name: cat.name, nameEn: cat.nameEn, slug: cat.slug, description: cat.desc, image } });
       createdCategories[cat.slug] = created.id;
     }
   }
