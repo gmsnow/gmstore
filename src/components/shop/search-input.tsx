@@ -9,16 +9,19 @@ export function SearchInput() {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasInteracted = useRef(false);
 
   function navigate(q: string) {
     if (q.trim()) {
       router.replace(`/products?q=${encodeURIComponent(q.trim())}`);
-    } else {
+    } else if (hasInteracted.current) {
       router.replace("/products");
     }
   }
 
   useEffect(() => {
+    if (!query && !hasInteracted.current) return;
+    hasInteracted.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => navigate(query), 400);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };

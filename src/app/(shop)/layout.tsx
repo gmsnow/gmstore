@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react";
 import { MobileNav } from "@/components/shop/mobile-nav";
 import { StickyHeader } from "@/components/shop/sticky-header";
 import { AIAssistantWrapper } from "@/components/shop/ai-assistant-wrapper";
+import { CurrencyProvider } from "@/lib/currency/context";
 
 function SignOutForm() {
   return (
@@ -24,16 +25,18 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   const session = await auth();
   const role = (session?.user as any)?.role;
   return (
-    <div className="flex min-h-screen flex-col">
-      <StickyHeader session={session} role={role} signOutForm={<SignOutForm />} />
-      <MobileNav session={session} role={role} />
-      <main className="flex-1 pb-16 md:pb-0 pt-[70px]">{children}</main>
-      <AIAssistantWrapper />
-      <footer className="border-t border-border bg-muted py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} <T k="nav.store_name" />. <T k="footer.rights" />
-        </div>
-      </footer>
-    </div>
+    <CurrencyProvider>
+      <div className="flex min-h-screen flex-col">
+        <StickyHeader session={session} role={role} signOutForm={<SignOutForm />} />
+        <MobileNav session={session} role={role} />
+        <main className="flex-1 pb-16 md:pb-0 pt-[70px]">{children}</main>
+        <AIAssistantWrapper />
+        <footer className="border-t border-border bg-muted py-8">
+          <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} <T k="nav.store_name" />. <T k="footer.rights" />
+          </div>
+        </footer>
+      </div>
+    </CurrencyProvider>
   );
 }

@@ -1,9 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { House, ShoppingBag, Tags, Heart, Package, Search, User, X } from "lucide-react";
+import { House, ShoppingBag, Tags, Heart, Package, Search, User, X, DollarSign } from "lucide-react";
+import { motion, animate } from "motion/react";
 import { useI18n } from "@/lib/i18n/provider";
+import { useCurrency } from "@/lib/currency/context";
+
+const INDICATOR_W = 68;
 
 export function MobileNav({ session, role }: { session: any; role: string | undefined }) {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -12,6 +16,8 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
   const router = useRouter();
   const pathname = usePathname();
   const isRtl = direction === "rtl";
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<SVGSVGElement>(null);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -28,6 +34,31 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
     { href: "/favorites", labelKey: "nav.favorites", icon: Heart },
     { href: "/track", labelKey: "track.nav_link", icon: Package },
   ];
+
+  function getActiveIndex() {
+    for (let i = 0; i < links.length; i++) {
+      if (pathname.startsWith(links[i].href)) return i;
+    }
+    return -1;
+  }
+
+  function moveIndicator(entry: HTMLElement) {
+    const scroll = scrollRef.current;
+    if (!scroll) return;
+    const left = entry.offsetLeft + entry.offsetWidth / 2 - INDICATOR_W / 2 - scroll.scrollLeft;
+    animate(indicatorRef.current!, { x: left }, { type: "spring", stiffness: 400, damping: 28 });
+  }
+
+  const activeIndex = getActiveIndex();
+
+  useEffect(() => {
+    if (activeIndex < 0 || !scrollRef.current) return;
+    const li = scrollRef.current.querySelectorAll("li")[activeIndex] as HTMLElement;
+    if (li) {
+      const left = li.offsetLeft + li.offsetWidth / 2 - INDICATOR_W / 2 - scrollRef.current.scrollLeft;
+      if (indicatorRef.current) indicatorRef.current.style.transform = `translateX(${left}px)`;
+    }
+  }, [activeIndex]);
 
   return (
     <>
@@ -52,35 +83,110 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
         </div>
       )}
 
-      <nav className="fixed bottom-0 inset-x-0 z-40 flex items-center overflow-x-auto border-t border-border bg-card shadow-lg px-2 py-1 md:hidden scrollbar-none" dir={direction} style={{ WebkitOverflowScrolling: "touch" }}>
-        {links.map((l) => {
-          const isActive = pathname.startsWith(l.href);
-          return (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1.5 text-[10px] transition-colors shrink-0 ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <l.icon className={`h-5 w-5 transition-all ${isActive ? "text-primary scale-110" : ""}`} />
-              <span className="truncate font-medium">{t(l.labelKey)}</span>
-            </Link>
-          );
-        })}
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="flex flex-col items-center gap-0.5 px-4 py-1.5 text-[10px] transition-colors shrink-0 text-muted-foreground hover:text-foreground"
-        >
-          <Search className="h-5 w-5" />
-          <span className="truncate font-medium">{t("nav.search")}</span>
-        </button>
-        <Link
-          href={session ? (role === "ADMIN" ? "/admin" : role === "MERCHANT" ? "/merchant" : "/favorites") : "/login"}
-          className={`flex flex-col items-center gap-0.5 px-4 py-1.5 text-[10px] transition-colors shrink-0 ${session ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-        >
-          <User className={`h-5 w-5 ${session ? "text-primary" : ""}`} />
-          <span className="truncate font-medium">{session ? t("nav.account") : t("nav.login")}</span>
-        </Link>
+      <nav
+        className="fixed bottom-0 inset-x-0 z-40 md:hidden"
+        style={{ WebkitTapHighlightColor: "transparent" }}
+        dir={direction}
+      >
+        <div className="relative mx-2 rounded-t-[31px] bg-card shadow-lg border border-border">
+          <svg
+            ref={indicatorRef}
+            className="absolute z-[1] left-0 bottom-0 w-[68px] h-[72px] overflow-visible pointer-events-none"
+            viewBox="0 0 68 72"
+            fill="none"
+          >
+            <defs>
+              <filter id="goo" x="-50%" width="200%" y="-50%" height="200%" colorInterpolationFilters="sRGB">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 21 -7" result="cm" />
+              </filter>
+            </defs>
+            <g filter="url(#goo)">
+              <motion.path
+                d="M34 54C45.4078 54 48.3887 66.7534 68 72H0C19.6113 66.7534 22.5922 54 34 54Z"
+                fill="#2092EB"
+              />
+              <motion.circle cx="34" cy="66" r="4" fill="#2092EB" />
+            </g>
+          </svg>
+
+          <div
+            ref={scrollRef}
+            className="overflow-x-auto scrollbar-none"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            <ul className="relative z-[1] flex items-center h-[72px] px-2 m-0 list-none w-max">
+              {links.map((l, i) => {
+                const isActive = i === activeIndex;
+                const Icon = l.icon;
+                return (
+                  <li key={l.href} className="px-[13px]">
+                    <Link
+                      href={l.href}
+                      onClick={(e) => moveIndicator(e.currentTarget.parentElement!)}
+                      className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors no-underline"
+                    >
+                      <div className="relative w-7 h-7">
+                        <Icon
+                          className={`absolute inset-0 w-7 h-7 transition-[clip-path] duration-300 ${isActive ? "text-white" : "text-[#2092EB]"}`}
+                          style={{ clipPath: isActive ? "circle(28px at 50% 100%)" : "circle(0px at 50% 100%)" }}
+                        />
+                        <Icon className="w-7 h-7 text-[#2092EB]" />
+                      </div>
+                      <span className={`truncate font-medium ${isActive ? "text-[#2092EB]" : ""}`}>
+                        {t(l.labelKey)}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+
+              <li className="px-[13px]">
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <div className="relative w-7 h-7">
+                    <Search className="w-7 h-7 text-[#2092EB]" />
+                  </div>
+                  <span className="truncate font-medium">{t("nav.search")}</span>
+                </button>
+              </li>
+
+              <li className="px-[13px]">
+                <CurrencyToggleButton />
+              </li>
+
+              <li className="px-[13px]">
+                <Link
+                  href={session ? (role === "ADMIN" ? "/admin" : role === "MERCHANT" ? "/merchant" : "/favorites") : "/login"}
+                  className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors no-underline"
+                >
+                  <div className="relative w-7 h-7">
+                    <User className="w-7 h-7 text-[#2092EB]" />
+                  </div>
+                  <span className="truncate font-medium">{session ? t("nav.account") : t("nav.login")}</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
       </nav>
     </>
+  );
+}
+
+function CurrencyToggleButton() {
+  const { showUsd, toggleCurrency } = useCurrency();
+  return (
+    <button
+      onClick={toggleCurrency}
+      className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+    >
+      <div className="relative w-7 h-7">
+        <DollarSign className="w-7 h-7 text-[#2092EB]" />
+      </div>
+      <span className="truncate font-medium">{showUsd ? "ريال" : "$"}</span>
+    </button>
   );
 }

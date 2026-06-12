@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { T } from "@/components/translate";
 import { LocalizedName } from "@/components/localized";
 import { useI18n } from "@/lib/i18n/provider";
+import { useCurrency, USD_TO_YER } from "@/lib/currency/context";
 import type { CartItem } from "@/types";
 
 function getLocalFavs(): string[] {
@@ -25,8 +26,9 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
   const [isFav, setIsFav] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [showUsd, setShowUsd] = useState(false);
-  const USD_TO_YER = 535;
+  const { showUsd } = useCurrency();
+  const [localUsd, setLocalUsd] = useState<boolean | null>(null);
+  const displayUsd = localUsd !== null ? localUsd : showUsd;
   const router = useRouter();
   const { direction } = useI18n();
   const isRtl = direction === "rtl";
@@ -223,7 +225,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           <div className="p-3 space-y-2">
             <div className="flex items-center gap-2">
               {product.category && (
-                <span className="bg-purple-600 text-white text-xs font-bold px-3 py-0.5 rounded-full">
+                <span className="bg-[#2092EB] text-white text-xs font-bold px-3 py-0.5 rounded-full">
                   <LocalizedName item={product.category} />
                 </span>
               )}
@@ -238,15 +240,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[28px] font-bold leading-none text-[#2092EB]">{showUsd ? (Number(product.price) / USD_TO_YER).toFixed(2) : Number(product.price).toFixed(2)}</span>
-              <span className="text-xs text-muted-foreground">{showUsd ? "$" : "ريال"}</span>
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); setShowUsd((p) => !p); }}
-                className="text-[10px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded border border-border"
-              >
-                {showUsd ? "ريال" : "$"}
-              </button>
+              <span className="text-[28px] font-bold leading-none text-[#2092EB]">{displayUsd ? (Number(product.price) / USD_TO_YER).toFixed(2) : Number(product.price).toFixed(2)}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -261,6 +255,14 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
                 className="p-1.5 rounded-full text-muted-foreground hover:text-emerald-500 transition-colors"
               >
                 <ShoppingCart className="h-4 w-4" />
+              </button>
+              <span className="text-xs text-muted-foreground">{displayUsd ? "$" : "ريال"}</span>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setLocalUsd(localUsd === null ? !showUsd : !localUsd); }}
+                className="text-[10px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded border border-border"
+              >
+                {displayUsd ? "ريال" : "$"}
               </button>
             </div>
           </div>

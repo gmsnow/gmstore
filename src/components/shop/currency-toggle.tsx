@@ -1,10 +1,8 @@
 "use client";
-import { useState } from "react";
-
-const USD_TO_YER = 535;
+import { useCurrency, USD_TO_YER } from "@/lib/currency/context";
 
 export function CurrencyToggle({ priceYer }: { priceYer: number }) {
-  const [showUsd, setShowUsd] = useState(false);
+  const { showUsd, toggleCurrency } = useCurrency();
 
   return (
     <div className="flex items-center gap-2">
@@ -14,7 +12,7 @@ export function CurrencyToggle({ priceYer }: { priceYer: number }) {
       <span className="text-lg text-muted-foreground">{showUsd ? "$" : "ريال"}</span>
       <button
         type="button"
-        onClick={() => setShowUsd((p) => !p)}
+        onClick={toggleCurrency}
         className="text-xs text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded border border-border"
       >
         {showUsd ? "ريال" : "$"}
