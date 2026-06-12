@@ -5,22 +5,29 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { T } from "@/components/translate";
 
-const slides = [
-  { image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80", titleKey: "home.slider_1_title", descKey: "home.slider_1_desc" },
-  { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80", titleKey: "home.slider_2_title", descKey: "home.slider_2_desc" },
-  { image: "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1600&q=80", titleKey: "home.slider_3_title", descKey: "home.slider_3_desc" },
-];
+interface Slide {
+  id: string;
+  image: string;
+  title?: string | null;
+  titleEn?: string | null;
+  desc?: string | null;
+  descEn?: string | null;
+  link: string;
+}
 
-export function HeroSlider() {
+export function HeroSlider({ slides }: { slides: Slide[] }) {
   const [current, setCurrent] = useState(0);
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
-  const { direction } = useI18n();
+  const { direction, locale } = useI18n();
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => setCurrent((p) => (p + 1) % slides.length), 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
+
+  if (slides.length === 0) return null;
 
   function prev() { setCurrent((p) => (p - 1 + slides.length) % slides.length); }
   function next() { setCurrent((p) => (p + 1) % slides.length); }
@@ -33,6 +40,8 @@ export function HeroSlider() {
   }
 
   const s = slides[current];
+  const title = locale === "en" ? s.titleEn || s.title : s.title;
+  const desc = locale === "en" ? s.descEn || s.desc : s.desc;
 
   return (
     <section
@@ -42,7 +51,7 @@ export function HeroSlider() {
       onTouchEnd={handleTouchEnd}
     >
       {slides.map((slide, i) => (
-        <div key={i} className={`absolute inset-0 transition-opacity duration-500 ${i === current ? "opacity-100" : "opacity-0"}`}>
+        <div key={slide.id} className={`absolute inset-0 transition-opacity duration-500 ${i === current ? "opacity-100" : "opacity-0"}`}>
           <img src={slide.image} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
         </div>
@@ -50,14 +59,18 @@ export function HeroSlider() {
 
       <div className="absolute inset-0 flex items-center z-10 px-6 sm:px-12 lg:px-20">
         <div className="max-w-lg">
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">
-            <T k={s.titleKey} />
-          </h2>
-          <p className="text-sm sm:text-lg text-white/80 mb-4 drop-shadow">
-            <T k={s.descKey} />
-          </p>
+          {title && (
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">
+              {title}
+            </h2>
+          )}
+          {desc && (
+            <p className="text-sm sm:text-lg text-white/80 mb-4 drop-shadow">
+              {desc}
+            </p>
+          )}
           <Link
-            href="/products"
+            href={s.link}
             className="inline-flex items-center gap-2 bg-[#2092EB] hover:bg-[#1A7CC8] text-white font-bold px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
           >
             <T k="home.shop_now" />
@@ -74,9 +87,9 @@ export function HeroSlider() {
       </button>
 
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
-        {slides.map((_, i) => (
+        {slides.map((slide, i) => (
           <button
-            key={i}
+            key={slide.id}
             onClick={() => setCurrent(i)}
             className={`rounded-full transition-all duration-300 ${i === current ? "w-6 h-2 bg-white" : "w-2 h-2 bg-white/50"}`}
           />

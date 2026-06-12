@@ -169,3 +169,16 @@ model Favorite {
 
   @@unique([userId, productId])
 }
+
+model Banner {
+  id        String   @id @default(cuid())
+  image     String
+  title     String?
+  titleEn   String?
+  desc      String?
+  descEn    String?
+  link      String   @default("/products")
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

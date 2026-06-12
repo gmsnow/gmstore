@@ -18,11 +18,12 @@ export default async function HomePage() {
   const isLoggedIn = !!sessionUserId;
   const locale = await getServerLocale();
 
-  const [rawFeatured, rawLatest, categories, userFavs] = await Promise.all([
+  const [rawFeatured, rawLatest, categories, userFavs, banners] = await Promise.all([
     prisma.product.findMany({ where: { featured: true }, select: productSelect, take: 4 }),
     prisma.product.findMany({ select: productSelect, orderBy: { createdAt: "desc" }, take: 8 }),
     prisma.category.findMany({ select: { id: true, name: true, nameEn: true, slug: true, image: true, _count: { select: { products: true } } } }),
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
+    prisma.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }),
   ]);
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
   const featured = (rawFeatured as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
@@ -30,7 +31,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroSlider />
+      <HeroSlider slides={banners} />
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
       
       {categories.length > 0 && (

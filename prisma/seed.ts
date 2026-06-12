@@ -405,6 +405,22 @@ async function main() {
   }
 
   console.log(`✅ Created ${createdCount} products (cleaned old Arabic-slug products)`);
+
+  // Default banners
+  const existingBanners = await prisma.banner.count();
+  if (existingBanners === 0) {
+    await prisma.banner.createMany({
+      data: [
+        { image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80", title: "تخفيضات تصل إلى 50%", titleEn: "Sales up to 50%", desc: "على جميع المنتجات المختارة", descEn: "On selected products", order: 0, link: "/products" },
+        { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80", title: "شحن مجاني", titleEn: "Free Shipping", desc: "للطلبات فوق 5000 ريال", descEn: "For orders over 5000 YER", order: 1, link: "/products" },
+        { image: "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1600&q=80", title: "أحدث المنتجات", titleEn: "New Arrivals", desc: "تصفح أحدث المنتجات المضافة", descEn: "Browse our latest products", order: 2, link: "/products" },
+      ],
+    });
+    console.log("✅ Created 3 default banners");
+  } else {
+    console.log(`Banners: ${existingBanners} already exist`);
+  }
+
   console.log("\n✅ Seed completed!");
 }
 

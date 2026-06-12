@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
-import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, LogOut, Store, Menu, X } from "lucide-react";
+import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, Image as ImageIcon, LogOut, Store, Menu, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
 export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
@@ -19,6 +19,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     { href: "/admin/categories", labelKey: "admin.categories", icon: Tags },
     { href: "/admin/orders", labelKey: "admin.orders", icon: ShoppingBag },
     { href: "/admin/orders/delivered", labelKey: "admin.delivered_orders", icon: CheckCheck },
+    { href: "/admin/banners", labelKey: "admin.banners", icon: ImageIcon },
   ];
 
   const [drawerOpen, setDrawerOpen] = useState(false);
