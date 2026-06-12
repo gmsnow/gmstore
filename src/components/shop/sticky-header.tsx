@@ -9,8 +9,10 @@ import { UserGreeting } from "@/components/shop/user-greeting";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
 
+
 export function StickyHeader({ session, role, signOutForm }: { session: any; role: string | undefined; signOutForm: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
+  const [showUsd, setShowUsd] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -75,6 +77,16 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
             </Link>
           </div>
         )}
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground">{showUsd ? "$" : "ريال"}</span>
+          <button
+            type="button"
+            onClick={() => setShowUsd((p) => !p)}
+            className="text-[10px] text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded border border-border"
+          >
+            {showUsd ? "ريال" : "$"}
+          </button>
+        </div>
         <Link href="/cart" className="relative p-2 hover:opacity-80 transition-opacity">
           <ShoppingCart className="h-5 w-5" />
         </Link>
