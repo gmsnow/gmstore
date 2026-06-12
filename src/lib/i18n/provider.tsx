@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { getDictionary, getDirection, type Locale } from "./dictionary";
 
 interface I18nContext {
@@ -19,6 +20,7 @@ const I18nContext = createContext<I18nContext>({
 });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>("ar");
   const [mounted, setMounted] = useState(false);
 
@@ -36,7 +38,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.cookie = `locale=${l};path=/;max-age=31536000`;
     document.documentElement.dir = getDirection(l);
     document.documentElement.lang = l;
-  }, []);
+    router.refresh();
+  }, [router]);
 
   const toggleLocale = useCallback(() => {
     setLocale(locale === "ar" ? "en" : "ar");
