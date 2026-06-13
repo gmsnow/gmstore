@@ -111,20 +111,24 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
   }
 
   return (
-    <div className="group relative bg-white dark:bg-gray-900 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <motion.div
+      className="group relative bg-white dark:bg-gray-900 overflow-hidden rounded-lg border border-transparent hover:border-[var(--primary)]/20"
+      whileHover={{ y: -4, boxShadow: "0 20px 40px rgba(0,0,0,0.12)" }}
+      transition={{ type: "spring", stiffness: 300, damping: 24 }}
+    >
       <div className="relative bg-[#f5f5f5] dark:bg-gray-800">
-        <Link href={`/products/${product.slug}`} className="block">
-          <div className="relative h-[250px] sm:h-[300px] overflow-hidden">
-            {images.length > 0 ? (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={imgIndex}
-                  className="h-full w-full"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+        <div className="relative h-[250px] sm:h-[300px] overflow-hidden">
+          {images.length > 0 ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={imgIndex}
+                className="h-full w-full"
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <Link href={`/products/${product.slug}`}>
                   <img
                     src={images[imgIndex]}
                     alt={product.name}
@@ -132,23 +136,25 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
                     loading="lazy"
                     draggable={false}
                   />
-                </motion.div>
-              </AnimatePresence>
-            ) : (
-              <div className="flex h-full items-center justify-center text-gray-400 text-sm"><T k="product.no_image" /></div>
-            )}
-            {hasHoverImg && (
+                </Link>
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <Link href={`/products/${product.slug}`} className="flex h-full items-center justify-center text-gray-400 text-sm"><T k="product.no_image" /></Link>
+          )}
+          {hasHoverImg && (
+            <Link href={`/products/${product.slug}`}>
               <img
                 src={images[1]}
                 alt={product.name}
-                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110"
+                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-110"
                 loading="lazy"
                 draggable={false}
               />
-            )}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-          </div>
-        </Link>
+            </Link>
+          )}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+        </div>
 
         {hasMultiple && (
           <motion.div
@@ -181,33 +187,47 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           )}
         </div>
 
-        <div className="absolute top-2 right-2 z-20 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-          <button
-            onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
+        <div className="absolute top-2 right-2 z-20 flex flex-col gap-2">
+          <motion.button
+            initial={{ opacity: 0, x: 8, scale: 0.8 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ delay: 0.05, type: "spring", stiffness: 400, damping: 20 }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
             className="text-white hover:scale-110 transition-transform leading-none drop-shadow-sm"
           >
             <Heart className={`h-5 w-5 ${isFav ? "fill-red-500 text-red-500" : ""}`} />
-          </button>
-          <Link href={`/products/${product.slug}`} className="text-white hover:scale-110 transition-transform leading-none drop-shadow-sm">
-            <Expand className="h-5 w-5" />
-          </Link>
+          </motion.button>
+          <motion.div
+            initial={{ opacity: 0, x: 8, scale: 0.8 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <Link href={`/products/${product.slug}`} className="text-white hover:scale-110 transition-transform leading-none drop-shadow-sm block">
+              <Expand className="h-5 w-5" />
+            </Link>
+          </motion.div>
         </div>
 
-        <div className="absolute left-2 bottom-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden flex flex-col">
+        <div className="absolute left-2 bottom-2 z-20">
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.9 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.08, type: "spring", stiffness: 350, damping: 18 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden flex flex-col"
+          >
             <button
-              onClick={(e) => { e.preventDefault(); setQuickViewOpen(true); }}
-              className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewOpen(true); }}
+              className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[var(--primary)] hover:text-white transition-all duration-200 flex items-center justify-center"
             >
               <Eye className="h-4 w-4" />
             </button>
             <button
-              onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
-              className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
+              className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[var(--primary)] hover:text-white transition-all duration-200 flex items-center justify-center"
             >
               <Link2 className="h-4 w-4" />
             </button>
-          </div>
+          </motion.div>
         </div>
 
         {product.brandLogo && (
@@ -215,20 +235,25 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         )}
 
         {product.colors?.length > 0 && (
-          <div className="absolute bottom-2 right-2 z-20 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <div className="absolute bottom-2 right-2 z-20 flex flex-col gap-1">
             {product.colors.slice(0, 6).map((c: string, i: number) => {
               const isSelected = selectedColor === c || (!selectedColor && i === 0);
               return (
-                <button
+                <motion.button
                   key={c}
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.05 * i, type: "spring", stiffness: 400, damping: 15 }}
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     setSelectedColor(c);
                     const ci = product.colorImages?.[c];
                     const idx = ci ? product.images?.indexOf(ci) : -1;
                     setImgIndex(idx >= 0 ? idx : (product.images?.length > i ? i : 0));
                   }}
-                  className={`h-3 w-3 rounded-full border shadow-sm transition-all shrink-0 ${isSelected ? "border-white" : "border-white/60 hover:scale-110"}`}
+                  className={`h-3 w-3 rounded-full border shadow-sm transition-all shrink-0 ${isSelected ? "border-white scale-110" : "border-white/60 hover:scale-110"}`}
                   style={{ backgroundColor: c }}
                 />
               );
@@ -239,22 +264,9 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </div>
         )}
 
-        <AnimatePresence>
-          {toast === "fav" && (
-            <motion.div
-              key="fav-heart"
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
-            >
-              <div className="bg-rose-500 text-white p-1.5 rounded-full shadow-lg">
-                <Heart className="h-4 w-4 fill-white" />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/5 group-hover:via-transparent group-hover:to-transparent transition-all duration-700" />
+        </div>
       </div>
 
       <Link href={`/products/${product.slug}`} className="block">
@@ -336,6 +348,6 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         )}
       </AnimatePresence>
       <QuickViewModal product={product} open={quickViewOpen} onClose={() => setQuickViewOpen(false)} />
-    </div>
+    </motion.div>
   );
 }
