@@ -157,12 +157,12 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
 
         <div className="absolute top-2 sm:top-3 lg:top-4 left-2 sm:left-3 lg:left-4 z-20 flex flex-col gap-2 sm:gap-2 lg:gap-3">
           {product.discount > 0 && (
-            <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] lg:w-[72px] lg:h-[72px] rounded-full bg-[#e95a00] text-white flex items-center justify-center text-[11px] sm:text-[13px] lg:text-[17px] font-bold">
+            <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] rounded-full bg-[#e95a00] text-white flex items-center justify-center text-[11px] sm:text-[13px] font-bold">
               -{product.discount}%
             </div>
           )}
           {product.stock <= 0 && (
-            <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] lg:w-[72px] lg:h-[72px] rounded-full bg-[#999] text-white flex items-center justify-center text-sm sm:text-base lg:text-xl font-bold">
+            <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] rounded-full bg-[#999] text-white flex items-center justify-center text-sm sm:text-base font-bold">
               نفذ
             </div>
           )}
@@ -173,25 +173,25 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
             className="text-white hover:scale-110 transition-transform leading-none"
           >
-            <Heart className={`h-[22px] w-[22px] sm:h-[28px] sm:w-[28px] lg:h-[35px] lg:w-[35px] ${isFav ? "fill-red-500 text-red-500" : ""}`} />
+            <Heart className={`h-[22px] w-[22px] sm:h-[28px] sm:w-[28px] ${isFav ? "fill-red-500 text-red-500" : ""}`} />
           </button>
           <Link href={`/products/${product.slug}`} className="text-white hover:scale-110 transition-transform leading-none">
-            <Expand className="h-[22px] w-[22px] sm:h-[28px] sm:w-[28px] lg:h-[35px] lg:w-[35px]" />
+            <Expand className="h-[22px] w-[22px] sm:h-[28px] sm:w-[28px]" />
           </Link>
         </div>
 
         <div className="absolute left-2 sm:left-3 lg:left-4 bottom-2 sm:bottom-3 lg:bottom-4 z-20 bg-white dark:bg-gray-800 rounded-[25px] sm:rounded-[30px] lg:rounded-[40px] shadow-[0_5px_15px_rgba(0,0,0,.15)] overflow-hidden flex">
           <button
             onClick={(e) => { e.preventDefault(); router.push(`/products/${product.slug}`); }}
-            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] lg:w-[75px] lg:h-[75px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
           >
-            <Eye className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px] lg:h-[34px] lg:w-[34px]" />
+            <Eye className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px]" />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
-            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] lg:w-[75px] lg:h-[75px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
           >
-            <Link2 className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px] lg:h-[34px] lg:w-[34px]" />
+            <Link2 className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px]" />
           </button>
         </div>
 
