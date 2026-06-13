@@ -261,23 +261,27 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             {product.colors.slice(0, 6).map((c: string, i: number) => {
               const isSelected = selectedColor === c || (!selectedColor && i === 0);
               return (
-                <motion.button
+                <motion.div
                   key={c}
                   initial={{ opacity: 0, scale: 0 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.05 * i, type: "spring", stiffness: 400, damping: 15 }}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setSelectedColor(c);
-                    const ci = product.colorImages?.[c];
-                    const idx = ci ? product.images?.indexOf(ci) : -1;
-                    setImgIndex(idx >= 0 ? idx : (product.images?.length > i ? i : 0));
-                  }}
-                  className={`h-3 w-3 rounded-full border shadow-sm transition-all shrink-0 ${isSelected ? "border-white scale-110" : "border-white/60 hover:scale-110"}`}
-                  style={{ backgroundColor: c }}
-                />
+                  className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center shrink-0"
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedColor(c);
+                      const ci = product.colorImages?.[c];
+                      const idx = ci ? product.images?.indexOf(ci) : -1;
+                      setImgIndex(idx >= 0 ? idx : (product.images?.length > i ? i : 0));
+                    }}
+                    className={`h-3 w-3 rounded-full border-2 transition-all shrink-0 ${isSelected ? "border-white scale-110" : "border-white/60 hover:scale-110"}`}
+                    style={{ backgroundColor: c }}
+                  />
+                </motion.div>
               );
             })}
             {product.colors.length > 6 && (
