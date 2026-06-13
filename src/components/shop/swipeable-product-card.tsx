@@ -163,15 +163,18 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             dragElastic={0}
             dragMomentum={false}
             onDragEnd={(_, info) => {
-              if (Math.abs(info.offset.x) < 10) {
-                router.push(`/products/${product.slug}`);
-              } else if (info.offset.x > 50 && imgIndex < images.length - 1) {
+              if (Math.abs(info.offset.x) < 10) return;
+              if (info.offset.x > 50 && imgIndex < images.length - 1) {
                 setImgIndex(i => i + 1);
               } else if (info.offset.x < -50 && imgIndex > 0) {
                 setImgIndex(i => i - 1);
               }
             }}
+            onClick={() => router.push(`/products/${product.slug}`)}
           />
+        )}
+        {!hasMultiple && (
+          <div className="absolute inset-0 z-10 cursor-pointer" onClick={() => router.push(`/products/${product.slug}`)} />
         )}
 
         <div className="absolute top-2 left-2 z-20 flex flex-col gap-1.5">
