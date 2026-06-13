@@ -111,7 +111,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
     <div className="relative bg-white dark:bg-gray-900 overflow-hidden transition-transform duration-300 hover:-translate-y-1">
       <div className="relative bg-[#f5f5f5] dark:bg-gray-800">
         <Link href={`/products/${product.slug}`} className="block">
-          <div className="relative h-[250px] sm:h-[300px] lg:h-[380px]">
+          <div className="relative h-[220px]">
             {images.length > 0 ? (
               <AnimatePresence mode="wait">
                 <motion.div
@@ -155,52 +155,52 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           />
         )}
 
-        <div className="absolute top-2 sm:top-3 lg:top-4 left-2 sm:left-3 lg:left-4 z-20 flex flex-col gap-2 sm:gap-2 lg:gap-3">
+        <div className="absolute top-2 left-2 z-20 flex flex-col gap-1.5">
           {product.discount > 0 && (
-            <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] rounded-full bg-[#e95a00] text-white flex items-center justify-center text-[11px] sm:text-[13px] font-bold">
+            <div className="w-9 h-9 rounded-full bg-[#e95a00] text-white flex items-center justify-center text-[10px] font-bold">
               -{product.discount}%
             </div>
           )}
           {product.stock <= 0 && (
-            <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] rounded-full bg-[#999] text-white flex items-center justify-center text-sm sm:text-base font-bold">
+            <div className="w-9 h-9 rounded-full bg-[#999] text-white flex items-center justify-center text-[10px] font-bold">
               نفذ
             </div>
           )}
         </div>
 
-        <div className="absolute top-2 sm:top-3 lg:top-4 right-2 sm:right-3 lg:right-4 z-20 flex flex-col gap-3 sm:gap-4 lg:gap-6">
+        <div className="absolute top-2 right-2 z-20 flex flex-col gap-2">
           <button
             onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
             className="text-white hover:scale-110 transition-transform leading-none"
           >
-            <Heart className={`h-[22px] w-[22px] sm:h-[28px] sm:w-[28px] ${isFav ? "fill-red-500 text-red-500" : ""}`} />
+            <Heart className={`h-5 w-5 ${isFav ? "fill-red-500 text-red-500" : ""}`} />
           </button>
           <Link href={`/products/${product.slug}`} className="text-white hover:scale-110 transition-transform leading-none">
-            <Expand className="h-[22px] w-[22px] sm:h-[28px] sm:w-[28px]" />
+            <Expand className="h-5 w-5" />
           </Link>
         </div>
 
-        <div className="absolute left-2 sm:left-3 lg:left-4 bottom-2 sm:bottom-3 lg:bottom-4 z-20 bg-white dark:bg-gray-800 rounded-[25px] sm:rounded-[30px] lg:rounded-[40px] shadow-[0_5px_15px_rgba(0,0,0,.15)] overflow-hidden flex">
+        <div className="absolute left-2 bottom-2 z-20 bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden flex">
           <button
             onClick={(e) => { e.preventDefault(); router.push(`/products/${product.slug}`); }}
-            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+            className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
           >
-            <Eye className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px]" />
+            <Eye className="h-4 w-4" />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
-            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+            className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
           >
-            <Link2 className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px]" />
+            <Link2 className="h-4 w-4" />
           </button>
         </div>
 
         {product.brandLogo && (
-          <img src={product.brandLogo} alt={product.brand || ""} className="absolute top-[60px] sm:top-[78px] lg:top-[102px] left-2 sm:left-3 lg:left-4 z-20 max-h-10 sm:max-h-12 lg:max-h-14 max-w-10 sm:max-w-12 lg:max-w-14 pointer-events-none mix-blend-multiply" />
+          <img src={product.brandLogo} alt={product.brand || ""} className="absolute top-[50px] left-2 z-20 max-h-8 max-w-8 pointer-events-none mix-blend-multiply" />
         )}
 
         {product.colors?.length > 0 && (
-          <div className="absolute bottom-2 sm:bottom-3 lg:bottom-4 right-2 sm:right-3 lg:right-4 z-20 flex flex-col gap-1">
+          <div className="absolute bottom-2 right-2 z-20 flex flex-col gap-1">
             {product.colors.slice(0, 6).map((c: string, i: number) => {
               const isSelected = selectedColor === c || (!selectedColor && i === 0);
               return (
@@ -213,13 +213,13 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
                     const idx = ci ? product.images?.indexOf(ci) : -1;
                     setImgIndex(idx >= 0 ? idx : (product.images?.length > i ? i : 0));
                   }}
-                  className={`h-4 w-4 rounded-full border-2 shadow-sm transition-all shrink-0 ${isSelected ? "border-white scale-125" : "border-white/60 hover:scale-110"}`}
+                  className={`h-3 w-3 rounded-full border shadow-sm transition-all shrink-0 ${isSelected ? "border-white" : "border-white/60 hover:scale-110"}`}
                   style={{ backgroundColor: c }}
                 />
               );
             })}
             {product.colors.length > 6 && (
-              <span className="text-[9px] text-gray-600 font-medium text-center">+{product.colors.length - 6}</span>
+              <span className="text-[8px] text-gray-600 font-medium text-center">+{product.colors.length - 6}</span>
             )}
           </div>
         )}
@@ -233,8 +233,8 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
               transition={{ type: "spring", stiffness: 400, damping: 12 }}
               className="absolute top-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
             >
-              <div className="bg-rose-500 text-white p-2 rounded-full shadow-lg">
-                <Heart className="h-5 w-5 fill-white" />
+              <div className="bg-rose-500 text-white p-1.5 rounded-full shadow-lg">
+                <Heart className="h-4 w-4 fill-white" />
               </div>
             </motion.div>
           )}
@@ -242,15 +242,15 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
       </div>
 
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="p-3 lg:p-5 text-center">
-          <h3 className="text-sm sm:text-lg lg:text-2xl leading-relaxed text-[var(--primary)] font-normal mb-2 lg:mb-4">
+        <div className="p-2.5 text-center">
+          <h3 className="text-xs leading-relaxed text-[var(--primary)] font-normal mb-1.5">
             <LocalizedName item={product} />
           </h3>
 
-          <div className="text-[var(--primary)] text-xs sm:text-base lg:text-[22px] mb-2 lg:mb-4">
+          <div className="text-[var(--primary)] text-[11px] mb-1.5">
             {avgRating > 0 ? (
-              <span className="flex items-center justify-center gap-1">
-                <Star className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 fill-yellow-400 text-yellow-400" />
+              <span className="flex items-center justify-center gap-0.5">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 {avgRating.toFixed(1)} ({reviewCount} <T k="detail.reviews" />)
               </span>
             ) : (
@@ -258,30 +258,30 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             )}
           </div>
 
-          <div className="flex items-center justify-center gap-2 lg:gap-3 flex-wrap">
-            <span className="text-xs sm:text-base lg:text-[22px] text-[var(--primary)] line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
+          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+            <span className="text-[11px] text-[var(--primary)] line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
           </div>
-          <div className="flex items-center justify-center gap-2 lg:gap-3 flex-wrap mt-1">
-            <span className="text-sm sm:text-xl lg:text-[26px] font-bold text-[var(--primary)]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
+          <div className="flex items-center justify-center gap-1.5 flex-wrap mt-0.5">
+            <span className="text-sm font-bold text-[var(--primary)]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mt-2 lg:mt-4">
+          <div className="flex items-center justify-center gap-1.5 mt-2">
             <button
               onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
-              className={`p-2 rounded-full transition-colors ${isFav ? "text-rose-500" : "text-gray-400 hover:text-rose-500"}`}
+              className={`p-1.5 rounded-full transition-colors ${isFav ? "text-rose-500" : "text-gray-400 hover:text-rose-500"}`}
             >
-              <Heart className={`h-5 w-5 ${isFav ? "fill-rose-500" : ""}`} />
+              <Heart className={`h-4 w-4 ${isFav ? "fill-rose-500" : ""}`} />
             </button>
             <button
               onClick={(e) => { e.preventDefault(); addToCart(); }}
-              className="p-2 rounded-full text-gray-400 hover:text-emerald-500 transition-colors"
+              className="p-1.5 rounded-full text-gray-400 hover:text-emerald-500 transition-colors"
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={(e) => { e.preventDefault(); cycleCurrency(); }}
-              className="text-xs text-gray-400 hover:text-[var(--primary)] transition-colors px-2 py-1 rounded border border-gray-300"
+              className="text-[10px] text-gray-400 hover:text-[var(--primary)] transition-colors px-1.5 py-0.5 rounded border border-gray-300"
             >
               {currencyLabels[(["yer", "usd", "sar"] as Currency[])[(["yer", "usd", "sar"].indexOf(displayCurrency) + 1) % 3]]}
             </button>
@@ -297,7 +297,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="absolute bottom-0 left-0 right-0 bg-emerald-500 text-white text-sm font-medium py-2.5 text-center z-20 shadow-lg"
+            className="absolute bottom-0 left-0 right-0 bg-emerald-500 text-white text-xs font-medium py-1.5 text-center z-20 shadow-lg"
           >
             <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 10 }}>
               ✓ أضيف إلى السلة
@@ -311,7 +311,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className={`absolute bottom-0 left-0 right-0 ${isFav ? "bg-rose-500" : "bg-gray-500"} text-white text-sm font-medium py-2.5 text-center z-20 shadow-lg`}
+            className={`absolute bottom-0 left-0 right-0 ${isFav ? "bg-rose-500" : "bg-gray-500"} text-white text-xs font-medium py-1.5 text-center z-20 shadow-lg`}
           >
             <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 10 }}>
               {isFav ? "♥ أضيف إلى المفضلة" : "أزيل من المفضلة"}
