@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Lock, ShieldCheck, RotateCcw, Truck, Headphones, ChevronDown, Star } from "lucide-react";
+import { Lock, ShieldCheck, RotateCcw, Truck, Headphones, ChevronDown, MessageCircle, Send, ExternalLink } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
 const trustItems = [
@@ -44,15 +44,23 @@ export function ProductTrust() {
         })}
       </div>
 
-      {/* Customer reviews summary */}
+      {/* Social media */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <h3 className="text-base font-bold mb-2 flex items-center gap-2">
-          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-          {t("detail.reviews")}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {t("detail.contact_desc")}
-        </p>
+        <h3 className="text-base font-bold mb-4">{t("detail.contact_us")}</h3>
+        <div className="flex flex-wrap gap-3">
+          <a href="https://wa.me/967700070007" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors">
+            <MessageCircle className="h-4 w-4 text-green-500" />
+            {t("detail.social_whatsapp")}
+          </a>
+          <a href="https://t.me/wanostore" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors">
+            <Send className="h-4 w-4 text-blue-400" />
+            {t("detail.social_telegram")}
+          </a>
+          <a href="https://facebook.com/wanostore" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors">
+            <ExternalLink className="h-4 w-4 text-blue-600" />
+            {t("detail.social_facebook")}
+          </a>
+        </div>
       </div>
 
       {/* FAQ accordion */}
