@@ -29,7 +29,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   });
   if (!product) notFound();
 
-  const related = await prisma.product.findMany({
+  const relatedRaw = await prisma.product.findMany({
     where: { categoryId: product.category.id, id: { not: product.id } },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
@@ -40,6 +40,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     },
     take: 8,
   });
+  const related = relatedRaw.map(r => ({ ...r, price: Number(r.price) }));
 
   const cartProduct = { id: product.id, name: localizedName(product, locale), price: Number(product.price), images: product.images, stock: product.stock };
   const sessionUserId = (session?.user as any)?.id;
