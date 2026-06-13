@@ -20,17 +20,22 @@ function setLocalFavs(ids: string[]) {
   window.dispatchEvent(new Event("favoritesUpdated"));
 }
 
-async function shareProduct(product: any): Promise<boolean> {
+function shareProduct(product: any): boolean {
   const url = window.location.origin + `/products/${product.slug}`;
-  if (typeof navigator.share === "function") {
-    try {
-      await navigator.share({ title: product.name, url });
-      return true;
-    } catch {
-      // share not supported or cancelled — fall through to clipboard
-    }
+  if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) && typeof navigator.share === "function") {
+    navigator.share({ title: product.name, url }).catch(() => {});
+    return true;
   }
-  try { await navigator.clipboard.writeText(url); } catch {}
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = url;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  } catch {}
   return false;
 }
 
@@ -239,7 +244,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
               <Eye className="h-4 w-4" />
             </button>
             <button
-              onClick={async (e) => { e.preventDefault(); e.stopPropagation(); const shared = await shareProduct(product); if (!shared) { setToast("share"); setTimeout(() => setToast(null), 1500); } }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); const shared = shareProduct(product); if (!shared) { setToast("share"); setTimeout(() => setToast(null), 1500); } }}
               className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[var(--primary)] hover:text-white transition-all duration-200 flex items-center justify-center"
             >
               <Share2 className="h-4 w-4" />
