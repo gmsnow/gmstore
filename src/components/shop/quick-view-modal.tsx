@@ -86,12 +86,12 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
           {'\u00D7'}
         </button>
 
-        <div className="p-10 md:p-[70px] flex flex-col order-2 md:order-1">
-          <h2 className="text-[28px] md:text-[38px] font-medium text-foreground mb-5" style={{ fontWeight: 500 }}>
+        <div className="p-5 sm:p-10 md:p-[70px] flex flex-col order-2 md:order-1">
+          <h2 className="text-xl sm:text-[28px] md:text-[38px] font-medium text-foreground mb-3 sm:mb-5" style={{ fontWeight: 500 }}>
             <LocalizedName item={product} />
           </h2>
 
-          <div className="text-[36px] md:text-[48px] text-[#D47800] mb-5" style={{ fontWeight: 500 }}>
+          <div className="text-2xl sm:text-[36px] md:text-[48px] text-[#D47800] mb-3 sm:mb-5" style={{ fontWeight: 500 }}>
             {formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}
           </div>
 
@@ -102,38 +102,38 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
             </div>
           )}
 
-          <p className="text-muted-foreground mb-[50px] text-[18px] md:text-[22px]">
+          <p className="text-muted-foreground mb-5 sm:mb-[50px] text-sm sm:text-[18px] md:text-[22px]">
             شحن محسوب عند الشراء.
           </p>
 
-          <p className="text-[#555] dark:text-gray-300 leading-relaxed text-[18px] md:text-[22px]" style={{ lineHeight: 2 }}>
+          <p className="text-[#555] dark:text-gray-300 leading-relaxed text-sm sm:text-[18px] md:text-[22px]" style={{ lineHeight: 2 }}>
             {product.description || product.descriptionEn || ""}
           </p>
 
-          <div className="flex items-center gap-[18px] mt-[35px] flex-wrap">
-            <button className="w-[65px] h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 text-[28px] flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <Heart className="h-7 w-7" />
+          <div className="flex items-center gap-2 sm:gap-[18px] mt-4 sm:mt-[35px] flex-wrap">
+            <button className="w-10 h-10 sm:w-[65px] sm:h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <Heart className="h-4 w-4 sm:h-7 sm:w-7" />
             </button>
 
-            <a href={`/products/${product.slug}`} className="w-[65px] h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 text-[28px] flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <Expand className="h-7 w-7" />
+            <a href={`/products/${product.slug}`} className="w-10 h-10 sm:w-[65px] sm:h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <Expand className="h-4 w-4 sm:h-7 sm:w-7" />
             </a>
 
             <button
               onClick={addToCart}
-              className="border-none text-white px-[55px] py-[18px] rounded-[40px] text-[18px] md:text-[22px] cursor-pointer hover:opacity-90 transition-opacity"
+              className="border-none text-white px-4 sm:px-[55px] py-2 sm:py-[18px] rounded-[40px] text-sm sm:text-[18px] md:text-[22px] cursor-pointer hover:opacity-90 transition-opacity"
               style={{ background: "#E4A90D" }}
             >
               إضافة للسلة
             </button>
 
             <div className="flex items-center border-2 border-[#222] dark:border-gray-200 rounded-[40px] overflow-hidden">
-              <button onClick={() => setQty(q => q + 1)} className="w-[60px] h-[60px] border-none bg-white dark:bg-gray-800 text-[30px] flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <Plus className="h-6 w-6" />
+              <button onClick={() => setQty(q => q + 1)} className="w-8 h-8 sm:w-[60px] sm:h-[60px] border-none bg-white dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <Plus className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
-              <span className="w-[60px] text-center text-[24px] text-foreground">{qty}</span>
-              <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-[60px] h-[60px] border-none bg-white dark:bg-gray-800 text-[30px] flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <Minus className="h-6 w-6" />
+              <span className="w-8 sm:w-[60px] text-center text-sm sm:text-[24px] text-foreground">{qty}</span>
+              <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-8 h-8 sm:w-[60px] sm:h-[60px] border-none bg-white dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <Minus className="h-4 w-4 sm:h-6 sm:w-6" />
               </button>
             </div>
           </div>
