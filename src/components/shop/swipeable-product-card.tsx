@@ -20,13 +20,14 @@ function setLocalFavs(ids: string[]) {
   window.dispatchEvent(new Event("favoritesUpdated"));
 }
 
-function shareProduct(product: any) {
+function shareProduct(product: any): boolean {
   const url = window.location.origin + `/products/${product.slug}`;
   if (navigator.share) {
     navigator.share({ title: product.name, url }).catch(() => {});
-  } else {
-    navigator.clipboard?.writeText(url);
+    return true;
   }
+  navigator.clipboard?.writeText(url);
+  return false;
 }
 
 export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds }: { product: any; isLoggedIn?: boolean; favoriteIds?: Set<string> }) {
@@ -234,7 +235,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
               <Eye className="h-4 w-4" />
             </button>
             <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); shareProduct(product); }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); const shared = shareProduct(product); if (!shared) { setToast("share"); setTimeout(() => setToast(null), 1500); } }}
               className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[var(--primary)] hover:text-white transition-all duration-200 flex items-center justify-center"
             >
               <Share2 className="h-4 w-4" />
@@ -355,6 +356,20 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           >
             <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 10 }}>
               {isFav ? "♥ أضيف إلى المفضلة" : "أزيل من المفضلة"}
+            </motion.span>
+          </motion.div>
+        )}
+        {toast === "share" && (
+          <motion.div
+            key="toast-share"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="absolute bottom-0 left-0 right-0 bg-[var(--primary)] text-white text-xs font-medium py-1.5 text-center z-20 shadow-lg"
+          >
+            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 10 }}>
+              ✓ نسخ الرابط
             </motion.span>
           </motion.div>
         )}
