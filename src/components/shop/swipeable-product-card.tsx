@@ -161,14 +161,17 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             ) : (
               <div className="flex h-full items-center justify-center text-muted-foreground text-sm"><T k="product.no_image" /></div>
             )}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
 
-          <div className="absolute top-3 left-3 z-10 pointer-events-none">
-            <div className="text-2xl font-black italic drop-shadow-lg" style={{ color: "#2092EB" }}>
-              Store
-            </div>
+            {product.brandLogo ? (
+              <img src={product.brandLogo} alt={product.brand || ""} className="absolute top-3 left-3 z-40 max-h-14 max-w-14 pointer-events-none mix-blend-multiply" />
+            ) : (
+              <div className="absolute top-3 left-3 z-40 text-2xl font-black italic pointer-events-none drop-shadow-lg" style={{ color: "#2092EB" }}>
+                Store
+              </div>
+            )}
           </div>
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
 
           {product.colors?.length > 0 && (
             <div className="absolute bottom-3 left-3 z-20 flex flex-col gap-1.5 p-1.5 rounded-lg bg-gray-900/40 backdrop-blur-sm">
@@ -230,6 +233,15 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
                 </span>
               )}
             </div>
+
+            {product.brand && (
+              <div className="flex items-center gap-1.5">
+                {product.brandLogo && (
+                  <img src={product.brandLogo} alt={product.brand} className="h-4 w-4 rounded object-contain" />
+                )}
+                <span className="text-xs text-muted-foreground">{product.brand}</span>
+              </div>
+            )}
 
             <h3 className="text-base font-medium truncate">
               <LocalizedName item={product} />

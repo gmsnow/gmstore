@@ -106,6 +106,8 @@ model Product {
   colors      String[]
   colorImages Json?
   videoUrl    String?
+  brand       String?
+  brandLogo   String?
   categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id])
   userId      String?

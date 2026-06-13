@@ -73,6 +73,7 @@ export const ar = {
   "detail.no_reviews": "لا توجد تقييمات بعد",
   "detail.already_reviewed": "قمت بتقييم هذا المنتج مسبقاً",
   "detail.rating_required": "التقييم يجب أن يكون بين 1 و 5",
+  "detail.also_like": "منتجات قد تعجبك",
 
   /* Cart */
   "cart.title": "سلة التسوق",
@@ -303,6 +304,7 @@ export const en: Record<string, string> = {
   "detail.no_reviews": "No reviews yet",
   "detail.already_reviewed": "You have already reviewed this product",
   "detail.rating_required": "Rating must be between 1 and 5",
+  "detail.also_like": "You May Also Like",
 
   "cart.title": "Shopping Cart",
   "cart.empty": "Your cart is empty",

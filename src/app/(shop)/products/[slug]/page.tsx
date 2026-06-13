@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ProductActions } from "@/components/shop/product-actions";
 import { ProductReviews } from "@/components/shop/product-reviews";
 import { ProductGallery } from "@/components/shop/product-gallery";
+import { ProductCarousel } from "@/components/shop/product-carousel";
 import { CurrencyToggle } from "@/components/shop/currency-toggle";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { FadeIn, FadeInUp } from "@/components/motion-wrappers";
@@ -27,6 +28,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     },
   });
   if (!product) notFound();
+
+  const related = await prisma.product.findMany({
+    where: { categoryId: product.category.id, id: { not: product.id } },
+    select: {
+      id: true, name: true, nameEn: true, slug: true, price: true,
+      images: true, colors: true, featured: true, stock: true,
+      brand: true, brandLogo: true,
+      category: { select: { id: true, name: true, nameEn: true, slug: true } },
+      reviews: { select: { rating: true } },
+    },
+    take: 8,
+  });
 
   const cartProduct = { id: product.id, name: localizedName(product, locale), price: Number(product.price), images: product.images, stock: product.stock };
   const sessionUserId = (session?.user as any)?.id;
@@ -66,6 +79,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </FadeInUp>
         </div>
         <ProductReviews productId={product.id} sessionUserId={sessionUserId} />
+        {related.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-bold mb-6"><T k="detail.also_like" /></h2>
+            <ProductCarousel products={related} isLoggedIn={!!session} />
+          </section>
+        )}
       </div>
     </FadeIn>
   );

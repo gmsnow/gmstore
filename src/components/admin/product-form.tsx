@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,14 +10,16 @@ import { X } from "lucide-react";
 import type { Category } from "@prisma/client";
 import { useI18n } from "@/lib/i18n/provider";
 import { localizedName } from "@/lib/i18n/localized";
+import { removeBackground } from "@imgly/background-removal";
 
 interface Props {
   categories: Category[];
   product?: any;
   backUrl?: string;
+  existingSlugs?: string[];
 }
 
-export function ProductForm({ categories, product, backUrl = "/admin/products" }: Props) {
+export function ProductForm({ categories, product, backUrl = "/admin/products", existingSlugs = [] }: Props) {
   const router = useRouter();
   const { locale } = useI18n();
   const [loading, setLoading] = useState(false);
@@ -28,6 +30,43 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
   const [colorInput, setColorInput] = useState("");
   const [colorImages, setColorImages] = useState<Record<string, string>>(product?.colorImages ?? {});
   const [uploadingColor, setUploadingColor] = useState<string | null>(null);
+  const [brandLogo, setBrandLogo] = useState<string>(product?.brandLogo ?? "");
+  const [uploadingBrand, setUploadingBrand] = useState(false);
+  const slugRef = useRef<HTMLSelectElement>(null);
+  const [autoSlug, setAutoSlug] = useState(!product?.slug);
+  const [slugOptions, setSlugOptions] = useState<{ value: string; label: string; taken?: boolean }[]>(() => {
+    if (product?.slug) return [{ value: product.slug, label: product.slug }];
+    return [];
+  });
+  const [showCustomSlug, setShowCustomSlug] = useState(false);
+
+  function slugify(text: string) {
+    return text
+      .normalize("NFKD")
+      .replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "")
+      .replace(/[^\u0600-\u06FF\w\s-]/g, "")
+      .replace(/[\s_]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase();
+  }
+
+  function handleNameChange(value: string) {
+    if (!autoSlug || product) return;
+    const base = slugify(value);
+    if (!base) { setSlugOptions([]); return; }
+    const taken = new Set(existingSlugs);
+    const opts: { value: string; label: string; taken?: boolean }[] = [];
+    if (!taken.has(base)) {
+      opts.push({ value: base, label: base });
+    }
+    for (let i = 1; opts.length < 15 && i <= 50; i++) {
+      const v = `${base}-${i}`;
+      if (!taken.has(v)) opts.push({ value: v, label: v });
+    }
+    opts.push({ value: "", label: "---", disabled: true } as any);
+    opts.push({ value: "__custom__", label: "أخرى (كتابة يدوية)" });
+    setSlugOptions(opts);
+  }
 
   const presetColors = [
     "#FF0000","#DC143C","#B22222","#8B0000","#FF4500","#FF6347","#FF8C00","#FFA500",
@@ -85,6 +124,21 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
     setImages((prev) => prev.filter((_, i) => i !== index));
   }
 
+  async function uploadBrandLogo(file: File) {
+    setUploadingBrand(true);
+    try {
+      const blob = await removeBackground(file);
+      const reader = new FileReader();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      setBrandLogo(dataUrl);
+    } catch {}
+    setUploadingBrand(false);
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -99,6 +153,8 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
       categoryId: form.get("categoryId"),
       stock: parseInt(form.get("stock") as string) || 0,
       featured: form.get("featured") === "on",
+      brand: form.get("brand"),
+      brandLogo: brandLogo || null,
       videoUrl: form.get("videoUrl"),
       images,
       colors,
@@ -121,9 +177,32 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      <Input id="name" name="name" label="اسم المنتج (عربي)" defaultValue={product?.name} required />
+      <Input id="name" name="name" label="اسم المنتج (عربي)" defaultValue={product?.name} required onChange={(e) => handleNameChange(e.target.value)} />
       <Input id="nameEn" name="nameEn" label="Product Name (English)" defaultValue={product?.nameEn} />
-      <Input id="slug" name="slug" label="الرابط (Slug)" defaultValue={product?.slug} required />
+      {product ? (
+        <Input id="slug" name="slug" label="الرابط (Slug)" defaultValue={product.slug} required />
+      ) : (
+        <>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-foreground">الرابط (Slug)</label>
+            {showCustomSlug ? (
+              <Input name="slug" label="" placeholder="أكتب الرابط يدوياً..." required />
+            ) : (
+              <select ref={slugRef} id="slug" name="slug" required onChange={(e) => { if (e.target.value === "__custom__") setShowCustomSlug(true); }} className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1">
+                <option value="">اختر...</option>
+                {slugOptions.map((o, i) => (
+                  <option key={i} value={o.taken ? "" : o.value} disabled={o.taken} className={o.taken ? "text-muted-foreground" : ""}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          {!showCustomSlug && existingSlugs.length > 0 && (
+            <p className="text-xs text-muted-foreground">الخيارات المستخدمة معطلة. أسم المنتج يولد خيارات جديدة.</p>
+          )}
+        </>
+      )}
       <Textarea id="description" name="description" label="الوصف (عربي)" defaultValue={product?.description} />
       <Textarea id="descriptionEn" name="descriptionEn" label="Description (English)" defaultValue={product?.descriptionEn} />
       <div className="grid grid-cols-2 gap-4">
@@ -142,6 +221,21 @@ export function ProductForm({ categories, product, backUrl = "/admin/products" }
         <input type="checkbox" name="featured" defaultChecked={product?.featured} className="h-4 w-4" />
         منتج مميز
       </label>
+      <Input id="brand" name="brand" label="العلامة التجارية" defaultValue={product?.brand} />
+      <div className="space-y-2">
+        <label className="text-sm font-medium">شعار العلامة التجارية</label>
+        {brandLogo ? (
+          <div className="relative inline-block h-16 w-16 overflow-hidden rounded-lg border border-border group">
+            <img src={brandLogo} alt="" className="h-full w-full object-contain" />
+            <button type="button" onClick={() => setBrandLogo("")} className="absolute inset-0 bg-black/50 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">حذف</button>
+          </div>
+        ) : (
+          <label className={`flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground hover:border-primary transition-colors ${uploadingBrand ? "opacity-50" : ""}`}>
+            {uploadingBrand ? "..." : "+"}
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadBrandLogo(f); }} />
+          </label>
+        )}
+      </div>
       <Input id="videoUrl" name="videoUrl" label="رابط الفيديو (Video URL)" defaultValue={product?.videoUrl} placeholder="https://www.youtube.com/watch?v=..." />
       <Card>
         <CardContent className="p-4 space-y-3">

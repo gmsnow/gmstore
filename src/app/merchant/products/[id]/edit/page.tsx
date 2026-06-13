@@ -9,10 +9,11 @@ export default async function MerchantEditProductPage({ params }: { params: Prom
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
   if (!product) notFound();
+  const plainProduct = { ...product, price: Number(product.price) };
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-bold mb-6">تعديل المنتج</h1>
-      <ProductForm categories={categories} product={product} backUrl="/merchant" />
+      <ProductForm categories={categories} product={plainProduct} backUrl="/merchant" />
     </div>
   );
 }

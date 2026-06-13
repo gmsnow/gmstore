@@ -94,7 +94,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
         style={{ WebkitTapHighlightColor: "transparent" }}
         dir={direction}
       >
-        <div ref={outerRef} className="relative mx-2 rounded-t-[31px] bg-card shadow-lg border border-border">
+        <div ref={outerRef} className="relative mx-2 rounded-t-[31px] bg-card shadow-lg border border-border overflow-hidden">
           <svg
             ref={indicatorRef}
             className="absolute z-[1] left-0 bottom-0 w-[68px] h-[72px] overflow-visible pointer-events-none"
@@ -122,7 +122,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
             className="overflow-x-auto scrollbar-none"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
-            <ul className="relative z-[1] flex items-center h-[72px] px-2 m-0 list-none w-max">
+            <ul className="relative z-[1] flex items-center h-[72px] px-2 m-0 list-none w-full">
               {links.map((l, i) => {
                 const isActive = i === activeIndex;
                 const Icon = l.icon;
