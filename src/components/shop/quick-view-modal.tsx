@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, ShoppingCart, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ShoppingCart, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { LocalizedName } from "@/components/localized";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
 import type { CartItem } from "@/types";
@@ -14,6 +14,7 @@ interface Props {
 
 export function QuickViewModal({ product, open, onClose }: Props) {
   const [imgIndex, setImgIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
   const { currency } = useCurrency();
   const [localCurrency, setLocalCurrency] = useState<Currency | null>(null);
   const displayCurrency = localCurrency !== null ? localCurrency : currency;
@@ -25,6 +26,14 @@ export function QuickViewModal({ product, open, onClose }: Props) {
     if (c === "usd") return (price / USD_TO_YER).toFixed(2);
     if (c === "sar") return (price / USD_TO_YER * USD_TO_SAR).toFixed(2);
     return price.toFixed(2);
+  }
+
+  function cycleCurrency() {
+    setLocalCurrency(prev => {
+      const base = prev ?? currency;
+      const idx = ["yer", "usd", "sar"].indexOf(base);
+      return (["yer", "usd", "sar"] as Currency[])[(idx + 1) % 3];
+    });
   }
 
   function addToCart() {
@@ -61,98 +70,157 @@ export function QuickViewModal({ product, open, onClose }: Props) {
             onClick={onClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 max-w-2xl w-full bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh]"
+            className="fixed inset-4 md:inset-8 lg:inset-12 z-50 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-y-auto"
           >
-            <button onClick={onClose} className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
-              <X className="h-5 w-5" />
-            </button>
+            <div className="sticky top-0 z-10 flex items-center justify-between bg-white dark:bg-gray-900 border-b border-border px-5 py-3">
+              <h2 className="text-lg font-bold text-foreground"><LocalizedName item={product} /></h2>
+              <button onClick={onClose} className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-            <div className="grid md:grid-cols-2">
-              <div className="relative bg-[#f5f5f5] dark:bg-gray-800">
-                {images.length > 0 ? (
-                  <>
-                    <div className="aspect-square">
-                      <img src={images[imgIndex]} alt={product.name} className="w-full h-full object-contain" />
-                    </div>
-                    {images.length > 1 && (
+            <div className="p-5 lg:p-8">
+              <div className="grid gap-8 lg:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="relative bg-[#f5f5f5] dark:bg-gray-800 rounded-xl overflow-hidden">
+                    {images.length > 0 ? (
                       <>
-                        <button onClick={() => setImgIndex(i => Math.max(0, i - 1))} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white/80 shadow hover:bg-white transition-colors">
-                          <ChevronLeft className="h-5 w-5" />
-                        </button>
-                        <button onClick={() => setImgIndex(i => Math.min(images.length - 1, i + 1))} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white/80 shadow hover:bg-white transition-colors">
-                          <ChevronRight className="h-5 w-5" />
-                        </button>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                          {images.map((_, i) => (
-                            <button key={i} onClick={() => setImgIndex(i)} className={`h-1.5 rounded-full transition-all ${i === imgIndex ? "w-5 bg-primary" : "w-1.5 bg-white/60"}`} />
-                          ))}
+                        <div className="aspect-square">
+                          <img src={images[imgIndex]} alt={product.name} className="w-full h-full object-contain" />
                         </div>
+                        {images.length > 1 && (
+                          <>
+                            <button onClick={() => setImgIndex(i => Math.max(0, i - 1))} className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 shadow hover:bg-white transition-colors">
+                              <ChevronLeft className="h-5 w-5" />
+                            </button>
+                            <button onClick={() => setImgIndex(i => Math.min(images.length - 1, i + 1))} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 shadow hover:bg-white transition-colors">
+                              <ChevronRight className="h-5 w-5" />
+                            </button>
+                          </>
+                        )}
                       </>
+                    ) : (
+                      <div className="aspect-square flex items-center justify-center text-gray-400">لا توجد صورة</div>
                     )}
-                  </>
-                ) : (
-                  <div className="aspect-square flex items-center justify-center text-gray-400 text-sm">لا توجد صورة</div>
-                )}
-                {product.discount > 0 && (
-                  <div className="absolute top-3 left-3 w-9 h-9 rounded-full bg-[#e95a00] text-white flex items-center justify-center text-[10px] font-bold">
-                    -{product.discount}%
+                    {product.discount > 0 && (
+                      <div className="absolute top-3 left-3 w-10 h-10 rounded-full bg-[#e95a00] text-white flex items-center justify-center text-xs font-bold">
+                        -{product.discount}%
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-
-              <div className="p-5 flex flex-col gap-3">
-                <h2 className="text-xl font-bold text-foreground">
-                  <LocalizedName item={product} />
-                </h2>
-
-                {avgRating > 0 && (
-                  <div className="text-sm text-muted-foreground">
-                    ★ {avgRating.toFixed(1)} ({reviewCount} تقييم)
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-[var(--primary)]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
-                  {Number(product.price) > 0 && (
-                    <span className="text-sm text-muted-foreground line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
+                  {images.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {images.map((url: string, i: number) => (
+                        <button key={i} onClick={() => setImgIndex(i)} className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${i === imgIndex ? "border-[var(--primary)]" : "border-transparent opacity-70 hover:opacity-100"}`}>
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
 
-                {product.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{product.description}</p>
-                )}
-
-                {product.colors?.length > 0 && (
+                <div className="space-y-5">
                   <div>
-                    <p className="text-sm font-medium mb-1.5">الألوان:</p>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {product.colors.map((c: string) => (
-                        <div key={c} className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: c }} />
-                      ))}
-                    </div>
+                    {product.category && (
+                      <span className="inline-block text-xs font-medium text-[var(--primary)] bg-[var(--primary)]/10 px-2.5 py-1 rounded-full mb-3">
+                        <LocalizedName item={product.category} />
+                      </span>
+                    )}
+                    <h1 className="text-2xl font-bold text-foreground">
+                      <LocalizedName item={product} />
+                    </h1>
                   </div>
-                )}
 
-                <div className="flex gap-2 mt-auto pt-3">
-                  <button
-                    onClick={addToCart}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[var(--primary)] text-white rounded-xl py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                    أضف إلى السلة
-                  </button>
-                  <a
-                    href={`/products/${product.slug}`}
-                    className="flex-1 flex items-center justify-center gap-2 bg-muted text-foreground rounded-xl py-2.5 text-sm font-medium hover:bg-muted/80 transition-colors text-center"
-                  >
-                    عرض التفاصيل
-                  </a>
+                  {avgRating > 0 && (
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span>{avgRating.toFixed(1)}</span>
+                      <span>({reviewCount} تقييم)</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl font-bold text-[var(--primary)]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
+                    <span className="text-base text-muted-foreground line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
+                    <button type="button" onClick={cycleCurrency} className="text-xs text-muted-foreground hover:text-[var(--primary)] transition-colors px-1.5 py-0.5 rounded border border-border">
+                      {currencyLabels[(["yer", "usd", "sar"] as Currency[])[(["yer", "usd", "sar"].indexOf(displayCurrency) + 1) % 3]]}
+                    </button>
+                  </div>
+
+                  {product.description && (
+                    <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+                  )}
+
+                  {product.descriptionEn && (
+                    <p className="text-sm text-muted-foreground/70 leading-relaxed dir-ltr">{product.descriptionEn}</p>
+                  )}
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">المخزون:</span>
+                    <span className={`font-medium ${product.stock > 0 ? "text-emerald-600" : "text-red-500"}`}>
+                      {product.stock > 0 ? `${product.stock} قطع` : "غير متوفر"}
+                    </span>
+                  </div>
+
+                  {product.colors?.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        الألوان: <span className="text-foreground">{selectedColor}</span>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {product.colors.map((c: string) => (
+                          <button key={c} type="button" onClick={() => setSelectedColor(c)}
+                            className={`h-7 w-7 rounded-full border-2 transition-all ${selectedColor === c ? "border-foreground scale-110" : "border-border hover:scale-105"}`}
+                            style={{ backgroundColor: c }} title={c}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {product.brand && (
+                    <div className="flex items-center gap-2">
+                      {product.brandLogo && <img src={product.brandLogo} alt="" className="h-8 w-8 object-contain" />}
+                      <span className="text-sm text-muted-foreground">العلامة التجارية: <span className="text-foreground font-medium">{product.brand}</span></span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-3 border-t border-border">
+                    <button onClick={addToCart} className="flex-1 flex items-center justify-center gap-2 bg-[var(--primary)] text-white rounded-xl py-3 text-sm font-medium hover:opacity-90 transition-opacity">
+                      <ShoppingCart className="h-4 w-4" />
+                      أضف إلى السلة
+                    </button>
+                    <a href={`/products/${product.slug}`} className="flex-1 flex items-center justify-center gap-2 bg-muted text-foreground rounded-xl py-3 text-sm font-medium hover:bg-muted/80 transition-colors text-center">
+                      عرض التفاصيل كاملة
+                    </a>
+                  </div>
                 </div>
               </div>
+
+              {product.reviews?.length > 0 && (
+                <div className="mt-10 pt-8 border-t border-border">
+                  <h3 className="text-lg font-bold mb-4">التقييمات ({reviewCount})</h3>
+                  <div className="space-y-4 max-h-60 overflow-y-auto">
+                    {product.reviews.map((r: any, i: number) => (
+                      <div key={r.id || i} className="bg-muted/50 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">{r.user?.name || "مستخدم"}</span>
+                          <div className="flex gap-0.5">
+                            {Array.from({ length: 5 }).map((_, j) => (
+                              <Star key={j} className={`h-3.5 w-3.5 ${j < r.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+                            ))}
+                          </div>
+                        </div>
+                        {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         </>
