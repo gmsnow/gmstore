@@ -40,7 +40,7 @@ function shareProduct(product: any): boolean {
 }
 
 export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds }: { product: any; isLoggedIn?: boolean; favoriteIds?: Set<string> }) {
-  const [toast, setToast] = useState<"cart" | "fav" | null>(null);
+  const [toast, setToast] = useState<"cart" | "fav" | "share" | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);

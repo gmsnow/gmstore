@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { Badge } from "@/components/ui/badge";
 import { Search, X } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
@@ -11,7 +10,7 @@ import { localizedName } from "@/lib/i18n/localized";
 import { ProductFilters } from "@/components/shop/product-filters";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 
-export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; featured?: string; q?: string; sort?: string; minPrice?: string; maxPrice?: string; inStock?: string }> }) {
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; featured?: string; q?: string; sort?: string; minPrice?: string; maxPrice?: string; inStock?: string; brand?: string; color?: string; size?: string; minRating?: string; newArrivals?: string; onSale?: string }> }) {
   const params = await searchParams;
   const locale = await getServerLocale();
   const session = await auth();
@@ -37,29 +36,45 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     if (params.minPrice) where.price.gte = parseFloat(params.minPrice);
     if (params.maxPrice) where.price.lte = parseFloat(params.maxPrice);
   }
+  if (params.brand) where.brand = params.brand;
+  if (params.color) where.colors = { has: params.color };
+  if (params.size) where.sizes = { has: params.size };
+  if (params.minRating) where.reviews = { some: { rating: { gte: parseInt(params.minRating) } } };
+  if (params.newArrivals === "true") {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    where.createdAt = { gte: thirtyDaysAgo };
+  }
+  if (params.onSale === "true") where.discount = { gt: 0 };
+
   if (params.sort === "price_asc") { orderBy.price = "asc"; delete orderBy.createdAt; }
   else if (params.sort === "price_desc") { orderBy.price = "desc"; delete orderBy.createdAt; }
   else if (params.sort === "name") { orderBy.name = "asc"; delete orderBy.createdAt; }
+  else if (params.sort === "discount_asc") { orderBy.discount = "asc"; delete orderBy.createdAt; }
+  else if (params.sort === "discount_desc") { orderBy.discount = "desc"; delete orderBy.createdAt; }
 
-  const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, discount: true, brand: true, brandLogo: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
+  const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, sizes: true, featured: true, stock: true, discount: true, brand: true, brandLogo: true, createdAt: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
-  const [products, categories, userFavs] = await Promise.all([
+  const [products, categories, brands, colorRows, sizeRows, userFavs] = await Promise.all([
     prisma.product.findMany({ where, select: productSelect, orderBy }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.product.findMany({ where: { brand: { not: null } }, select: { brand: true }, distinct: ["brand"], orderBy: { brand: "asc" } }),
+    prisma.product.findMany({ select: { colors: true } }),
+    prisma.product.findMany({ select: { sizes: true } }),
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
+  const uniqueBrands = brands.map((b: any) => b.brand).filter(Boolean);
+  const uniqueColors = [...new Set(colorRows.flatMap((r: any) => r.colors))].sort();
+  const uniqueSizes = [...new Set(sizeRows.flatMap((r: any) => r.sizes))].sort();
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
   const productList = (products as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
 
   function filterUrl(overrides: Record<string, string | null | undefined>) {
     const p = new URLSearchParams();
-    if (params.q) p.set("q", params.q);
-    if (params.category && !("category" in overrides)) p.set("category", params.category);
-    if (params.sort && params.sort !== "newest" && !("sort" in overrides)) p.set("sort", params.sort);
-    if (params.minPrice && !("minPrice" in overrides)) p.set("minPrice", params.minPrice);
-    if (params.maxPrice && !("maxPrice" in overrides)) p.set("maxPrice", params.maxPrice);
-    if (params.inStock && !("inStock" in overrides)) p.set("inStock", params.inStock);
-    if (params.featured && !("featured" in overrides)) p.set("featured", params.featured);
+    const preserveKeys = ["q", "category", "sort", "minPrice", "maxPrice", "inStock", "featured", "brand", "color", "size", "minRating", "newArrivals", "onSale"];
+    for (const key of preserveKeys) {
+      if ((params as any)[key] && !(key in overrides)) p.set(key, (params as any)[key]);
+    }
     for (const [k, v] of Object.entries(overrides)) {
       if (v === null || v === undefined || v === "") p.delete(k);
       else p.set(k, v);
@@ -91,8 +106,20 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   if (params.featured === "true") activeTags.push(activeFilterTag(locale === "en" ? "Featured" : "مميز", "featured"));
   if (params.minPrice) activeTags.push(activeFilterTag(`≥ ${params.minPrice}`, "minPrice"));
   if (params.maxPrice) activeTags.push(activeFilterTag(`≤ ${params.maxPrice}`, "maxPrice"));
+  if (params.brand) activeTags.push(activeFilterTag(params.brand, "brand"));
+  if (params.color) activeTags.push(activeFilterTag(params.color, "color"));
+  if (params.size) activeTags.push(activeFilterTag(params.size, "size"));
+  if (params.minRating) activeTags.push(activeFilterTag(`★${params.minRating}+`, "minRating"));
+  if (params.newArrivals === "true") activeTags.push(activeFilterTag(locale === "en" ? "New" : "جديد", "newArrivals"));
+  if (params.onSale === "true") activeTags.push(activeFilterTag(locale === "en" ? "Sale" : "خصم", "onSale"));
   if (params.sort && params.sort !== "newest") {
-    const sortLabels: Record<string, string> = { price_asc: locale === "en" ? "Price ↑" : "السعر ↑", price_desc: locale === "en" ? "Price ↓" : "السعر ↓", name: locale === "en" ? "Name" : "الاسم" };
+    const sortLabels: Record<string, string> = {
+      price_asc: locale === "en" ? "Price ↑" : "السعر ↑",
+      price_desc: locale === "en" ? "Price ↓" : "السعر ↓",
+      name: locale === "en" ? "Name" : "الاسم",
+      discount_asc: locale === "en" ? "Discount ↑" : "الخصم ↑",
+      discount_desc: locale === "en" ? "Discount ↓" : "الخصم ↓",
+    };
     activeTags.push(activeFilterTag(sortLabels[params.sort] || params.sort, "sort"));
   }
 
@@ -114,7 +141,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         )}
 
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <ProductFilters categories={categories} />
+          <ProductFilters categories={categories} brands={uniqueBrands} colors={uniqueColors} sizes={uniqueSizes} />
           {activeTags.length > 0 && (
             <Link href="/products" className="text-xs text-muted-foreground hover:text-primary transition-colors">
               <T k="products.clear_filters" />

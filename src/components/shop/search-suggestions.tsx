@@ -34,7 +34,7 @@ export function SearchSuggestions({ query, onSelect, onClose, closeSearch }: {
   const [listening, setListening] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const ref = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => { setHistory(getHistory()); }, []);
 

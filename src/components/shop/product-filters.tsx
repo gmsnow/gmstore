@@ -1,10 +1,10 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback } from "react";
-import { SlidersHorizontal, X } from "lucide-react";
+import { useState } from "react";
+import { SlidersHorizontal, X, Star } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
-export function ProductFilters({ categories: rawCategories }: { categories: { id: string; name: string; nameEn?: string | null; slug: string }[] }) {
+export function ProductFilters({ categories: rawCategories, brands, colors, sizes }: { categories: { id: string; name: string; nameEn?: string | null; slug: string }[]; brands: string[]; colors: string[]; sizes: string[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, locale } = useI18n();
@@ -17,6 +17,12 @@ export function ProductFilters({ categories: rawCategories }: { categories: { id
   const currentInStock = searchParams.get("inStock") === "true";
   const currentFeatured = searchParams.get("featured") === "true";
   const currentQ = searchParams.get("q") || "";
+  const currentBrand = searchParams.get("brand") || "";
+  const currentColor = searchParams.get("color") || "";
+  const currentSize = searchParams.get("size") || "";
+  const currentMinRating = searchParams.get("minRating") || "";
+  const currentNewArrivals = searchParams.get("newArrivals") === "true";
+  const currentOnSale = searchParams.get("onSale") === "true";
 
   const categories = rawCategories;
 
@@ -33,13 +39,18 @@ export function ProductFilters({ categories: rawCategories }: { categories: { id
     return `/products${qs ? `?${qs}` : ""}`;
   }
 
-  const hasActiveFilters = currentSort !== "newest" || currentMin || currentMax || currentInStock || currentFeatured || currentCategory || currentQ;
+  const hasActiveFilters = currentSort !== "newest" || currentMin || currentMax || currentInStock || currentFeatured || currentCategory || currentQ || currentBrand || currentColor || currentSize || currentMinRating || currentNewArrivals || currentOnSale;
 
   function clearAll() {
     router.push("/products");
   }
 
-  const filterCount = [currentCategory, currentMin || currentMax ? "price" : "", currentInStock ? "stock" : "", currentFeatured ? "featured" : "", currentSort !== "newest" ? "sort" : ""].filter(Boolean).length;
+  const filterCount = [
+    currentCategory, currentMin || currentMax ? "price" : "", currentInStock ? "stock" : "",
+    currentFeatured ? "featured" : "", currentSort !== "newest" ? "sort" : "",
+    currentBrand ? "brand" : "", currentColor ? "color" : "", currentSize ? "size" : "",
+    currentMinRating ? "rating" : "", currentNewArrivals ? "new" : "", currentOnSale ? "sale" : "",
+  ].filter(Boolean).length;
 
   return (
     <>
@@ -96,6 +107,91 @@ export function ProductFilters({ categories: rawCategories }: { categories: { id
                 </div>
               </div>
 
+              {/* Brand */}
+              {brands.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">{t("products.brand")}</h3>
+                  <select
+                    value={currentBrand}
+                    onChange={(e) => router.push(buildUrl({ brand: e.target.value || null }))}
+                    className="w-full rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary bg-background"
+                  >
+                    <option value="">{t("products.all_brands")}</option>
+                    {brands.map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Color */}
+              {colors.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">{t("products.color")}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {currentColor && (
+                      <button
+                        onClick={() => router.push(buildUrl({ color: null }))}
+                        className="text-xs text-primary hover:underline mb-1 w-full text-start"
+                      >
+                        {t("products.all")}
+                      </button>
+                    )}
+                    {colors.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => router.push(buildUrl({ color: currentColor === c ? null : c }))}
+                        className={`h-8 w-8 rounded-full border-2 transition-all ${currentColor === c ? "border-primary scale-110" : "border-border hover:scale-110"}`}
+                        style={{ backgroundColor: c.toLowerCase() }}
+                        title={c}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Size */}
+              {sizes.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">{t("products.size")}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {sizes.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => router.push(buildUrl({ size: currentSize === s ? null : s }))}
+                        className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${currentSize === s ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Rating */}
+              <div>
+                <h3 className="text-sm font-semibold mb-3">{t("products.rating")}</h3>
+                <div className="space-y-1">
+                  {[5, 4, 3, 2, 1].map((r) => (
+                    <label key={r} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="radio"
+                        name="rating"
+                        checked={currentMinRating === String(r)}
+                        onChange={() => router.push(buildUrl({ minRating: currentMinRating === String(r) ? null : String(r) }))}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      <span className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <Star key={i} className={`h-3.5 w-3.5 ${i < r ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`} />
+                        ))}
+                        <span className="mr-1 text-muted-foreground">& {t("products.any_rating")}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Price range */}
               <div>
                 <h3 className="text-sm font-semibold mb-3">{t("products.price")}</h3>
@@ -138,6 +234,8 @@ export function ProductFilters({ categories: rawCategories }: { categories: { id
                   <option value="price_asc">{t("products.sort_price_asc")}</option>
                   <option value="price_desc">{t("products.sort_price_desc")}</option>
                   <option value="name">{t("products.sort_name")}</option>
+                  <option value="discount_asc">{t("products.discount_asc")}</option>
+                  <option value="discount_desc">{t("products.discount_desc")}</option>
                 </select>
               </div>
 
@@ -150,16 +248,25 @@ export function ProductFilters({ categories: rawCategories }: { categories: { id
                     onChange={(e) => router.push(buildUrl({ inStock: e.target.checked ? "true" : null }))}
                     className="h-4 w-4 accent-primary"
                   />
-                  {t("products.in_stock")}
+                  {t("products.availability")}
                 </label>
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={currentFeatured}
-                    onChange={(e) => router.push(buildUrl({ featured: e.target.checked ? "true" : null }))}
+                    checked={currentNewArrivals}
+                    onChange={(e) => router.push(buildUrl({ newArrivals: e.target.checked ? "true" : null }))}
                     className="h-4 w-4 accent-primary"
                   />
-                  {t("products.featured_only")}
+                  {t("products.new_arrivals")}
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={currentOnSale}
+                    onChange={(e) => router.push(buildUrl({ onSale: e.target.checked ? "true" : null }))}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  {t("products.on_sale")}
                 </label>
               </div>
 
