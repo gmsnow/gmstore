@@ -40,8 +40,9 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
           : "bg-white/90 dark:bg-card/90 backdrop-blur-md text-black dark:text-white shadow-sm"
       }`}
     >
-      <Link href="/" className="flex items-center">
-        <img src="/wanologo.png" alt="WANOSTORE" className="h-10 w-auto" />
+      <Link href="/" className="flex items-center gap-2">
+        <img src="/wanologo.png" alt="WANOSTORE" className="h-9 w-auto" />
+        <span className="text-lg font-bold"><T k="nav.store_name" /></span>
       </Link>
       <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
         <Link href="/products" className="hover:opacity-80 transition-opacity"><T k="nav.products" /></Link>
