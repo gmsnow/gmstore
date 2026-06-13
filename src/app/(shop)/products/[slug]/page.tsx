@@ -33,7 +33,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { categoryId: product.category.id, id: { not: product.id } },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, featured: true, stock: true,
+      images: true, colors: true, featured: true, stock: true, discount: true,
       brand: true, brandLogo: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
       reviews: { select: { rating: true } },

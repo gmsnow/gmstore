@@ -11,7 +11,8 @@ export const GET = auth(async (req) => {
       product: {
         select: {
           id: true, name: true, nameEn: true, slug: true, price: true,
-          images: true, colors: true, stock: true,
+          images: true, colors: true, stock: true, discount: true,
+          brand: true, brandLogo: true,
           category: { select: { id: true, name: true, nameEn: true, slug: true } },
         },
       },

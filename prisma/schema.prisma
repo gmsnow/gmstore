@@ -113,6 +113,7 @@ model Product {
   userId      String?
   user        User?       @relation(fields: [userId], references: [id])
   stock       Int         @default(0)
+  discount    Int         @default(0)
   featured    Boolean     @default(false)
   orderItems  OrderItem[]
   reviews     Review[]

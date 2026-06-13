@@ -29,6 +29,7 @@ export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string
         price: parseFloat(body.price),
         categoryId: body.categoryId,
         stock: parseInt(body.stock) || 0,
+        discount: parseInt(body.discount) || 0,
         featured: body.featured ?? false,
         images: body.images ?? [],
         colors: body.colors ?? [],

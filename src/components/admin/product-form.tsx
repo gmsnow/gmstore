@@ -152,6 +152,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
       price: parseFloat(form.get("price") as string),
       categoryId: form.get("categoryId"),
       stock: parseInt(form.get("stock") as string) || 0,
+      discount: parseInt(form.get("discount") as string) || 0,
       featured: form.get("featured") === "on",
       brand: form.get("brand"),
       brandLogo: brandLogo || null,
@@ -208,6 +209,9 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
       <div className="grid grid-cols-2 gap-4">
         <Input id="price" name="price" type="number" step="0.01" label="السعر" defaultValue={product?.price?.toString()} required />
         <Input id="stock" name="stock" type="number" label="المخزون" defaultValue={product?.stock?.toString() ?? "0"} />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Input id="discount" name="discount" type="number" min="0" max="100" label="الخصم %" defaultValue={product?.discount?.toString() ?? "0"} />
       </div>
       <Select
         id="categoryId"

@@ -156,9 +156,11 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         )}
 
         <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-20 flex flex-col gap-2 sm:gap-2 md:gap-3">
-          <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[72px] md:h-[72px] rounded-full bg-[#e95a00] text-white flex items-center justify-center text-[11px] sm:text-[13px] md:text-[17px] font-bold">
-            -20%
-          </div>
+          {product.discount > 0 && (
+            <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[72px] md:h-[72px] rounded-full bg-[#e95a00] text-white flex items-center justify-center text-[11px] sm:text-[13px] md:text-[17px] font-bold">
+              -{product.discount}%
+            </div>
+          )}
           {product.stock <= 0 && (
             <div className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[72px] md:h-[72px] rounded-full bg-[#999] text-white flex items-center justify-center text-sm sm:text-base md:text-xl font-bold">
               نفذ

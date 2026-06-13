@@ -11,7 +11,7 @@ export const GET = async (req: Request) => {
 
     const listSelect = {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, colorImages: true, stock: true, featured: true,
+      images: true, colors: true, colorImages: true, stock: true, discount: true, featured: true,
       description: true, descriptionEn: true, brand: true, brandLogo: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
     } as const;
@@ -89,6 +89,7 @@ export const POST = auth(async (req) => {
         categoryId: body.categoryId,
         userId,
         stock: parseInt(body.stock) || 0,
+        discount: parseInt(body.discount) || 0,
         featured: body.featured ?? false,
         images: body.images ?? [],
         colors: body.colors ?? [],
@@ -131,6 +132,7 @@ export const PATCH = auth(async (req) => {
         price: parseFloat(body.price),
         categoryId: body.categoryId,
         stock: parseInt(body.stock) || 0,
+        discount: parseInt(body.discount) || 0,
         featured: body.featured ?? false,
         images: body.images ?? [],
         colors: body.colors ?? [],
