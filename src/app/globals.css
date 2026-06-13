@@ -6,9 +6,9 @@
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
-  --primary: #2092EB;
+  --primary: #E4A90D;
   --primary-foreground: #ffffff;
-  --accent: #2092EB;
+  --accent: #E4A90D;
   --accent-foreground: #ffffff;
   --muted: #f5f5f5;
   --muted-foreground: #737373;
@@ -20,9 +20,9 @@
 .dark {
   --background: #0a0a0a;
   --foreground: #fafafa;
-  --primary: #1A7CC8;
+  --primary: #C8910A;
   --primary-foreground: #ffffff;
-  --accent: #1A7CC8;
+  --accent: #C8910A;
   --accent-foreground: #ffffff;
   --muted: #1a1a1a;
   --muted-foreground: #a3a3a3;

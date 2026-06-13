@@ -71,7 +71,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
           )}
           <Link
             href={s.link}
-            className="inline-flex items-center gap-2 bg-[#2092EB] hover:bg-[#1A7CC8] text-white font-bold px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
+            className="inline-flex items-center gap-2 bg-[var(--primary)] hover:opacity-90 text-white font-bold px-6 py-3 rounded-lg transition-all text-sm sm:text-base"
           >
             <T k="home.shop_now" />
             <ChevronLeft className={`h-4 w-4 ${direction === "rtl" ? "" : "hidden"}`} />

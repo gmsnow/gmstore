@@ -110,9 +110,9 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
             <g filter="url(#goo)">
               <motion.path
                 d="M34 54C45.4078 54 48.3887 66.7534 68 72H0C19.6113 66.7534 22.5922 54 34 54Z"
-                fill="#2092EB"
+                fill="#E4A90D"
               />
-              <motion.circle cx="34" cy="66" r="4" fill="#2092EB" />
+              <motion.circle cx="34" cy="66" r="4" fill="#E4A90D" />
             </g>
           </svg>
 
@@ -135,12 +135,12 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
                     >
                       <div className="relative w-7 h-7">
                         <Icon
-                          className={`absolute inset-0 w-7 h-7 transition-[clip-path] duration-300 ${isActive ? "text-white" : "text-[#2092EB]"}`}
+                          className={`absolute inset-0 w-7 h-7 transition-[clip-path] duration-300 ${isActive ? "text-white" : "text-[#E4A90D]"}`}
                           style={{ clipPath: isActive ? "circle(28px at 50% 100%)" : "circle(0px at 50% 100%)" }}
                         />
-                        <Icon className="w-7 h-7 text-[#2092EB]" />
+                        <Icon className="w-7 h-7 text-[#E4A90D]" />
                       </div>
-                      <span className={`truncate font-medium ${isActive ? "text-[#2092EB]" : ""}`}>
+                      <span className={`truncate font-medium ${isActive ? "text-[#E4A90D]" : ""}`}>
                         {t(l.labelKey)}
                       </span>
                     </Link>
@@ -154,7 +154,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
                   className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <div className="relative w-7 h-7">
-                    <Search className="w-7 h-7 text-[#2092EB]" />
+                    <Search className="w-7 h-7 text-[#E4A90D]" />
                   </div>
                   <span className="truncate font-medium">{t("nav.search")}</span>
                 </button>
@@ -170,7 +170,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
                   className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors no-underline"
                 >
                   <div className="relative w-7 h-7">
-                    <User className="w-7 h-7 text-[#2092EB]" />
+                    <User className="w-7 h-7 text-[#E4A90D]" />
                   </div>
                   <span className="truncate font-medium">{session ? t("nav.account") : t("nav.login")}</span>
                 </Link>
@@ -200,7 +200,7 @@ function CurrencyToggleButton() {
       className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
     >
       <div className="relative w-7 h-7">
-        <DollarSign className="w-7 h-7 text-[#2092EB]" />
+        <DollarSign className="w-7 h-7 text-[#E4A90D]" />
       </div>
       <span className="truncate font-medium">{nextLabel()}</span>
     </button>
