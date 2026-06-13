@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 
 export const USD_TO_YER = 535;
-export const USD_TO_SAR = 3.75;
+export const USD_TO_SAR = 535 / 140;
 
 export type Currency = "yer" | "usd" | "sar";
 
