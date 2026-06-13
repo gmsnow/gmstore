@@ -49,6 +49,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
   const router = useRouter();
   const images = product.images?.length ? product.images : [];
   const hasMultiple = images.length > 1;
+  const hasHoverImg = images.length > 1;
 
   const avgRating = product.reviews?.length
     ? product.reviews.reduce((s: number, r: any) => s + r.rating, 0) / product.reviews.length
@@ -110,10 +111,10 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
   }
 
   return (
-    <div className="relative bg-white dark:bg-gray-900 overflow-hidden transition-transform duration-300 hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-gray-900 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div className="relative bg-[#f5f5f5] dark:bg-gray-800">
         <Link href={`/products/${product.slug}`} className="block">
-          <div className="relative h-[250px] sm:h-[300px]">
+          <div className="relative h-[250px] sm:h-[300px] overflow-hidden">
             {images.length > 0 ? (
               <AnimatePresence mode="wait">
                 <motion.div
@@ -136,6 +137,16 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             ) : (
               <div className="flex h-full items-center justify-center text-gray-400 text-sm"><T k="product.no_image" /></div>
             )}
+            {hasHoverImg && (
+              <img
+                src={images[1]}
+                alt={product.name}
+                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110"
+                loading="lazy"
+                draggable={false}
+              />
+            )}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
           </div>
         </Link>
 
@@ -170,31 +181,33 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           )}
         </div>
 
-        <div className="absolute top-2 right-2 z-20 flex flex-col gap-2">
+        <div className="absolute top-2 right-2 z-20 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
           <button
             onClick={(e) => { e.preventDefault(); toggleFav(); setToast("fav"); setTimeout(() => setToast(null), 1500); }}
-            className="text-white hover:scale-110 transition-transform leading-none"
+            className="text-white hover:scale-110 transition-transform leading-none drop-shadow-sm"
           >
             <Heart className={`h-5 w-5 ${isFav ? "fill-red-500 text-red-500" : ""}`} />
           </button>
-          <Link href={`/products/${product.slug}`} className="text-white hover:scale-110 transition-transform leading-none">
+          <Link href={`/products/${product.slug}`} className="text-white hover:scale-110 transition-transform leading-none drop-shadow-sm">
             <Expand className="h-5 w-5" />
           </Link>
         </div>
 
-        <div className="absolute left-2 bottom-2 z-20 bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden flex flex-col">
-          <button
-            onClick={(e) => { e.preventDefault(); setQuickViewOpen(true); }}
-            className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          >
-            <Eye className="h-4 w-4" />
-          </button>
-          <button
-            onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
-            className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-          >
-            <Link2 className="h-4 w-4" />
-          </button>
+        <div className="absolute left-2 bottom-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden flex flex-col">
+            <button
+              onClick={(e) => { e.preventDefault(); setQuickViewOpen(true); }}
+              className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+            <button
+              onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
+              className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+            >
+              <Link2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {product.brandLogo && (
@@ -202,7 +215,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         )}
 
         {product.colors?.length > 0 && (
-          <div className="absolute bottom-2 right-2 z-20 flex flex-col gap-1">
+          <div className="absolute bottom-2 right-2 z-20 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
             {product.colors.slice(0, 6).map((c: string, i: number) => {
               const isSelected = selectedColor === c || (!selectedColor && i === 0);
               return (
