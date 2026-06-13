@@ -20,7 +20,7 @@ export function CurrencyToggle({ priceYer }: { priceYer: number }) {
 
   return (
     <div className="flex items-center gap-2">
-      <p className="text-3xl font-bold text-primary">{formatPrice(currency)}</p>
+      <p className="text-3xl font-bold text-[#D47800]">{formatPrice(currency)}</p>
       <span className="text-lg text-muted-foreground">{labels[currency]}</span>
       <button
         type="button"

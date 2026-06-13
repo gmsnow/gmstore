@@ -275,10 +275,10 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </div>
 
           <div className="flex items-center justify-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-[var(--primary)] line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
+            <span className="text-[11px] text-[#D47800] line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
           </div>
           <div className="flex items-center justify-center gap-1.5 flex-wrap mt-0.5">
-            <span className="text-sm font-bold text-[var(--primary)]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
+            <span className="text-sm font-bold text-[#D47800]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
           </div>
 
           <div className="flex items-center justify-center gap-1.5 mt-2">
