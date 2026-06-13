@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Heart, Expand, ShoppingCart, Star, Minus, Plus } from "lucide-react";
 import { LocalizedName } from "@/components/localized";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
+import { useI18n } from "@/lib/i18n/provider";
 import type { CartItem } from "@/types";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 function ModalInner({ product, onClose }: { product: any; onClose: () => void }) {
+  const { direction } = useI18n();
   const [imgIndex, setImgIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
   const [qty, setQty] = useState(1);
@@ -22,6 +24,7 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
   const displayCurrency = localCurrency !== null ? localCurrency : currency;
   const currencyLabels: Record<Currency, string> = { yer: "ريال", usd: "$", sar: "رس" };
   const productImages = product.images?.length ? product.images : [];
+  const isRtl = direction === "rtl";
 
   function formatPrice(c: Currency) {
     const price = Number(product.price);
@@ -176,7 +179,7 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
             onClick={() => setImgIndex(i => (i - 1 + productImages.length) % productImages.length)}
             className="absolute left-[25px] w-[65px] h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 text-[42px] flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10"
           >
-            {'\u2039'}
+            {isRtl ? '\u203A' : '\u2039'}
           </button>
 
           {productImages.length > 0 ? (
@@ -189,7 +192,7 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
             onClick={() => setImgIndex(i => (i + 1) % productImages.length)}
             className="absolute right-[25px] w-[65px] h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 text-[42px] flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10"
           >
-            {'\u203A'}
+            {isRtl ? '\u2039' : '\u203A'}
           </button>
         </div>
       </motion.div>
