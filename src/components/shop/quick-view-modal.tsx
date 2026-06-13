@@ -94,7 +94,7 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
             <LocalizedName item={product} />
           </h2>
 
-          <div className="text-2xl sm:text-[36px] md:text-[48px] text-[#D47800] mb-3 sm:mb-5" style={{ fontWeight: 500 }}>
+          <div className="text-2xl sm:text-[36px] md:text-[48px] text-[var(--primary)] mb-3 sm:mb-5" style={{ fontWeight: 500 }}>
             {formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}
           </div>
 
@@ -125,7 +125,7 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
             <button
               onClick={addToCart}
               className="border-none text-white px-4 sm:px-[55px] py-2 sm:py-[18px] rounded-[40px] text-sm sm:text-[18px] md:text-[22px] cursor-pointer hover:opacity-90 transition-opacity"
-              style={{ background: "#E4A90D" }}
+              style={{ background: "var(--primary)" }}
             >
               إضافة للسلة
             </button>
