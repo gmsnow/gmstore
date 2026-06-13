@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, ShoppingCart, Star, Eye, Link2, Expand } from "lucide-react";
+import { Heart, ShoppingCart, Star, Eye, Share2, Expand } from "lucide-react";
 import { T } from "@/components/translate";
 import { LocalizedName } from "@/components/localized";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
@@ -237,7 +237,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); shareProduct(product); }}
               className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[var(--primary)] hover:text-white transition-all duration-200 flex items-center justify-center"
             >
-              <Link2 className="h-4 w-4" />
+              <Share2 className="h-4 w-4" />
             </button>
           </motion.div>
         </div>
