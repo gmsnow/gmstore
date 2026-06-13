@@ -8,6 +8,7 @@ import { ProductActions } from "@/components/shop/product-actions";
 import { ProductReviews } from "@/components/shop/product-reviews";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductCarousel } from "@/components/shop/product-carousel";
+import { ProductTrust } from "@/components/shop/product-trust";
 import { CurrencyToggle } from "@/components/shop/currency-toggle";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { FadeIn, FadeInUp } from "@/components/motion-wrappers";
@@ -79,6 +80,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             </div>
           </FadeInUp>
         </div>
+
+        <section>
+          <h2 className="text-xl font-bold mb-6"><T k="detail.why_trust" /></h2>
+          <ProductTrust />
+        </section>
+
         <ProductReviews productId={product.id} sessionUserId={sessionUserId} />
         {related.length > 0 && (
           <section>
