@@ -8,6 +8,7 @@ import { T } from "@/components/translate";
 import { LocalizedName } from "@/components/localized";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
 import type { CartItem } from "@/types";
+import { QuickViewModal } from "./quick-view-modal";
 
 function getLocalFavs(): string[] {
   if (typeof window === "undefined") return [];
@@ -21,6 +22,7 @@ function setLocalFavs(ids: string[]) {
 
 export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds }: { product: any; isLoggedIn?: boolean; favoriteIds?: Set<string> }) {
   const [toast, setToast] = useState<"cart" | "fav" | null>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -182,7 +184,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
 
         <div className="absolute left-2 bottom-2 z-20 bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden flex flex-col">
           <button
-            onClick={(e) => { e.preventDefault(); router.push(`/products/${product.slug}`); }}
+            onClick={(e) => { e.preventDefault(); setQuickViewOpen(true); }}
             className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
           >
             <Eye className="h-4 w-4" />
@@ -320,6 +322,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </motion.div>
         )}
       </AnimatePresence>
+      <QuickViewModal product={product} open={quickViewOpen} onClose={() => setQuickViewOpen(false)} />
     </div>
   );
 }
