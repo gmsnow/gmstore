@@ -108,8 +108,8 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
   }
 
   return (
-    <div className="relative bg-white overflow-hidden transition-transform duration-300 hover:-translate-y-1">
-      <div className="relative bg-[#f5f5f5]">
+    <div className="relative bg-white dark:bg-gray-900 overflow-hidden transition-transform duration-300 hover:-translate-y-1">
+      <div className="relative bg-[#f5f5f5] dark:bg-gray-800">
         <Link href={`/products/${product.slug}`} className="block">
           <div className="relative h-[250px] sm:h-[300px] md:h-[380px]">
             {images.length > 0 ? (
@@ -178,16 +178,16 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </Link>
         </div>
 
-        <div className="absolute left-2 sm:left-3 md:left-4 bottom-2 sm:bottom-3 md:bottom-4 z-20 bg-white rounded-[25px] sm:rounded-[30px] md:rounded-[40px] shadow-[0_5px_15px_rgba(0,0,0,.15)] overflow-hidden flex">
+        <div className="absolute left-2 sm:left-3 md:left-4 bottom-2 sm:bottom-3 md:bottom-4 z-20 bg-white dark:bg-gray-800 rounded-[25px] sm:rounded-[30px] md:rounded-[40px] shadow-[0_5px_15px_rgba(0,0,0,.15)] overflow-hidden flex">
           <button
             onClick={(e) => { e.preventDefault(); router.push(`/products/${product.slug}`); }}
-            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[75px] md:h-[75px] border-none bg-white cursor-pointer text-[#333] hover:bg-[#f3f3f3] transition-colors flex items-center justify-center"
+            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[75px] md:h-[75px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
           >
             <Eye className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px] md:h-[34px] md:w-[34px]" />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
-            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[75px] md:h-[75px] border-none bg-white cursor-pointer text-[#333] hover:bg-[#f3f3f3] transition-colors flex items-center justify-center"
+            className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px] md:w-[75px] md:h-[75px] border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
           >
             <Link2 className="h-[20px] w-[20px] sm:h-[26px] sm:w-[26px] md:h-[34px] md:w-[34px]" />
           </button>
