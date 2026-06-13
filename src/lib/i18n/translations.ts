@@ -104,7 +104,7 @@ export const ar = {
   "detail.faq_2_q": "كيف يمكنني تتبع طلبي؟",
   "detail.faq_2_a": "يمكنك تتبع طلبك من خلال صفحة تتبع الطلب باستخدام رقم الطلب.",
   "detail.faq_3_q": "هل يمكنني تغيير أو إلغاء الطلب؟",
-  "detail.faq_3_a": "نعم، يمكنك الإلغاء أو التعديل خلال 24 ساعة من تقديم الطلب.",
+  "detail.faq_3_a": "نعم، يمكنك الإلغاء أو التعديل خلال 24 ساعة من تقديم الطلب. كما يمكنك إلغاء الطلب قبل الشحن.",
   "detail.faq_4_q": "ما هي طرق الدفع المتاحة؟",
   "detail.faq_4_a": "نقبل الدفع عند الاستلام والتحويل البنكي.",
 
@@ -368,7 +368,7 @@ export const en: Record<string, string> = {
   "detail.faq_2_q": "How can I track my order?",
   "detail.faq_2_a": "You can track your order via the Track Order page using your order ID.",
   "detail.faq_3_q": "Can I change or cancel my order?",
-  "detail.faq_3_a": "Yes, you can cancel or modify within 24 hours of placing the order.",
+  "detail.faq_3_a": "Yes, you can cancel or modify within 24 hours of placing the order. You can also cancel before the order is shipped.",
   "detail.faq_4_q": "What payment methods are available?",
   "detail.faq_4_a": "We accept cash on delivery and bank transfer.",
 
