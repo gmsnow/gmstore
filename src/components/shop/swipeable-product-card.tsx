@@ -225,13 +225,14 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         )}
 
         <AnimatePresence>
-          {isFav && (
+          {toast === "fav" && (
             <motion.div
               key="fav-heart"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 400, damping: 12 }}
-              className="absolute top-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
             >
               <div className="bg-rose-500 text-white p-1.5 rounded-full shadow-lg">
                 <Heart className="h-4 w-4 fill-white" />
