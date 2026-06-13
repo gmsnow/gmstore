@@ -111,7 +111,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
     <div className="relative bg-white dark:bg-gray-900 overflow-hidden transition-transform duration-300 hover:-translate-y-1">
       <div className="relative bg-[#f5f5f5] dark:bg-gray-800">
         <Link href={`/products/${product.slug}`} className="block">
-          <div className="relative h-[220px]">
+          <div className="relative h-[250px] sm:h-[300px]">
             {images.length > 0 ? (
               <AnimatePresence mode="wait">
                 <motion.div
@@ -196,7 +196,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         </div>
 
         {product.brandLogo && (
-          <img src={product.brandLogo} alt={product.brand || ""} className="absolute top-[50px] left-2 z-20 max-h-8 max-w-8 pointer-events-none mix-blend-multiply" />
+          <img src={product.brandLogo} alt={product.brand || ""} className="absolute top-[52px] left-2 z-20 max-h-8 max-w-8 pointer-events-none mix-blend-multiply" />
         )}
 
         {product.colors?.length > 0 && (
