@@ -6,6 +6,7 @@ import { House, ShoppingBag, Tags, Heart, Package, Search, User, X, DollarSign }
 import { motion, animate } from "motion/react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency } from "@/lib/currency/context";
+import { SearchSuggestions } from "./search-suggestions";
 
 const INDICATOR_W = 68;
 
@@ -19,14 +20,6 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
   const scrollRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<SVGSVGElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    router.push(q ? `/products?q=${encodeURIComponent(q)}` : "/products");
-    setSearchOpen(false);
-    setSearchQuery("");
-  }
 
   const links = [
     { href: "/", labelKey: "nav.home", icon: House },
@@ -70,7 +63,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
     <>
       {searchOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-background/95 backdrop-blur-sm pt-4 md:hidden">
-          <form onSubmit={handleSearch} className="relative w-full max-w-md mx-4">
+          <div className="relative w-full max-w-md mx-4">
             <input
               type="text"
               value={searchQuery}
@@ -79,13 +72,14 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
               className="w-full rounded-full border border-border bg-muted/50 px-4 py-3 ps-12 text-sm outline-none focus:border-primary transition-colors"
               autoFocus
             />
-            <button type="submit" className={`absolute top-1/2 -translate-y-1/2 ${isRtl ? "right-4" : "left-4"} text-muted-foreground`}>
+            <button onClick={() => { if (searchQuery.trim()) { const h = JSON.parse(localStorage.getItem("searchHistory") || "[]") as string[]; const next = h.filter(x => x !== searchQuery.trim()); next.unshift(searchQuery.trim()); localStorage.setItem("searchHistory", JSON.stringify(next.slice(0, 8))); router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`); setSearchOpen(false); setSearchQuery(""); } }} className={`absolute top-1/2 -translate-y-1/2 ${isRtl ? "right-4" : "left-4"} text-muted-foreground`}>
               <Search className="h-4 w-4" />
             </button>
             <button type="button" onClick={() => setSearchOpen(false)} className={`absolute top-1/2 -translate-y-1/2 ${isRtl ? "left-4" : "right-4"} text-muted-foreground hover:text-foreground`}>
               <X className="h-4 w-4" />
             </button>
-          </form>
+            <SearchSuggestions query={searchQuery} onClose={() => {}} closeSearch={() => { setSearchOpen(false); setSearchQuery(""); }} />
+          </div>
         </div>
       )}
 
