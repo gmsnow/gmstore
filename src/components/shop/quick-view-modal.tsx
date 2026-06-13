@@ -61,20 +61,19 @@ export function QuickViewModal({ product, open, onClose }: Props) {
   return (
     <AnimatePresence>
       {open && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-            onClick={onClose}
-          />
+        <motion.div
+          key="wrapper"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50"
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-4 md:inset-8 lg:inset-12 z-50 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-y-auto"
+            className="fixed inset-4 md:inset-8 lg:inset-12 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-y-auto"
           >
             <div className="sticky top-0 z-10 flex items-center justify-between bg-white dark:bg-gray-900 border-b border-border px-5 py-3">
               <h2 className="text-lg font-bold text-foreground"><LocalizedName item={product} /></h2>
@@ -223,7 +222,7 @@ export function QuickViewModal({ product, open, onClose }: Props) {
               )}
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );
