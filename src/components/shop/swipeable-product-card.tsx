@@ -193,21 +193,19 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </Link>
         </div>
 
-        <div className="absolute left-2 bottom-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-          <div className="bg-[#D47800] rounded-2xl shadow overflow-hidden flex flex-col">
-            <button
-              onClick={(e) => { e.preventDefault(); setQuickViewOpen(true); }}
-              className="w-9 h-9 border-none bg-transparent cursor-pointer text-white hover:brightness-110 transition-all flex items-center justify-center"
-            >
-              <Eye className="h-4 w-4" />
-            </button>
-            <button
-              onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
-              className="w-9 h-9 border-none bg-transparent cursor-pointer text-white hover:brightness-110 transition-all flex items-center justify-center"
-            >
-              <Link2 className="h-4 w-4" />
-            </button>
-          </div>
+        <div className="absolute left-2 bottom-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 flex flex-col gap-2">
+          <button
+            onClick={(e) => { e.preventDefault(); setQuickViewOpen(true); }}
+            className="w-9 h-9 border-none bg-transparent cursor-pointer text-[#D47800] hover:text-[#C06000] transition-colors flex items-center justify-center drop-shadow-sm"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+          <button
+            onClick={(e) => { e.preventDefault(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
+            className="w-9 h-9 border-none bg-transparent cursor-pointer text-[#D47800] hover:text-[#C06000] transition-colors flex items-center justify-center drop-shadow-sm"
+          >
+            <Link2 className="h-4 w-4" />
+          </button>
         </div>
 
         {product.brandLogo && (
