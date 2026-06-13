@@ -241,11 +241,11 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
 
       <Link href={`/products/${product.slug}`} className="block">
         <div className="p-3 md:p-5 text-center">
-          <h3 className="text-sm sm:text-lg md:text-2xl leading-relaxed text-primary font-normal mb-2 md:mb-4">
+          <h3 className="text-sm sm:text-lg md:text-2xl leading-relaxed text-[var(--primary)] font-normal mb-2 md:mb-4">
             <LocalizedName item={product} />
           </h3>
 
-          <div className="text-primary text-xs sm:text-base md:text-[22px] mb-2 md:mb-4">
+          <div className="text-[var(--primary)] text-xs sm:text-base md:text-[22px] mb-2 md:mb-4">
             {avgRating > 0 ? (
               <span className="flex items-center justify-center gap-1">
                 <Star className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 fill-yellow-400 text-yellow-400" />
@@ -257,10 +257,10 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </div>
 
           <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
-            <span className="text-xs sm:text-base md:text-[22px] text-primary line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
+            <span className="text-xs sm:text-base md:text-[22px] text-[var(--primary)] line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
           </div>
           <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap mt-1">
-            <span className="text-sm sm:text-xl md:text-[26px] font-bold text-primary">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
+            <span className="text-sm sm:text-xl md:text-[26px] font-bold text-[var(--primary)]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
           </div>
 
           <div className="flex items-center justify-center gap-2 mt-2 md:mt-4">
@@ -279,7 +279,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             <button
               type="button"
               onClick={(e) => { e.preventDefault(); cycleCurrency(); }}
-              className="text-xs text-gray-400 hover:text-primary transition-colors px-2 py-1 rounded border border-gray-300"
+              className="text-xs text-gray-400 hover:text-[var(--primary)] transition-colors px-2 py-1 rounded border border-gray-300"
             >
               {currencyLabels[(["yer", "usd", "sar"] as Currency[])[(["yer", "usd", "sar"].indexOf(displayCurrency) + 1) % 3]]}
             </button>
