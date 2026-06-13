@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
     const systemMsg = {
       role: "user",
-      parts: [{ text: `أنت مساعد متجر GMstore للتسوق الإلكتروني. تساعد العملاء في:
+      parts: [{ text: `أنت مساعد متجر WANOSTORE للتسوق الإلكتروني. تساعد العملاء في:
 - اقتراح المنتجات
 - الإجابة عن أسئلة حول المنتجات
 - المساعدة في التصفح والشراء

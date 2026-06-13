@@ -2,33 +2,37 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 
 export const USD_TO_YER = 535;
+export const USD_TO_SAR = 3.75;
 
-type Currency = "yer" | "usd";
+export type Currency = "yer" | "usd" | "sar";
 
 interface CurrencyContext {
-  showUsd: boolean;
+  currency: Currency;
   toggleCurrency: () => void;
 }
 
 const CurrencyCtx = createContext<CurrencyContext>({
-  showUsd: false,
+  currency: "yer",
   toggleCurrency: () => {},
 });
 
+const cycle: Currency[] = ["yer", "usd", "sar"];
+
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [showUsd, setShowUsd] = useState(false);
+  const [currency, setCurrency] = useState<Currency>("yer");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("currency");
-    setShowUsd(stored === "usd");
+    const stored = localStorage.getItem("currency") as Currency | null;
+    if (stored && cycle.includes(stored)) setCurrency(stored);
     setMounted(true);
   }, []);
 
   const toggleCurrency = useCallback(() => {
-    setShowUsd((p) => {
-      const next = !p;
-      localStorage.setItem("currency", next ? "usd" : "yer");
+    setCurrency((p) => {
+      const idx = cycle.indexOf(p);
+      const next = cycle[(idx + 1) % cycle.length];
+      localStorage.setItem("currency", next);
       return next;
     });
   }, []);
@@ -36,7 +40,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   if (!mounted) return <>{children}</>;
 
   return (
-    <CurrencyCtx.Provider value={{ showUsd, toggleCurrency }}>
+    <CurrencyCtx.Provider value={{ currency, toggleCurrency }}>
       {children}
     </CurrencyCtx.Provider>
   );

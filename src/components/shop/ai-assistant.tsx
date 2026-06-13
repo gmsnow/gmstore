@@ -28,12 +28,12 @@ const replies: [string, string][] = [
   ["حساب", "أنشئ حساب أو سجل دخول: /register أو /login"],
   ["مساعدة", "أنا هنا لمساعدتك!\n🛍️ /products\n📦 /track\n💳 طرق الدفع\n🚚 التوصيل\n📝 /register"],
   ["السلام", "وعليكم السلام! كيف أقدر أساعدك؟ 🙂"],
-  ["مرحبا", "مرحباً بك في GMstore! 🙂"],
+  ["مرحبا", "مرحباً بك في WANOSTORE! 🙂"],
   ["تحيه", "أهلاً وسهلاً!"],
   ["اهلا", "أهلاً وسهلاً!"],
   ["هلا", "هلا والله! 😊"],
-  ["hello", "Welcome to GMstore! 🙂"],
-  ["hi", "Hi there! Welcome to GMstore!"],
+  ["hello", "Welcome to WANOSTORE! 🙂"],
+  ["hi", "Hi there! Welcome to WANOSTORE!"],
   ["help", "I'm here to help!\n🛍️ /products\n📦 /track\n💳 Payment\n🚚 Delivery\n📝 /register"],
   ["product", "Browse all products: /products\nUse search bar to find specific items."],
   ["order", "Track your order: /track"],
@@ -42,10 +42,10 @@ const replies: [string, string][] = [
 ];
 
 const fallbackReplies = [
-  "أهلاً بك في GMstore!\n🛍️ ابحث عن منتج\n📦 تتبع طلبك\n💳 طرق الدفع\n💡 اكتب سؤالك!",
+  "أهلاً بك في WANOSTORE!\n🛍️ ابحث عن منتج\n📦 تتبع طلبك\n💳 طرق الدفع\n💡 اكتب سؤالك!",
   "تصفح المنتجات: /products أو تتبع: /track. هل تبحث عن شيء معين؟",
   "اكتب ما تبحث عنه. مثلاً:\n- ابحث عن مصباح\n- كيفية الدفع\n- تتبع طلبي",
-  "أنا مساعد GMstore. جرب:\n- أريد شراء...\n- كيف أدفع؟\n- أبي أتتبع طلبي",
+  "أنا مساعد WANOSTORE. جرب:\n- أريد شراء...\n- كيف أدفع؟\n- أبي أتتبع طلبي",
 ];
 
 function getSmartReply(input: string): string | null {
@@ -63,7 +63,7 @@ async function tryBrowserAI(messages: { role: string; content: string }[]): Prom
     const capabilities = await ai.languageModel.capabilities();
     if (capabilities.available === "no") return null;
     const session = await ai.languageModel.create({
-      systemPrompt: "أنت مساعد متجر GMstore للتسوق الإلكتروني باللغة العربية. تساعد العملاء باقتراح المنتجات والإجابة عن أسئلتهم. كن مفيداً وودوداً. أجب دائماً بالعربية.",
+      systemPrompt: "أنت مساعد متجر WANOSTORE للتسوق الإلكتروني باللغة العربية. تساعد العملاء باقتراح المنتجات والإجابة عن أسئلتهم. كن مفيداً وودوداً. أجب دائماً بالعربية.",
     });
     const lastMsg = messages[messages.length - 1]?.content || "";
     const result = await session.prompt(lastMsg);
@@ -112,7 +112,7 @@ function rankProducts(query: string, products: any[]): any[] {
 export function AIAssistant() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "مرحباً! أنا مساعد GMstore الذكي. كيف يمكنني مساعدتك؟ 🛍️" },
+    { role: "assistant", content: "مرحباً! أنا مساعد WANOSTORE الذكي. كيف يمكنني مساعدتك؟ 🛍️" },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -195,7 +195,7 @@ export function AIAssistant() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-16 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-105"
+        className="fixed bottom-20 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-105"
         title="المساعد الذكي"
       >
         <Bot className="h-6 w-6" />
@@ -213,7 +213,7 @@ export function AIAssistant() {
             <div className="flex items-center justify-between bg-primary p-4 text-primary-foreground">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
-                <span className="font-semibold text-sm">GMstore AI</span>
+                <span className="font-semibold text-sm">WANOSTORE AI</span>
               </div>
               <button onClick={() => setOpen(false)} className="p-1 rounded-full hover:bg-primary-foreground/20 transition-colors">
                 <X className="h-4 w-4" />

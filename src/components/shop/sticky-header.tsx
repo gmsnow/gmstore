@@ -8,12 +8,20 @@ import { SearchInput } from "@/components/shop/search-input";
 import { UserGreeting } from "@/components/shop/user-greeting";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
-import { useCurrency } from "@/lib/currency/context";
+import { useCurrency, type Currency } from "@/lib/currency/context";
 
 
 export function StickyHeader({ session, role, signOutForm }: { session: any; role: string | undefined; signOutForm: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
-  const { showUsd, toggleCurrency } = useCurrency();
+  const { currency, toggleCurrency } = useCurrency();
+
+  const currencyLabels: Record<string, string> = { yer: "ريال", usd: "$", sar: "رس" };
+
+  function nextCurrency() {
+    const cycle = ["yer", "usd", "sar"] as const;
+    const idx = cycle.indexOf(currency);
+    return cycle[(idx + 1) % cycle.length];
+  }
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -83,7 +91,7 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
           onClick={toggleCurrency}
           className="max-md:hidden text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded border border-border"
         >
-          {showUsd ? "ريال" : "$"}
+          {currencyLabels[nextCurrency()]}
         </button>
         <Link href="/cart" className="relative p-2 hover:opacity-80 transition-opacity">
           <ShoppingCart className="h-5 w-5" />

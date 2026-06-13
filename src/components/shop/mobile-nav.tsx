@@ -94,7 +94,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
         style={{ WebkitTapHighlightColor: "transparent" }}
         dir={direction}
       >
-        <div ref={outerRef} className="relative mx-2 rounded-t-[31px] bg-card shadow-lg border border-border overflow-hidden">
+        <div ref={outerRef} className="relative rounded-t-[25px] bg-card shadow-lg border border-border overflow-hidden">
           <svg
             ref={indicatorRef}
             className="absolute z-[1] left-0 bottom-0 w-[68px] h-[72px] overflow-visible pointer-events-none"
@@ -184,7 +184,16 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
 }
 
 function CurrencyToggleButton() {
-  const { showUsd, toggleCurrency } = useCurrency();
+  const { currency, toggleCurrency } = useCurrency();
+
+  const labels: Record<string, string> = { yer: "ريال", usd: "$", sar: "رس" };
+  const cycle = ["yer", "usd", "sar"];
+
+  function nextLabel() {
+    const idx = cycle.indexOf(currency);
+    return labels[cycle[(idx + 1) % cycle.length]];
+  }
+
   return (
     <button
       onClick={toggleCurrency}
@@ -193,7 +202,7 @@ function CurrencyToggleButton() {
       <div className="relative w-7 h-7">
         <DollarSign className="w-7 h-7 text-[#2092EB]" />
       </div>
-      <span className="truncate font-medium">{showUsd ? "ريال" : "$"}</span>
+      <span className="truncate font-medium">{nextLabel()}</span>
     </button>
   );
 }
