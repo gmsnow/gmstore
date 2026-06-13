@@ -77,7 +77,7 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.2 }}
-        className="bg-white dark:bg-gray-900 grid grid-cols-1 md:grid-cols-2 relative"
+        className="bg-white dark:bg-gray-900 grid grid-cols-1 md:grid-cols-2 relative max-h-[85vh] overflow-y-auto"
         style={{ width: "92%", maxWidth: 1450 }}
         onClick={(e) => e.stopPropagation()}
       >
