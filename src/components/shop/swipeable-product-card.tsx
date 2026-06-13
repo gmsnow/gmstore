@@ -20,6 +20,15 @@ function setLocalFavs(ids: string[]) {
   window.dispatchEvent(new Event("favoritesUpdated"));
 }
 
+function shareProduct(product: any) {
+  const url = window.location.origin + `/products/${product.slug}`;
+  if (navigator.share) {
+    navigator.share({ title: product.name, url }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(url);
+  }
+}
+
 export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds }: { product: any; isLoggedIn?: boolean; favoriteIds?: Set<string> }) {
   const [toast, setToast] = useState<"cart" | "fav" | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
@@ -225,7 +234,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
               <Eye className="h-4 w-4" />
             </button>
             <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigator.clipboard?.writeText(window.location.origin + `/products/${product.slug}`); }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); shareProduct(product); }}
               className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[var(--primary)] hover:text-white transition-all duration-200 flex items-center justify-center"
             >
               <Link2 className="h-4 w-4" />
