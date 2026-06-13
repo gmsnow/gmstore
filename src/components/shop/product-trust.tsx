@@ -48,7 +48,7 @@ export function ProductTrust() {
       <div className="rounded-xl border border-border bg-card p-6">
         <h3 className="text-base font-bold mb-4">{t("detail.contact_us")}</h3>
         <div className="flex flex-wrap gap-3">
-          <a href="https://wa.me/967700070007" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors">
+          <a href="https://whatsapp.com/channel/0029VbC16MPAjPXSlOlZD92I" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors">
             <MessageCircle className="h-4 w-4 text-green-500" />
             {t("detail.social_whatsapp")}
           </a>
