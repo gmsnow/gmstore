@@ -180,7 +180,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
           </Link>
         </div>
 
-        <div className="absolute left-2 bottom-2 z-20 bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden flex">
+        <div className="absolute left-2 bottom-2 z-20 bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden flex flex-col">
           <button
             onClick={(e) => { e.preventDefault(); router.push(`/products/${product.slug}`); }}
             className="w-9 h-9 border-none bg-white dark:bg-gray-800 cursor-pointer text-[#333] dark:text-gray-200 hover:bg-[#f3f3f3] dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
