@@ -123,8 +123,25 @@ export default function FavoritesPage() {
       ) : (
         <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
           {products.map((p: any) => (
-            <StaggerItem key={p.id}>
-              <SwipeableProductCard product={p} />
+            <StaggerItem key={p.id} className="relative group">
+              <button
+                onClick={async () => {
+                  if (isLoggedIn) {
+                    await fetch("/api/favorites", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ productId: p.id }) });
+                    window.dispatchEvent(new Event("favoritesUpdated"));
+                  } else {
+                    const stored: string[] = JSON.parse(localStorage.getItem("favorites") || "[]");
+                    localStorage.setItem("favorites", JSON.stringify(stored.filter((id: string) => id !== p.id)));
+                    window.dispatchEvent(new Event("favoritesUpdated"));
+                  }
+                  setIds((prev) => prev.filter((id) => id !== p.id));
+                  setProducts((prev) => prev.filter((pr: any) => pr.id !== p.id));
+                }}
+                className="absolute top-2 left-2 z-30 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 hover:bg-red-500/80 transition-all"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={new Set(ids)} />
             </StaggerItem>
           ))}
         </StaggerContainer>
