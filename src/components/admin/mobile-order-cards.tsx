@@ -78,7 +78,7 @@ export function MobileOrderCards({ orders }: { orders: any[] }) {
               <div className="flex items-center gap-3 mb-2">
                 <div className="flex -space-x-2 rtl:space-x-reverse">
                   {o.items.slice(0, 4).map((item: any) => (
-                    <div key={item.id} className="relative h-8 w-8 rounded-full border-2 border-background overflow-hidden" title={`${item.product?.name || ""}${item.color ? ` (${item.color})` : ""}`}>
+                    <div key={item.id} className="relative h-8 w-8 rounded-full border-2 border-background overflow-hidden" title={`${item.product?.name || ""}${item.color ? ` (${item.color})` : ""}${item.size ? ` [${item.size}]` : ""}`}>
                       {item.product?.images?.[0] ? (
                         <img src={item.product.images[0]} alt="" className="h-full w-full object-cover" />
                       ) : (

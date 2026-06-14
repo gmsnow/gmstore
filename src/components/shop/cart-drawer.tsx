@@ -80,6 +80,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     if (disc !== null) {
       setDiscount(Math.round(subtotal * disc / 100));
       setCouponMsg(t("cart.coupon_applied"));
+      localStorage.setItem("appliedCoupon", couponCode);
     } else {
       setDiscount(0);
       setCouponMsg(t("cart.coupon_invalid"));

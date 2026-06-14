@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
+const FREE_SHIPPING_THRESHOLD = 5000;
+const SHIPPING_COST = 500;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { customerName, customerEmail, customerPhone, shippingAddress, items } = body;
+    const { customerName, customerEmail, customerPhone, shippingAddress, items, couponCode } = body;
 
     if (!items?.length) {
       return NextResponse.json({ error: "السلة فارغة" }, { status: 400 });
@@ -15,14 +18,29 @@ export async function POST(req: Request) {
     const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
     const productMap = new Map(products.map((p: any) => [p.id, p]));
 
-    let total = 0;
+    let subtotal = 0;
     const orderItems = items.map((item: any) => {
       const product = productMap.get(item.productId);
       if (!product) throw new Error(`Product not found: ${item.productId}`);
       const price = Number(product.price);
-      total += price * item.quantity;
+      subtotal += price * item.quantity;
       return { productId: item.productId, quantity: item.quantity, price, color: item.color || null, size: item.size || null, status: "PENDING" };
     });
+
+    let discount = 0;
+    let couponId: string | undefined;
+
+    if (couponCode) {
+      const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+      if (coupon && coupon.active && (!coupon.expiresAt || coupon.expiresAt > new Date()) && (!coupon.maxUses || coupon.usedCount < coupon.maxUses) && (!coupon.minAmount || Number(coupon.minAmount) <= subtotal)) {
+        discount = Math.round(subtotal * coupon.discount / 100);
+        couponId = coupon.id;
+        await prisma.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+      }
+    }
+
+    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    const total = subtotal + shippingCost - discount;
 
     const order = await prisma.order.create({
       data: {
@@ -30,16 +48,23 @@ export async function POST(req: Request) {
         customerEmail,
         customerPhone,
         shippingAddress,
+        subtotal,
+        shippingCost,
+        discount,
         total,
+        couponId,
         status: "PENDING",
         items: { create: orderItems },
       },
       include: { items: { include: { product: { select: { name: true, nameEn: true, images: true } } } } },
     });
 
-    logger.info("Order created", { orderId: order.id });
+    logger.info("Order created", { orderId: order.id, shippingCost, discount, total });
     const serialized = {
       ...order,
+      subtotal: Number(order.subtotal),
+      shippingCost: Number(order.shippingCost),
+      discount: Number(order.discount),
       total: Number(order.total),
       items: order.items.map((i) => ({ ...i, price: Number(i.price) })),
     };

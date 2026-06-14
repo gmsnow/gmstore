@@ -41,6 +41,7 @@ export default function CheckoutPage() {
       customerPhone: form.get("phone"),
       shippingAddress,
       items: cart,
+      couponCode: localStorage.getItem("appliedCoupon") || undefined,
     };
     try {
       const res = await fetch("/api/checkout", {
@@ -50,6 +51,7 @@ export default function CheckoutPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
+        localStorage.removeItem("appliedCoupon");
         localStorage.setItem("lastOrderId", data.id);
         localStorage.setItem("lastOrder", JSON.stringify(data));
         localStorage.removeItem("cart");

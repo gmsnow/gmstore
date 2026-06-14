@@ -27,7 +27,7 @@ function OrderThumbs({ items }: { items: any[] }) {
   return (
     <div className="flex -space-x-2 rtl:space-x-reverse">
       {items.slice(0, 4).map((item: any) => (
-        <div key={item.id} className="relative h-8 w-8 rounded-full border-2 border-background overflow-hidden" title={`${item.product?.name || ""}${item.color ? ` (${item.color})` : ""}`}>
+        <div key={item.id} className="relative h-8 w-8 rounded-full border-2 border-background overflow-hidden" title={`${item.product?.name || ""}${item.color ? ` (${item.color})` : ""}${item.size ? ` [${item.size}]` : ""}`}>
           {item.product?.images?.[0] ? (
             <img src={item.product.images[0]} alt="" className="h-full w-full object-cover" />
           ) : (

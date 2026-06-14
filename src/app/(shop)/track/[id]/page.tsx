@@ -209,15 +209,35 @@ export default function TrackOrderByIdPage() {
           </Card>
         )}
 
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            {formatDate(order.createdAt)}
-          </div>
-          <div className="text-lg font-bold">
-            {t("track.total")}: {Number(order.total).toFixed(2)} {t("merchant.currency")}
-          </div>
-        </div>
+        <Card>
+          <CardContent className="p-6 space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">{t("checkout.subtotal") || "المجموع الفرعي"}</span>
+              <span>{Number(order.subtotal || order.total).toFixed(2)} {t("merchant.currency")}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">{t("cart.shipping") || "التوصيل"}</span>
+              <span className={Number(order.shippingCost) === 0 ? "text-green-600 font-semibold" : ""}>
+                {Number(order.shippingCost) === 0 ? (t("cart.free_shipping") || "مجاني") : `${Number(order.shippingCost).toFixed(2)} ${t("merchant.currency")}`}
+              </span>
+            </div>
+            {Number(order.discount) > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("cart.coupon_discount") || "الخصم"}</span>
+                <span className="text-green-600">-{Number(order.discount).toFixed(2)} {t("merchant.currency")}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-2 border-t border-border">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                {formatDate(order.createdAt)}
+              </div>
+              <div className="text-lg font-bold">
+                {t("track.total")}: {Number(order.total).toFixed(2)} {t("merchant.currency")}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {canCancel && (
           <div className="text-center">

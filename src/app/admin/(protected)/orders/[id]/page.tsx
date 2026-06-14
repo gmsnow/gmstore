@@ -248,9 +248,12 @@ export default function AdminOrderDetailPage() {
         )}
       </div>
 
-      <div className="text-left">
-        <p className="text-lg md:text-xl font-bold">
-          المجموع الكلي: {Number(order.total).toFixed(2)} ريال
+      <div className="text-left space-y-1">
+        <p className="text-sm text-muted-foreground">المجموع الفرعي: {Number(order.subtotal || order.total).toFixed(2)} ريال</p>
+        <p className="text-sm text-muted-foreground">التوصيل: {Number(order.shippingCost) === 0 ? "مجاني" : `${Number(order.shippingCost).toFixed(2)} ريال`}</p>
+        {Number(order.discount) > 0 && <p className="text-sm text-green-600">الخصم: -{Number(order.discount).toFixed(2)} ريال</p>}
+        <p className="text-lg md:text-xl font-bold pt-2 border-t border-border">
+          الإجمالي: {Number(order.total).toFixed(2)} ريال
         </p>
         <p className="text-[11px] md:text-xs text-muted-foreground mt-1">
           تاريخ الطلب: {new Date(order.createdAt).toLocaleDateString("ar-SA")}

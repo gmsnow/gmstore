@@ -12,6 +12,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
   const serialized = {
     ...order,
+    subtotal: Number(order.subtotal),
+    shippingCost: Number(order.shippingCost),
+    discount: Number(order.discount),
     total: Number(order.total),
     items: order.items.map((i) => ({ ...i, price: Number(i.price) })),
   };

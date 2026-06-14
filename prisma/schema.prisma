@@ -178,6 +178,9 @@ model Order {
   customerEmail   String
   customerPhone   String
   items           OrderItem[]
+  subtotal        Decimal       @db.Decimal(10, 2) @default(0)
+  shippingCost    Decimal       @db.Decimal(10, 2) @default(0)
+  discount        Decimal       @db.Decimal(10, 2) @default(0)
   total           Decimal       @db.Decimal(10, 2)
   status          OrderStatus   @default(PENDING)
   shippingAddress String?
