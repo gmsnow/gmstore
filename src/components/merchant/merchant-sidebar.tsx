@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Store, LayoutDashboard, ShoppingBag, Package, Star, Settings, Wallet, ArrowRight, LogOut, Menu, X } from "lucide-react";
@@ -11,7 +11,6 @@ import { LangToggle } from "@/components/lang-toggle";
 const links = [
   { href: "/merchant", labelKey: "merchant.dashboard", icon: LayoutDashboard },
   { href: "/merchant/orders", labelKey: "merchant.orders", icon: ShoppingBag },
-  { href: "/merchant/products", labelKey: "merchant.products", icon: Package },
   { href: "/merchant/store", labelKey: "merchant.store_settings", icon: Store },
   { href: "/merchant/reviews", labelKey: "merchant.reviews", icon: Star },
   { href: "/merchant/withdrawals", labelKey: "merchant.withdrawals", icon: Wallet },
@@ -21,7 +20,18 @@ const links = [
 export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }: { children: React.ReactNode; storeName: string; storeNameEn: string; storeLogo?: string | null }) {
   const pathname = usePathname();
   const { direction, t } = useI18n();
+  const navRef = useRef<HTMLElement>(null);
+  const [indicator, setIndicator] = useState({ width: 0, x: 0 });
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (!navRef.current) return;
+    const active = navRef.current.querySelector<HTMLAnchorElement>("a[data-active=true]");
+    if (!active) return;
+    const r = active.getBoundingClientRect();
+    const nr = navRef.current.getBoundingClientRect();
+    setIndicator({ width: r.width, x: r.left - nr.left });
+  }, [pathname]);
 
   useEffect(() => { setDrawerOpen(false); }, [pathname]);
 
@@ -39,7 +49,7 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }:
         }
       `}</style>
 
-      {/* Mobile hamburger */}
+      {/* Hamburger — mobile only */}
       <button
         type="button"
         onClick={() => setDrawerOpen(true)}
@@ -49,7 +59,7 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }:
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Mobile drawer overlay */}
+      {/* Drawer overlay — mobile only */}
       {drawerOpen && (
         <div className="mobile-only-block fixed inset-0 z-50 hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
@@ -80,6 +90,15 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }:
               ))}
             </nav>
             <div className="pt-8 space-y-1 border-t border-border">
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
+                <LangToggle />
+                <span className="flex-1"><T k="lang.switch" /></span>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
+                <Store className="h-4 w-4" />
+                <span className="flex-1"><T k="admin.night_mode" /></span>
+                <ThemeToggle />
+              </div>
               <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors" onClick={() => setDrawerOpen(false)}>
                 <ArrowRight className="h-4 w-4" />
                 <T k="nav.back_to_shop" />
@@ -131,6 +150,28 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }:
       <div className="flex-1 pb-20 lg:pb-0">
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
+
+      {/* Mobile bottom nav — same as admin */}
+      <nav ref={navRef} className="mobile-only fixed bottom-4 inset-x-4 z-40 items-center justify-around rounded-2xl border border-border bg-card shadow-lg px-2 py-2" style={{ direction: direction }}>
+        <div
+          className="absolute bottom-2 top-2 rounded-xl bg-primary/10 transition-all duration-300 ease-out"
+          style={{ width: indicator.width, left: indicator.x, opacity: indicator.width > 0 ? 1 : 0 }}
+        />
+        {links.map((l) => {
+          const isActive = pathname === l.href;
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              data-active={isActive ? "true" : undefined}
+              className={`relative z-10 flex flex-col items-center gap-0.5 px-3 py-1.5 text-[10px] transition-colors min-w-0 flex-1 ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <l.icon className={`h-5 w-5 transition-all ${isActive ? "text-primary scale-110" : ""}`} />
+              <span className="truncate font-medium"><T k={l.labelKey} /></span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
