@@ -6,6 +6,7 @@ import { Heart, Expand, ShoppingCart, Star, Minus, Plus } from "lucide-react";
 import { LocalizedName } from "@/components/localized";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
 import { useI18n } from "@/lib/i18n/provider";
+import { CompareButton } from "@/components/shop/compare-button";
 import type { CartItem } from "@/types";
 
 interface Props {
@@ -19,6 +20,7 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
   const [imgIndex, setImgIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
   const [qty, setQty] = useState(1);
+  const [isFav, setIsFav] = useState(false);
   const { currency } = useCurrency();
   const [localCurrency, setLocalCurrency] = useState<Currency | null>(null);
   const displayCurrency = localCurrency !== null ? localCurrency : currency;
@@ -39,6 +41,30 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
       const idx = ["yer", "usd", "sar"].indexOf(base);
       return (["yer", "usd", "sar"] as Currency[])[(idx + 1) % 3];
     });
+  }
+
+  useEffect(() => {
+    try {
+      const favs: string[] = JSON.parse(localStorage.getItem("favorites") || "[]");
+      setIsFav(favs.includes(product.id));
+    } catch { setIsFav(false); }
+  }, [product.id]);
+
+  function toggleFav(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      let favs: string[] = JSON.parse(localStorage.getItem("favorites") || "[]");
+      if (favs.includes(product.id)) {
+        favs = favs.filter((id: string) => id !== product.id);
+        setIsFav(false);
+      } else {
+        favs.push(product.id);
+        setIsFav(true);
+      }
+      localStorage.setItem("favorites", JSON.stringify(favs));
+      window.dispatchEvent(new CustomEvent("favoritesUpdated"));
+    } catch { /* noop */ }
   }
 
   function addToCart() {
@@ -114,13 +140,17 @@ function ModalInner({ product, onClose }: { product: any; onClose: () => void })
           </p>
 
           <div className="flex items-center gap-2 sm:gap-[18px] mt-4 sm:mt-[35px] flex-wrap">
-            <button className="w-10 h-10 sm:w-[65px] sm:h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <Heart className="h-4 w-4 sm:h-7 sm:w-7" />
+            <button onClick={toggleFav} className="w-10 h-10 sm:w-[65px] sm:h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <Heart className={`h-4 w-4 sm:h-7 sm:w-7 ${isFav ? "fill-red-500 text-red-500" : ""}`} />
             </button>
 
             <a href={`/products/${product.slug}`} className="w-10 h-10 sm:w-[65px] sm:h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <Expand className="h-4 w-4 sm:h-7 sm:w-7" />
             </a>
+
+            <div className="w-10 h-10 sm:w-[65px] sm:h-[65px] rounded-full border-2 border-[#222] dark:border-gray-200 bg-white dark:bg-gray-800 flex items-center justify-center">
+              <CompareButton productId={product.id} iconClass="h-4 w-4 sm:h-7 sm:w-7" />
+            </div>
 
             <button
               onClick={addToCart}

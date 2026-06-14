@@ -9,6 +9,7 @@ import { ProductReviews } from "@/components/shop/product-reviews";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductCarousel } from "@/components/shop/product-carousel";
 import { ProductTrust } from "@/components/shop/product-trust";
+import { CompareButton } from "@/components/shop/compare-button";
 import { CurrencyToggle } from "@/components/shop/currency-toggle";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { FadeIn, FadeInUp } from "@/components/motion-wrappers";
@@ -77,6 +78,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </Badge>
               </div>
               <ProductActions product={cartProduct} colors={product.colors} />
+              <div className="flex items-center gap-2">
+                <CompareButton productId={product.id} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors" />
+                <span className="text-sm text-muted-foreground"><T k="comparison.add" /></span>
+              </div>
             </div>
           </FadeInUp>
         </div>

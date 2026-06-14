@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star, Eye, Share2, Expand } from "lucide-react";
+import { CompareButton } from "@/components/shop/compare-button";
 import { T } from "@/components/translate";
 import { LocalizedName } from "@/components/localized";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
@@ -227,6 +228,13 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             <Link href={`/products/${product.slug}`} className="text-white hover:scale-110 transition-transform leading-none drop-shadow-sm block">
               <Expand className="h-5 w-5" />
             </Link>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 8, scale: 0.8 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <CompareButton productId={product.id} className="text-white hover:scale-110 transition-transform leading-none drop-shadow-sm" iconClass="h-5 w-5" />
           </motion.div>
         </div>
 

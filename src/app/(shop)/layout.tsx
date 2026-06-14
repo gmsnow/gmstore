@@ -7,6 +7,7 @@ import { StickyHeader } from "@/components/shop/sticky-header";
 import { AIAssistantWrapper } from "@/components/shop/ai-assistant-wrapper";
 import { CurrencyProvider } from "@/lib/currency/context";
 import { PageTransition } from "@/components/page-transition";
+import { ComparisonBar } from "@/components/shop/comparison-bar";
 
 function SignOutForm() {
   return (
@@ -34,6 +35,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
           <PageTransition>{children}</PageTransition>
         </main>
         <AIAssistantWrapper />
+        <ComparisonBar />
         <footer className="border-t border-border bg-muted py-8">
           <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} <T k="nav.store_name" />. <T k="footer.rights" />
