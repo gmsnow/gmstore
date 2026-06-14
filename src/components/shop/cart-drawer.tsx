@@ -284,7 +284,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 {orderExpanded && (
                   <div className="px-4 pb-3 space-y-3">
                     {renderTracking({ o: order, isCancelled: orderCancelled, statusIndex: orderStatusIndex })}
-                    <button onClick={() => { localStorage.removeItem("lastOrder"); setLastOrder(null); setItems(getCart()); }} className="block w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors">
+                    <button onClick={() => setOrderExpanded(false)} className="block w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors">
                       {t("cart.new_order")}
                     </button>
                   </div>
