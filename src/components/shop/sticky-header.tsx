@@ -9,11 +9,22 @@ import { UserGreeting } from "@/components/shop/user-greeting";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
 import { useCurrency, type Currency } from "@/lib/currency/context";
+import { cartCount } from "@/lib/cart/store";
+import { CartDrawer } from "@/components/shop/cart-drawer";
 
 
 export function StickyHeader({ session, role, signOutForm }: { session: any; role: string | undefined; signOutForm: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [badge, setBadge] = useState(0);
   const { currency, toggleCurrency } = useCurrency();
+
+  useEffect(() => {
+    setBadge(cartCount());
+    const handler = () => setBadge(cartCount());
+    window.addEventListener("cartUpdated", handler);
+    return () => window.removeEventListener("cartUpdated", handler);
+  }, []);
 
   const currencyLabels: Record<string, string> = { yer: "ريال", usd: "$", sar: "رس" };
 
@@ -93,9 +104,15 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
         >
           {currencyLabels[nextCurrency()]}
         </button>
-        <Link href="/cart" className="relative p-2 hover:opacity-80 transition-opacity">
+        <button onClick={() => setCartOpen(true)} className="relative p-2 hover:opacity-80 transition-opacity">
           <ShoppingCart className="h-5 w-5" />
-        </Link>
+          {badge > 0 && (
+            <span className="absolute -top-0.5 -end-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground px-1">
+              {badge > 99 ? "99+" : badge}
+            </span>
+          )}
+        </button>
+        <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       </div>
     </header>
   );
