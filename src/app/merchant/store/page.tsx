@@ -59,7 +59,11 @@ export default function MerchantStorePage() {
         return r.json();
       })
       .then((data) => {
-        setProfile({ ...emptyProfile, ...data });
+        const sanitized = { ...emptyProfile };
+        for (const key of Object.keys(emptyProfile) as (keyof StoreProfile)[]) {
+          sanitized[key] = data[key] ?? "";
+        }
+        setProfile(sanitized);
         setLoading(false);
       })
       .catch(() => {
