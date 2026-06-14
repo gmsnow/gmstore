@@ -1,190 +1,286 @@
-import { redirect } from "next/navigation";
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { DeleteProductButton } from "@/components/admin/delete-product-button";
-import { Package, Plus, DollarSign, TrendingUp, Layers, Eye, Pencil, Trash2, Tags, Crown, Clock, AlertCircle } from "lucide-react";
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
-import { T } from "@/components/translate";
-import { getServerLocale } from "@/lib/i18n/server";
-import { localizedName } from "@/lib/i18n/localized";
+import { useI18n } from "@/lib/i18n/provider";
+import { Package, ShoppingBag, DollarSign, Wallet, TrendingUp, Star, AlertCircle, Calendar, ArrowUp } from "lucide-react";
 
-export default async function MerchantDashboard() {
-  const locale = await getServerLocale();
-  const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (!session || role !== "MERCHANT") redirect("/login");
+interface BestSellingProduct {
+  id: string;
+  name: string;
+  nameEn: string | null;
+  images: string[];
+  totalSold: number;
+  revenue: number;
+}
 
-  const userId = (session.user as any).id;
-  const [products, categories] = await Promise.all([
-    prisma.product.findMany({
-      where: { userId },
-      select: { id: true, name: true, nameEn: true, slug: true, price: true, images: true, stock: true, discount: true, dealEnd: true, category: { select: { id: true, name: true, nameEn: true, slug: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-  ]);
-  const totalValue = products.reduce((sum, p) => sum + Number(p.price) * p.stock, 0);
-  const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
-  const outOfStock = products.filter((p) => p.stock === 0).length;
+interface SalesDay {
+  date: string;
+  orders: number;
+  revenue: number;
+}
+
+interface Stats {
+  totalProducts: number;
+  publishedProducts: number;
+  lowStock: number;
+  totalOrders: number;
+  newOrdersToday: number;
+  newOrdersThisMonth: number;
+  totalRevenue: number;
+  revenueToday: number;
+  revenueThisMonth: number;
+  bestSelling: BestSellingProduct[];
+  salesByDay: SalesDay[];
+  feesTotal: number;
+  withdrawableBalance: number;
+}
+
+export default function MerchantDashboard() {
+  const { t } = useI18n();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/merchant/stats")
+      .then((r) => {
+        if (!r.ok) throw new Error(t("common.error"));
+        return r.json();
+      })
+      .then((data) => {
+        setStats(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(t("merchant.stats_error"));
+        setLoading(false);
+      });
+  }, [t]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+        <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="h-16 bg-muted rounded animate-pulse" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-64 bg-muted rounded animate-pulse" />
+              </CardContent>
+            </Card>
+          </div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="h-64 bg-muted rounded animate-pulse" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Card>
+          <CardContent className="p-12 text-center text-muted-foreground">
+            <AlertCircle className="mx-auto h-12 w-12 mb-4 text-red-500" />
+            <p className="text-lg">{error || t("merchant.stats_error")}</p>
+            <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+              {t("merchant.retry")}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const maxOrders = Math.max(...stats.salesByDay.map((d) => d.orders), 1);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-      <FadeIn>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold"><T k="merchant.title" /></h1>
-          <Link href="/merchant/products/new"><Button><Plus className="ms-2 h-4 w-4" /><T k="merchant.add_product" /></Button></Link>
-        </div>
-      </FadeIn>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t("merchant.title")}</h1>
+        <Link href="/merchant/products/new">
+          <Button><ArrowUp className="ms-2 h-4 w-4 rotate-45" />{t("merchant.add_product")}</Button>
+        </Link>
+      </div>
 
-      <StaggerContainer className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <StaggerItem>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground"><T k="merchant.total_products" /></CardTitle>
-              <Package className="h-5 w-5 text-blue-600" />
-            </CardHeader>
-            <CardContent><p className="text-3xl font-bold">{products.length}</p></CardContent>
-          </Card>
-        </StaggerItem>
-        <StaggerItem>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground"><T k="merchant.stock_value" /></CardTitle>
-              <DollarSign className="h-5 w-5 text-green-600" />
-            </CardHeader>
-            <CardContent><p className="text-3xl font-bold">{totalValue.toFixed(0)} <T k="merchant.currency" /></p></CardContent>
-          </Card>
-        </StaggerItem>
-        <StaggerItem>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground"><T k="merchant.total_stock" /></CardTitle>
-              <TrendingUp className="h-5 w-5 text-purple-600" />
-            </CardHeader>
-            <CardContent><p className="text-3xl font-bold">{totalStock}</p></CardContent>
-          </Card>
-        </StaggerItem>
-        <StaggerItem>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground"><T k="merchant.out_of_stock" /></CardTitle>
-              <AlertCircle className={`h-5 w-5 ${outOfStock > 0 ? "text-red-500" : "text-green-500"}`} />
-            </CardHeader>
-            <CardContent><p className={`text-3xl font-bold ${outOfStock > 0 ? "text-red-500" : ""}`}>{outOfStock}</p></CardContent>
-          </Card>
-        </StaggerItem>
-      </StaggerContainer>
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("merchant.total_products")}</CardTitle>
+            <Package className="h-5 w-5 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.totalProducts}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("merchant.new_orders_today")}</CardTitle>
+            <ShoppingBag className="h-5 w-5 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.newOrdersToday}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("merchant.revenue_today")}</CardTitle>
+            <DollarSign className="h-5 w-5 text-emerald-600" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{Number(stats.revenueToday).toFixed(0)} {t("merchant.currency")}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("merchant.withdrawable_balance")}</CardTitle>
+            <Wallet className="h-5 w-5 text-amber-600" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{Number(stats.withdrawableBalance).toFixed(0)} {t("merchant.currency")}</p>
+          </CardContent>
+        </Card>
+      </div>
 
-      <FadeIn>
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2"><Layers className="h-5 w-5" /><T k="merchant.categories_title" /></h2>
-          <div className="flex flex-wrap gap-3">
-            {categories.length === 0 ? (
-              <p className="text-muted-foreground"><T k="merchant.no_categories" /></p>
-            ) : (
-              categories.map((c) => (
-                <Badge key={c.id} variant="outline" className="px-4 py-2 text-sm">{localizedName(c, locale)}</Badge>
-              ))
-            )}
-          </div>
-        </div>
-      </FadeIn>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold"><T k="merchant.my_products" /></h2>
-        </div>
-        {products.length === 0 ? (
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <Card>
-            <CardContent className="p-12 text-center text-muted-foreground">
-                <T k="merchant.no_products" />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-amber-500" />
+                {t("merchant.best_selling")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stats.bestSelling.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">{t("merchant.no_sales")}</p>
+              ) : (
+                <div className="divide-y divide-border">
+                  <div className="grid grid-cols-12 gap-2 pb-2 text-xs font-medium text-muted-foreground">
+                    <div className="col-span-6">{t("merchant.product")}</div>
+                    <div className="col-span-3 text-center">{t("merchant.sold")}</div>
+                    <div className="col-span-3 text-end">{t("merchant.revenue")}</div>
+                  </div>
+                  {stats.bestSelling.map((product, i) => (
+                    <div key={product.id} className="grid grid-cols-12 gap-2 py-3 items-center">
+                      <div className="col-span-6 flex items-center gap-3">
+                        <span className="text-xs font-bold text-muted-foreground w-5">#{i + 1}</span>
+                        <div className="h-10 w-10 rounded-lg border border-border bg-muted overflow-hidden flex-shrink-0">
+                          {product.images?.[0] ? (
+                            <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+                          ) : (
+                            <Package className="h-5 w-5 m-auto text-muted-foreground/40" />
+                          )}
+                        </div>
+                        <span className="text-sm font-medium truncate">{product.name}</span>
+                      </div>
+                      <div className="col-span-3 text-center text-sm">{product.totalSold}</div>
+                      <div className="col-span-3 text-end text-sm font-medium">
+                        {Number(product.revenue).toFixed(0)} {t("merchant.currency")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products.map((p) => (
-              <div key={p.id} className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                {/* Image */}
-                <div className="relative h-44 bg-muted overflow-hidden">
-                  {p.images?.[0] ? (
-                    <img src={p.images[0]} alt={localizedName(p, locale)} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-muted-foreground/40">
-                      <Package className="h-12 w-12" />
-                    </div>
-                  )}
-                  {/* Badges */}
-                  <div className="absolute top-2 start-2 flex flex-col gap-1">
-                    {p.discount > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                        -{p.discount}%
-                      </span>
-                    )}
-                    {p.stock === 0 && (
-                      <span className="bg-gray-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                        <T k="merchant.out_of_stock" />
-                      </span>
-                    )}
-                    {p.dealEnd && new Date(p.dealEnd) > new Date() && (
-                      <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {Math.ceil((new Date(p.dealEnd).getTime() - Date.now()) / 3600000)}h
-                      </span>
-                    )}
-                  </div>
-                </div>
+        </div>
 
-                {/* Content */}
-                <div className="p-3 space-y-2">
-                  <h3 className="text-sm font-bold line-clamp-1">{localizedName(p, locale)}</h3>
-
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Tags className="h-3 w-3" />
-                    <span>{localizedName(p.category, locale)}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      {p.discount > 0 ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-bold text-primary">{(Number(p.price) * (1 - p.discount / 100)).toFixed(0)} <T k="merchant.currency" /></span>
-                          <span className="text-[10px] text-muted-foreground line-through">{Number(p.price).toFixed(0)}</span>
-                        </div>
-                      ) : (
-                        <span className="text-sm font-bold text-primary">{Number(p.price).toFixed(0)} <T k="merchant.currency" /></span>
-                      )}
-                    </div>
-                    <Badge variant={p.stock > 0 ? "success" : "danger"} className="text-[10px]">
-                      {p.stock} <T k="merchant.in_stock" />
-                    </Badge>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-1 border-t border-border">
-                    <Link href={`/products/${p.slug}`} className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full gap-1 text-xs">
-                        <Eye className="h-3 w-3" />
-                        <T k="merchant.view" />
-                      </Button>
-                    </Link>
-                    <Link href={`/merchant/products/${p.id}/edit`} className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full gap-1 text-xs">
-                        <Pencil className="h-3 w-3" />
-                        <T k="merchant.edit" />
-                      </Button>
-                    </Link>
-                    <DeleteProductButton productId={p.id} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("merchant.total_revenue")}</CardTitle>
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{Number(stats.totalRevenue).toFixed(0)} {t("merchant.currency")}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("merchant.platform_fees")}</CardTitle>
+              <DollarSign className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-muted-foreground">{Number(stats.feesTotal).toFixed(0)} {t("merchant.currency")}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("merchant.monthly_orders")}</CardTitle>
+              <Calendar className="h-5 w-5 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{stats.newOrdersThisMonth}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t("merchant.low_stock")}</CardTitle>
+              <AlertCircle className={`h-5 w-5 ${stats.lowStock > 0 ? "text-red-500" : "text-green-500"}`} />
+            </CardHeader>
+            <CardContent>
+              <p className={`text-2xl font-bold ${stats.lowStock > 0 ? "text-red-500" : ""}`}>{stats.lowStock}</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            {t("merchant.daily_sales")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {stats.salesByDay.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">{t("merchant.no_sales_data")}</p>
+          ) : (
+            <div className="space-y-4">
+              {stats.salesByDay.map((day) => {
+                const dateStr = new Date(day.date).toLocaleDateString("ar-SA", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                });
+                const widthPct = maxOrders > 0 ? (day.orders / maxOrders) * 100 : 0;
+                return (
+                  <div key={day.date} className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-3 text-sm text-muted-foreground">{dateStr}</div>
+                    <div className="col-span-6 flex items-center gap-2">
+                      <div className="flex-1 h-5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all duration-500"
+                          style={{ width: `${widthPct}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium w-6 text-center">{day.orders}</span>
+                    </div>
+                    <div className="col-span-3 text-end text-sm font-medium">
+                      {Number(day.revenue).toFixed(0)} {t("merchant.currency")}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
