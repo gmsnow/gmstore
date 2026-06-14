@@ -249,6 +249,12 @@ export const ar = {
   "favorites.remove": "إزالة",
   "favorites.added": "أضيف إلى المفضلة",
   "favorites.removed": "أزيل من المفضلة",
+  "favorites.share": "مشاركة القائمة",
+  "favorites.share_copied": "تم نسخ رابط القائمة",
+  "favorites.share_login": "سجل الدخول لمشاركة قائمة الأمنيات",
+  "favorites.shared_title": "قائمة أمنيات",
+  "favorites.shared_empty": "هذه القائمة فارغة",
+  "favorites.shared_not_found": "المستخدم غير موجود",
 
   /* Comparison */
   "comparison.title": "المقارنة",
@@ -531,6 +537,12 @@ export const en: Record<string, string> = {
   "favorites.remove": "Remove",
   "favorites.added": "Added to favorites",
   "favorites.removed": "Removed from favorites",
+  "favorites.share": "Share Wishlist",
+  "favorites.share_copied": "Wishlist link copied",
+  "favorites.share_login": "Login to share your wishlist",
+  "favorites.shared_title": "Wishlist",
+  "favorites.shared_empty": "This wishlist is empty",
+  "favorites.shared_not_found": "User not found",
 
   "comparison.title": "Compare",
   "comparison.empty": "No products selected for comparison",

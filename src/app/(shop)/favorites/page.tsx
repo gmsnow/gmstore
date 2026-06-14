@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Heart, ArrowLeft, Trash2 } from "lucide-react";
+import { Heart, ArrowLeft, Trash2, Share2 } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 import { T } from "@/components/translate";
@@ -82,6 +82,19 @@ export default function FavoritesPage() {
             )}
           </div>
           <div className="flex items-center gap-3">
+            {isLoggedIn && ids.length > 0 && (
+              <button
+                onClick={() => {
+                  const link = `${window.location.origin}/favorites/shared/${userId}`;
+                  if (navigator.share) { navigator.share({ url: link }); }
+                  else { navigator.clipboard?.writeText(link); }
+                }}
+                className="flex items-center gap-1.5 text-sm text-primary hover:underline transition-colors"
+              >
+                <Share2 className="h-4 w-4" />
+                <T k="favorites.share" />
+              </button>
+            )}
             {ids.length > 0 && (
               <button
                 onClick={removeAll}
