@@ -208,6 +208,9 @@ export const ar = {
   "merchant.stock": "المخزون",
   "merchant.edit": "تعديل",
   "merchant.currency": "ريال",
+  "merchant.out_of_stock": "نفذت الكمية",
+  "merchant.in_stock": "قطعة",
+  "merchant.view": "عرض",
 
   /* Admin */
   "admin.dashboard": "لوحة التحكم",
@@ -529,6 +532,9 @@ export const en: Record<string, string> = {
   "merchant.stock": "Stock",
   "merchant.edit": "Edit",
   "merchant.currency": "SAR",
+  "merchant.out_of_stock": "Out of Stock",
+  "merchant.in_stock": "in stock",
+  "merchant.view": "View",
 
   "admin.dashboard": "Dashboard",
   "admin.products": "Products",
