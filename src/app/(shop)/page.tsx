@@ -9,6 +9,7 @@ import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 import { HeroSlider } from "@/components/shop/hero-slider";
 import { localizedName } from "@/lib/i18n/localized";
 import { getServerLocale } from "@/lib/i18n/server";
+import { DealsSection } from "@/components/shop/deals-section";
 
 const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, discount: true, brand: true, brandLogo: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
@@ -25,9 +26,37 @@ export default async function HomePage() {
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
     prisma.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }),
   ]);
+
+  const bestRaw = await prisma.orderItem.groupBy({
+    by: ["productId"],
+    _sum: { quantity: true },
+    orderBy: { _sum: { quantity: "desc" } },
+    take: 8,
+  });
+  const bestIds = bestRaw.map((b) => b.productId);
+  const bestProducts = bestIds.length > 0
+    ? await prisma.product.findMany({ where: { id: { in: bestIds } }, select: productSelect })
+    : [];
+  const bestMap = new Map(bestProducts.map((p) => [p.id, p]));
+  const bestSellers = bestIds.map((id) => bestMap.get(id)).filter(Boolean);
+
+  const rawDeals = await prisma.product.findMany({
+    where: { discount: { gt: 0 } },
+    select: productSelect,
+    orderBy: { discount: "desc" },
+    take: 8,
+  });
+
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
   const featured = (rawFeatured as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
   const latest = (rawLatest as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
+  const bestList = (bestSellers as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
+  const deals = (rawDeals as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
+
+  const nextMidnight = new Date();
+  nextMidnight.setDate(nextMidnight.getDate() + 1);
+  nextMidnight.setHours(0, 0, 0, 0);
+  const dealTarget = nextMidnight.toISOString();
 
   return (
     <>
@@ -54,6 +83,11 @@ export default async function HomePage() {
         </FadeInUp>
       )}
 
+      {/* Deals section with countdown */}
+      {deals.length > 0 && (
+        <DealsSection products={deals} target={dealTarget} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
+      )}
+
       {featured.length > 0 && (
         <FadeInUp>
           <section className="space-y-6">
@@ -63,6 +97,24 @@ export default async function HomePage() {
             </div>
             <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
               {featured.map((p: any) => (
+                <StaggerItem key={p.id}>
+                  <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </section>
+        </FadeInUp>
+      )}
+
+      {/* Best sellers section */}
+      {bestList.length > 0 && (
+        <FadeInUp>
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold"><T k="home.best_seller" /></h2>
+            </div>
+            <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+              {bestList.map((p: any) => (
                 <StaggerItem key={p.id}>
                   <SwipeableProductCard product={p} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
                 </StaggerItem>
