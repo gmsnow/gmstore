@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck } from "lucide-react";
+import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
 import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost, validateCoupon } from "@/lib/cart/store";
 import type { CartItem } from "@/types";
+
+const statusSteps = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t, locale } = useI18n();
@@ -15,6 +17,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [couponMsg, setCouponMsg] = useState("");
+  const [lastOrder, setLastOrder] = useState<any>(null);
+  const [orderExpanded, setOrderExpanded] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -22,12 +26,29 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     setCouponCode("");
     setDiscount(0);
     setCouponMsg("");
+    setOrderExpanded(false);
+    try {
+      const raw = localStorage.getItem("lastOrder");
+      setLastOrder(raw ? JSON.parse(raw) : null);
+    } catch { setLastOrder(null); }
   }, [open]);
 
   useEffect(() => {
     const handler = () => { if (open) setItems(getCart()); };
     window.addEventListener("cartUpdated", handler);
     return () => window.removeEventListener("cartUpdated", handler);
+  }, [open]);
+
+  useEffect(() => {
+    const handler = () => {
+      if (!open) return;
+      try {
+        const raw = localStorage.getItem("lastOrder");
+        setLastOrder(raw ? JSON.parse(raw) : null);
+      } catch { setLastOrder(null); }
+    };
+    window.addEventListener("orderPlaced", handler);
+    return () => window.removeEventListener("orderPlaced", handler);
   }, [open]);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -56,6 +77,10 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     }
   }
 
+  const order = lastOrder?.id ? lastOrder : null;
+  const orderStatusIndex = order ? statusSteps.indexOf(order.status) : -1;
+  const orderCancelled = order?.status === "CANCELLED";
+
   return (
     <AnimatePresence>
       {open && (
@@ -78,125 +103,225 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <ShoppingBag className="h-5 w-5 text-primary" />
-                {t("cart.drawer_title")}
-                {items.length > 0 && <span className="text-sm text-muted-foreground">({items.length})</span>}
+                {order ? t("cart.track_title") : t("cart.drawer_title")}
+                {!order && items.length > 0 && <span className="text-sm text-muted-foreground">({items.length})</span>}
               </h2>
               <button onClick={onClose} className="p-1 hover:text-primary transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Free shipping progress */}
-            <div className="px-4 py-3 border-b border-border">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
-                <Truck className="h-3.5 w-3.5" />
-                {isFreeShipping
-                  ? <span className="text-green-600 font-semibold">{t("cart.free_shipping_achieved")}</span>
-                  : <span>{t("cart.free_shipping_progress").replace("{amount}", `${formatPrice(remaining)} ${label}`)}</span>
-                }
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${isFreeShipping ? "bg-green-500" : "bg-primary"}`}
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-              {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
-                  <p className="text-sm text-muted-foreground">{t("cart.empty_drawer")}</p>
-                  <button onClick={onClose} className="text-sm text-primary hover:underline">{t("cart.continue_shopping")}</button>
+            {/* Free shipping progress (only if no order) */}
+            {!order && (
+              <div className="px-4 py-3 border-b border-border">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
+                  <Truck className="h-3.5 w-3.5" />
+                  {isFreeShipping
+                    ? <span className="text-green-600 font-semibold">{t("cart.free_shipping_achieved")}</span>
+                    : <span>{t("cart.free_shipping_progress").replace("{amount}", `${formatPrice(remaining)} ${label}`)}</span>
+                  }
                 </div>
-              ) : (
-                items.map((item, idx) => (
-                  <div key={`${item.productId}-${item.color || ""}-${item.size || ""}-${idx}`} className="flex gap-3 rounded-lg border border-border bg-card p-3">
-                    <div className="h-20 w-20 shrink-0 rounded-lg overflow-hidden bg-muted">
-                      <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <Link href={`/products/${item.productId}`} className="text-sm font-semibold line-clamp-2 hover:text-primary" onClick={onClose}>
-                        {item.name}
-                      </Link>
-                      {item.color && <span className="text-xs text-muted-foreground">{item.color}</span>}
-                      {item.size && <span className="text-xs text-muted-foreground mr-1">{item.size}</span>}
-                      <div className="flex items-center justify-between pt-1">
-                        <div className="flex items-center gap-0.5 border border-border rounded-lg">
-                          <button onClick={() => updateQuantity(item.productId, item.color, -1)} className="p-1 hover:text-primary transition-colors">
-                            <Minus className="h-3.5 w-3.5" />
-                          </button>
-                          <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.productId, item.color, 1)} className="p-1 hover:text-primary transition-colors">
-                            <Plus className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-primary">{formatPrice(item.price)} {label}</span>
-                          <button onClick={() => { removeFromCart(item.productId, item.color); setItems(getCart()); }} className="p-1 text-muted-foreground hover:text-red-500 transition-colors">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${isFreeShipping ? "bg-green-500" : "bg-primary"}`}
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Items / Tracking */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+              {order ? (
+                <>
+                  {/* Order status banner */}
+                  <div className={`rounded-lg p-3 text-center ${orderCancelled ? "bg-red-50 dark:bg-red-950" : "bg-green-50 dark:bg-green-950"}`}>
+                    <Package className="h-8 w-8 mx-auto mb-1 text-primary" />
+                    <p className="text-sm font-bold">{t("track.title")}</p>
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">{order.id?.slice(0, 12)}...</p>
+                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-xs font-semibold ${
+                      orderCancelled ? "bg-red-200 text-red-700" :
+                      order.status === "DELIVERED" ? "bg-green-200 text-green-700" :
+                      order.status === "SHIPPED" ? "bg-blue-200 text-blue-700" :
+                      "bg-yellow-200 text-yellow-700"
+                    }`}>
+                      {t(`track.status_${order.status}`)}
+                    </span>
+                  </div>
+
+                  {/* Progress steps */}
+                  {!orderCancelled && (
+                    <div className="px-2 py-3">
+                      <div className="flex items-center gap-0 mb-1">
+                        {statusSteps.map((step, i) => {
+                          const stepStatus = i < orderStatusIndex ? "completed" : i === orderStatusIndex ? "current" : "upcoming";
+                          return (
+                            <div key={step} className="flex-1 flex items-center">
+                              <div className={`flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold shrink-0 ${
+                                stepStatus === "completed" ? "bg-primary text-primary-foreground" :
+                                stepStatus === "current" ? "bg-primary text-primary-foreground ring-2 ring-primary/30" :
+                                "bg-muted text-muted-foreground"
+                              }`}>
+                                {stepStatus === "completed" ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                              </div>
+                              <div className={`h-0.5 flex-1 mx-[2px] ${i < statusSteps.length - 1 ? (i < orderStatusIndex ? "bg-primary" : "bg-muted") : ""}`} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                        {statusSteps.map((step) => (
+                          <span key={step} className="text-center flex-1">{t(`track.status_${step}`)}</span>
+                        ))}
                       </div>
                     </div>
+                  )}
+
+                  {/* Order items */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-muted-foreground">{t("track.items")} ({order.items?.length || 0})</p>
+                      <button onClick={() => setOrderExpanded(!orderExpanded)} className="text-xs text-primary hover:underline flex items-center gap-1">
+                        {orderExpanded ? t("cart.show_less") : t("cart.show_details")}
+                        <ChevronUp className={`h-3 w-3 transition-transform ${orderExpanded ? "" : "rotate-180"}`} />
+                      </button>
+                    </div>
+                    {(order.items || []).slice(0, orderExpanded ? undefined : 2).map((item: any) => (
+                      <div key={item.id} className="flex gap-3 rounded-lg border border-border bg-card p-3">
+                        {item.product?.images?.[0] && (
+                          <div className="h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-muted">
+                            <img src={item.product.images[0]} alt="" className="h-full w-full object-cover" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          <p className="text-sm font-semibold truncate">{item.product?.name || item.product?.nameEn || ""}</p>
+                          <p className="text-xs text-muted-foreground">{t("track.quantity")}: {item.quantity} × {Number(item.price).toFixed(2)}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            {statusSteps.map((s) => (
+                              <span key={s} className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                statusSteps.indexOf(s) < statusSteps.indexOf(item.status) ? "bg-primary/20 text-primary" :
+                                s === item.status ? "bg-primary text-primary-foreground" :
+                                "bg-muted text-muted-foreground"
+                              }`}>
+                                {t(`track.status_${s}`)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))
+
+                  {/* Total */}
+                  <div className="flex items-center justify-between text-sm pt-2">
+                    <span className="text-muted-foreground">{t("track.total")}</span>
+                    <span className="text-lg font-bold text-primary">{Number(order.total).toFixed(2)} {t("merchant.currency")}</span>
+                  </div>
+
+                  {/* New order button */}
+                  <button onClick={() => { localStorage.removeItem("lastOrder"); setLastOrder(null); setItems(getCart()); }} className="block w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors mt-2">
+                    {t("cart.new_order")}
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Empty state */}
+                  {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 gap-3">
+                      <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                      <p className="text-sm text-muted-foreground">{t("cart.empty_drawer")}</p>
+                      <button onClick={onClose} className="text-sm text-primary hover:underline">{t("cart.continue_shopping")}</button>
+                    </div>
+                  ) : (
+                    items.map((item, idx) => (
+                      <div key={`${item.productId}-${item.color || ""}-${item.size || ""}-${idx}`} className="flex gap-3 rounded-lg border border-border bg-card p-3">
+                        <div className="h-20 w-20 shrink-0 rounded-lg overflow-hidden bg-muted">
+                          <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <Link href={`/products/${item.productId}`} className="text-sm font-semibold line-clamp-2 hover:text-primary" onClick={onClose}>
+                            {item.name}
+                          </Link>
+                          {item.color && <span className="text-xs text-muted-foreground">{item.color}</span>}
+                          {item.size && <span className="text-xs text-muted-foreground mr-1">{item.size}</span>}
+                          <div className="flex items-center justify-between pt-1">
+                            <div className="flex items-center gap-0.5 border border-border rounded-lg">
+                              <button onClick={() => updateQuantity(item.productId, item.color, -1)} className="p-1 hover:text-primary transition-colors">
+                                <Minus className="h-3.5 w-3.5" />
+                              </button>
+                              <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
+                              <button onClick={() => updateQuantity(item.productId, item.color, 1)} className="p-1 hover:text-primary transition-colors">
+                                <Plus className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-primary">{formatPrice(item.price)} {label}</span>
+                              <button onClick={() => { removeFromCart(item.productId, item.color); setItems(getCart()); }} className="p-1 text-muted-foreground hover:text-red-500 transition-colors">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
               )}
             </div>
 
-            {/* Coupon */}
-            <div className="px-4 py-3 border-t border-border">
-              <div className="flex items-center gap-2">
-                <Ticket className="h-4 w-4 text-muted-foreground shrink-0" />
-                <input
-                  type="text"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  placeholder={t("cart.coupon_placeholder")}
-                  className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary bg-background"
-                />
-                <button onClick={applyCoupon} className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity">
-                  {t("cart.coupon_apply")}
-                </button>
-              </div>
-              {couponMsg && <p className={`text-xs mt-1 ${discount > 0 ? "text-green-600" : "text-red-500"}`}>{couponMsg}</p>}
-            </div>
-
-            {/* Footer with totals */}
-            <div className="border-t border-border p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t("cart.subtotal")}</span>
-                <span className="font-semibold">{formatPrice(subtotal)} {label}</span>
-              </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("cart.coupon_discount")} ({couponCode})</span>
-                  <span className="font-semibold text-green-600">-{formatPrice(discount)} {label}</span>
+            {/* Coupon + Footer (only if no order) */}
+            {!order && (
+              <>
+                <div className="px-4 py-3 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <Ticket className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      placeholder={t("cart.coupon_placeholder")}
+                      className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary bg-background"
+                    />
+                    <button onClick={applyCoupon} className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity">
+                      {t("cart.coupon_apply")}
+                    </button>
+                  </div>
+                  {couponMsg && <p className={`text-xs mt-1 ${discount > 0 ? "text-green-600" : "text-red-500"}`}>{couponMsg}</p>}
                 </div>
-              )}
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t("cart.shipping")}</span>
-                <span className={isFreeShipping ? "text-green-600 font-semibold" : "font-semibold"}>
-                  {isFreeShipping ? t("cart.free_shipping") : `${formatPrice(shippingCost)} ${label}`}
-                </span>
-              </div>
-              <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
-                <span>{t("cart.total")}</span>
-                <span className="text-primary">{formatPrice(total)} {label}</span>
-              </div>
-              <Link
-                href="/checkout"
-                onClick={onClose}
-                className="block w-full text-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity mt-2"
-              >
-                {t("cart.checkout")}
-              </Link>
-              <button onClick={onClose} className="block w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors">
-                {t("cart.continue_shopping")}
-              </button>
-            </div>
+                <div className="border-t border-border p-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t("cart.subtotal")}</span>
+                    <span className="font-semibold">{formatPrice(subtotal)} {label}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t("cart.coupon_discount")} ({couponCode})</span>
+                      <span className="font-semibold text-green-600">-{formatPrice(discount)} {label}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t("cart.shipping")}</span>
+                    <span className={isFreeShipping ? "text-green-600 font-semibold" : "font-semibold"}>
+                      {isFreeShipping ? t("cart.free_shipping") : `${formatPrice(shippingCost)} ${label}`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
+                    <span>{t("cart.total")}</span>
+                    <span className="text-primary">{formatPrice(total)} {label}</span>
+                  </div>
+                  <Link
+                    href="/checkout"
+                    onClick={onClose}
+                    className="block w-full text-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity mt-2"
+                  >
+                    {t("cart.checkout")}
+                  </Link>
+                  <button onClick={onClose} className="block w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors">
+                    {t("cart.continue_shopping")}
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
         </>
       )}

@@ -30,11 +30,11 @@ enum ItemStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String      @unique
   password      String?
-  role          Role      @default(CUSTOMER)
+  role          Role        @default(CUSTOMER)
   image         String?
   emailVerified DateTime?
   accounts      Account[]
@@ -43,7 +43,12 @@ model User {
   products      Product[]
   reviews       Review[]
   favorites     Favorite[]
-  createdAt     DateTime  @default(now())
+  points        Int         @default(0)
+  referralCode  String?     @unique
+  referredById  String?
+  referredBy    User?       @relation("Referrals", fields: [referredById], references: [id])
+  referrals     User[]      @relation("Referrals")
+  createdAt     DateTime    @default(now())
 }
 
 model Account {
@@ -137,6 +142,9 @@ model Order {
   status          OrderStatus   @default(PENDING)
   shippingAddress String?
   paymentIntentId String?
+  couponId        String?
+  coupon          Coupon?       @relation(fields: [couponId], references: [id])
+  pointsEarned    Int           @default(0)
   createdAt       DateTime      @default(now())
 }
 
@@ -187,4 +195,17 @@ model Banner {
   order     Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+model Coupon {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  discount  Int
+  maxUses   Int       @default(0)
+  usedCount Int       @default(0)
+  minAmount Decimal?  @db.Decimal(10, 2)
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  orders    Order[]
+  createdAt DateTime  @default(now())
 }

@@ -51,6 +51,10 @@ export default function CheckoutPage() {
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
         localStorage.setItem("lastOrderId", data.id);
+        localStorage.setItem("lastOrder", JSON.stringify(data));
+        localStorage.removeItem("cart");
+        window.dispatchEvent(new CustomEvent("orderPlaced"));
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
         router.push(`/track/${data.id}`);
       } else {
         setError(data?.error || `${t("general.error")} ${res.status}`);

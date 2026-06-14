@@ -34,10 +34,16 @@ export async function POST(req: Request) {
         status: "PENDING",
         items: { create: orderItems },
       },
+      include: { items: { include: { product: { select: { name: true, nameEn: true, images: true } } } } },
     });
 
     logger.info("Order created", { orderId: order.id });
-    return NextResponse.json(order);
+    const serialized = {
+      ...order,
+      total: Number(order.total),
+      items: order.items.map((i) => ({ ...i, price: Number(i.price) })),
+    };
+    return NextResponse.json(serialized);
   } catch (error) {
     const msg = error instanceof Error ? error.message : "فشل إنشاء الطلب";
     logger.error("Checkout failed", { error: msg });
