@@ -4,6 +4,7 @@ import { T } from "@/components/translate";
 import { LogOut } from "lucide-react";
 import { MobileNav } from "@/components/shop/mobile-nav";
 import { StickyHeader } from "@/components/shop/sticky-header";
+import { CartProvider } from "@/components/shop/cart-context";
 import { AIAssistantWrapper } from "@/components/shop/ai-assistant-wrapper";
 import { CurrencyProvider } from "@/lib/currency/context";
 import { PageTransition } from "@/components/page-transition";
@@ -28,6 +29,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   const role = (session?.user as any)?.role;
   return (
     <CurrencyProvider>
+      <CartProvider>
       <div className="flex min-h-screen flex-col">
         <StickyHeader session={session} role={role} signOutForm={<SignOutForm />} />
         <MobileNav session={session} role={role} />
@@ -42,6 +44,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
           </div>
         </footer>
       </div>
+      </CartProvider>
     </CurrencyProvider>
   );
 }

@@ -6,6 +6,8 @@ import { House, ShoppingBag, Tags, Heart, Package, Search, User, X, DollarSign }
 import { motion, animate } from "motion/react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency } from "@/lib/currency/context";
+import { cartCount } from "@/lib/cart/store";
+import { useCart } from "@/components/shop/cart-context";
 import { SearchSuggestions } from "./search-suggestions";
 
 const INDICATOR_W = 68;
@@ -13,6 +15,7 @@ const INDICATOR_W = 68;
 export function MobileNav({ session, role }: { session: any; role: string | undefined }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [badge, setBadge] = useState(0);
   const { t, direction } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
@@ -20,6 +23,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
   const scrollRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<SVGSVGElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
+  const { setOpen } = useCart();
 
   const links = [
     { href: "/", labelKey: "nav.home", icon: House },
@@ -58,6 +62,13 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
   }
 
   useEffect(() => { updateIndicator(); }, [activeIndex]);
+
+  useEffect(() => {
+    setBadge(cartCount());
+    const handler = () => setBadge(cartCount());
+    window.addEventListener("cartUpdated", handler);
+    return () => window.removeEventListener("cartUpdated", handler);
+  }, []);
 
   return (
     <>
@@ -151,6 +162,23 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
                     <Search className="w-7 h-7 text-[var(--primary)]" />
                   </div>
                   <span className="truncate font-medium">{t("nav.search")}</span>
+                </button>
+              </li>
+
+              <li className="px-[13px]">
+                <button
+                  onClick={() => setOpen(true)}
+                  className="relative flex flex-col items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <div className="relative w-7 h-7">
+                    <ShoppingBag className="w-7 h-7 text-[var(--primary)]" />
+                    {badge > 0 && (
+                      <span className="absolute -top-1 -end-1 flex h-4 min-w-[14px] items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground px-1">
+                        {badge > 99 ? "99+" : badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="truncate font-medium">{t("nav.cart")}</span>
                 </button>
               </li>
 
