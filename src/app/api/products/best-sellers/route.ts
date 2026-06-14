@@ -15,7 +15,7 @@ export async function GET() {
     where: { id: { in: ids } },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, featured: true, stock: true, discount: true,
+      images: true, colors: true, featured: true, stock: true, discount: true, dealEnd: true,
       brand: true, brandLogo: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
       reviews: { select: { rating: true } },

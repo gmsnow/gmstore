@@ -23,7 +23,7 @@ export default async function MerchantDashboard() {
   const [products, categories] = await Promise.all([
     prisma.product.findMany({
       where: { userId },
-      select: { id: true, name: true, nameEn: true, slug: true, price: true, stock: true, category: { select: { id: true, name: true, nameEn: true, slug: true } } },
+      select: { id: true, name: true, nameEn: true, slug: true, price: true, stock: true, discount: true, dealEnd: true, category: { select: { id: true, name: true, nameEn: true, slug: true } } },
       orderBy: { createdAt: "desc" },
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),

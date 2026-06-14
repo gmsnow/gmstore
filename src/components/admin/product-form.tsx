@@ -153,6 +153,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
       categoryId: form.get("categoryId"),
       stock: parseInt(form.get("stock") as string) || 0,
       discount: parseInt(form.get("discount") as string) || 0,
+      dealEnd: form.get("dealEnd") ? new Date(form.get("dealEnd") as string).toISOString() : null,
       featured: form.get("featured") === "on",
       brand: form.get("brand"),
       brandLogo: brandLogo || null,
@@ -212,6 +213,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
       </div>
       <div className="grid grid-cols-2 gap-4">
         <Input id="discount" name="discount" type="number" min="0" max="100" label="الخصم %" defaultValue={product?.discount?.toString() ?? "0"} />
+        <Input id="dealEnd" name="dealEnd" type="datetime-local" label="نهاية العرض" defaultValue={product?.dealEnd ? new Date(product.dealEnd).toISOString().slice(0, 16) : ""} />
       </div>
       <Select
         id="categoryId"

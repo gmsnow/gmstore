@@ -53,7 +53,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   else if (params.sort === "discount_asc") { orderBy.discount = "asc"; delete orderBy.createdAt; }
   else if (params.sort === "discount_desc") { orderBy.discount = "desc"; delete orderBy.createdAt; }
 
-  const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, sizes: true, featured: true, stock: true, discount: true, brand: true, brandLogo: true, createdAt: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
+  const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, sizes: true, featured: true, stock: true, discount: true, dealEnd: true, brand: true, brandLogo: true, createdAt: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
   const [products, categories, brands, colorRows, sizeRows, userFavs] = await Promise.all([
     prisma.product.findMany({ where, select: productSelect, orderBy }),

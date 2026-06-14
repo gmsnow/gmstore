@@ -11,6 +11,7 @@ import { ProductCarousel } from "@/components/shop/product-carousel";
 import { ProductTrust } from "@/components/shop/product-trust";
 import { CompareButton } from "@/components/shop/compare-button";
 import { CurrencyToggle } from "@/components/shop/currency-toggle";
+import { CountdownTimer } from "@/components/shop/countdown-timer";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { FadeIn, FadeInUp } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
@@ -25,7 +26,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { slug },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, stock: true, description: true, descriptionEn: true, videoUrl: true, userId: true,
+      images: true, colors: true, stock: true, description: true, descriptionEn: true, videoUrl: true, userId: true, discount: true, dealEnd: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
     },
   });
@@ -35,7 +36,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { categoryId: product.category.id, id: { not: product.id } },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, featured: true, stock: true, discount: true,
+      images: true, colors: true, featured: true, stock: true, discount: true, dealEnd: true,
       brand: true, brandLogo: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
       reviews: { select: { rating: true } },
@@ -71,6 +72,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <h1 className="text-3xl font-bold">{localizedName(product, locale)}</h1>
               <CurrencyToggle priceYer={Number(product.price)} />
               <p className="text-muted-foreground leading-relaxed">{localizedDescription(product, locale)}</p>
+              {product.dealEnd && new Date(product.dealEnd) > new Date() && (
+                <div className="flex items-center gap-2 text-sm bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
+                  <span className="text-muted-foreground">العرض ينتهي خلال:</span>
+                  <CountdownTimer target={product.dealEnd.toISOString()} />
+                </div>
+              )}
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-foreground"><T k="detail.stock" /></span>
                 <Badge variant={product.stock > 0 ? "success" : "danger"}>

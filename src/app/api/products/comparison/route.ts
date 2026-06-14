@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     where: { id: { in: ids } },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, sizes: true, stock: true, discount: true,
+      images: true, colors: true, sizes: true, stock: true, discount: true, dealEnd: true,
       brand: true, description: true, descriptionEn: true,
       category: { select: { id: true, name: true, nameEn: true } },
       reviews: { select: { rating: true } },

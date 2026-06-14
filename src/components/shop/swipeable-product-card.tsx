@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star, Eye, Share2, Expand } from "lucide-react";
 import { CompareButton } from "@/components/shop/compare-button";
+import { DealBadge } from "@/components/shop/deal-badge";
 import { T } from "@/components/translate";
 import { LocalizedName } from "@/components/localized";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
@@ -208,6 +209,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
               نفذ
             </div>
           )}
+          {product.dealEnd && <DealBadge dealEnd={product.dealEnd} />}
         </div>
 
         <div className="absolute top-2 right-2 z-20 flex flex-col gap-2">

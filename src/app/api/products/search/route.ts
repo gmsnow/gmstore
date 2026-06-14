@@ -20,7 +20,7 @@ export const GET = async (req: Request) => {
     },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, discount: true,
+      images: true, discount: true, dealEnd: true,
       category: { select: { name: true, nameEn: true, slug: true } },
     },
     take: limit,
