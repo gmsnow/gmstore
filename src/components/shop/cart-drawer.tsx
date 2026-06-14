@@ -5,7 +5,7 @@ import Link from "next/link";
 import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check, Search } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
-import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost, validateCoupon } from "@/lib/cart/store";
+import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost } from "@/lib/cart/store";
 import type { CartItem } from "@/types";
 
 const statusSteps = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
@@ -31,6 +31,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     setCouponCode("");
     setDiscount(0);
     setCouponMsg("");
+    localStorage.removeItem("appliedCoupon");
     setOrderExpanded(false);
     setShowTrackSearch(false);
     setTrackOrderId("");
@@ -75,14 +76,36 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   }
   const label = currency === "usd" ? "$" : currency === "sar" ? "رس" : "ريال";
 
-  function applyCoupon() {
-    const disc = validateCoupon(couponCode);
-    if (disc !== null) {
-      setDiscount(Math.round(subtotal * disc / 100));
-      setCouponMsg(t("cart.coupon_applied"));
-    } else {
+  async function applyCoupon() {
+    const code = couponCode.trim();
+    if (!code) return;
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        const discPct = data.discount;
+        let minAmount = data.minAmount || 0;
+        if (subtotal < minAmount) {
+          setDiscount(0);
+          setCouponMsg(t("cart.coupon_min_amount").replace("{amount}", `${minAmount}`));
+          return;
+        }
+        setDiscount(Math.round(subtotal * discPct / 100));
+        setCouponMsg(t("cart.coupon_applied"));
+        localStorage.setItem("appliedCoupon", JSON.stringify({ code: data.code, discount: discPct }));
+      } else {
+        setDiscount(0);
+        setCouponMsg(data.error || t("cart.coupon_invalid"));
+        localStorage.removeItem("appliedCoupon");
+      }
+    } catch {
       setDiscount(0);
-      setCouponMsg(t("cart.coupon_invalid"));
+      setCouponMsg(t("general.error"));
+      localStorage.removeItem("appliedCoupon");
     }
   }
 
