@@ -144,6 +144,8 @@ export const ar = {
   "cart.show_details": "عرض الكل",
   "cart.show_less": "عرض أقل",
   "cart.new_order": "طلب جديد",
+  "cart.track_order": "تتبع الطلب",
+  "cart.track_another": "تتبع طلب آخر",
   "cart.empty_drawer": "سلتك فارغة",
   "cart.coupon_discount": "الخصم",
 
@@ -472,6 +474,8 @@ export const en: Record<string, string> = {
   "cart.show_details": "Show All",
   "cart.show_less": "Show Less",
   "cart.new_order": "New Order",
+  "cart.track_order": "Track Order",
+  "cart.track_another": "Track Another Order",
   "cart.empty_drawer": "Your cart is empty",
   "cart.coupon_discount": "Discount",
 
