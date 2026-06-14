@@ -23,21 +23,26 @@ export const GET = auth(async (req) => {
     include: { order: true, product: true },
   });
 
-  const orderIds = [...new Set(orderItems.map((i) => i.orderId))];
+  // Exclude cancelled orders and cancelled items
+  const activeItems = orderItems.filter(
+    (i) => i.order.status !== "CANCELLED" && i.status !== "CANCELLED",
+  );
+
+  const orderIds = [...new Set(activeItems.map((i) => i.orderId))];
   const totalOrders = orderIds.length;
 
-  const todayItems = orderItems.filter((i) => i.order.createdAt >= todayStart);
-  const monthItems = orderItems.filter((i) => i.order.createdAt >= monthStart);
+  const todayItems = activeItems.filter((i) => i.order.createdAt >= todayStart);
+  const monthItems = activeItems.filter((i) => i.order.createdAt >= monthStart);
 
   const newOrdersToday = [...new Set(todayItems.map((i) => i.orderId))].length;
   const newOrdersThisMonth = [...new Set(monthItems.map((i) => i.orderId))].length;
 
-  const totalRevenue = orderItems.reduce((sum, i) => sum + Number(i.price) * i.quantity, 0);
+  const totalRevenue = activeItems.reduce((sum, i) => sum + Number(i.price) * i.quantity, 0);
   const revenueToday = todayItems.reduce((sum, i) => sum + Number(i.price) * i.quantity, 0);
   const revenueThisMonth = monthItems.reduce((sum, i) => sum + Number(i.price) * i.quantity, 0);
 
   const productSales: Record<string, { name: string; nameEn: string | null; count: number }> = {};
-  for (const item of orderItems) {
+  for (const item of activeItems) {
     if (!productSales[item.productId]) {
       productSales[item.productId] = { name: item.product.name, nameEn: item.product.nameEn, count: 0 };
     }
@@ -52,7 +57,7 @@ export const GET = auth(async (req) => {
   for (let i = 6; i >= 0; i--) {
     const dayStart = new Date(todayStart.getTime() - i * 24 * 60 * 60 * 1000);
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-    const dayItems = orderItems.filter(
+    const dayItems = activeItems.filter(
       (item) => item.order.createdAt >= dayStart && item.order.createdAt < dayEnd,
     );
     const dayOrders = [...new Set(dayItems.map((i) => i.orderId))];
