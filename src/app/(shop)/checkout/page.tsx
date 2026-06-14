@@ -41,7 +41,6 @@ export default function CheckoutPage() {
       customerPhone: form.get("phone"),
       shippingAddress,
       items: cart,
-      couponCode: JSON.parse(localStorage.getItem("appliedCoupon") || "null")?.code || null,
     };
     try {
       const res = await fetch("/api/checkout", {

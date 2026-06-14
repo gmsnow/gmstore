@@ -2,10 +2,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check, Search } from "lucide-react";
+import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check, Search, ChevronDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
-import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost } from "@/lib/cart/store";
+import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost, validateCoupon } from "@/lib/cart/store";
 import type { CartItem } from "@/types";
 
 const statusSteps = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
@@ -31,7 +31,6 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     setCouponCode("");
     setDiscount(0);
     setCouponMsg("");
-    localStorage.removeItem("appliedCoupon");
     setOrderExpanded(false);
     setShowTrackSearch(false);
     setTrackOrderId("");
@@ -76,36 +75,14 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   }
   const label = currency === "usd" ? "$" : currency === "sar" ? "رس" : "ريال";
 
-  async function applyCoupon() {
-    const code = couponCode.trim();
-    if (!code) return;
-    try {
-      const res = await fetch("/api/coupons/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      const data = await res.json();
-      if (data.valid) {
-        const discPct = data.discount;
-        let minAmount = data.minAmount || 0;
-        if (subtotal < minAmount) {
-          setDiscount(0);
-          setCouponMsg(t("cart.coupon_min_amount").replace("{amount}", `${minAmount}`));
-          return;
-        }
-        setDiscount(Math.round(subtotal * discPct / 100));
-        setCouponMsg(t("cart.coupon_applied"));
-        localStorage.setItem("appliedCoupon", JSON.stringify({ code: data.code, discount: discPct }));
-      } else {
-        setDiscount(0);
-        setCouponMsg(data.error || t("cart.coupon_invalid"));
-        localStorage.removeItem("appliedCoupon");
-      }
-    } catch {
+  function applyCoupon() {
+    const disc = validateCoupon(couponCode);
+    if (disc !== null) {
+      setDiscount(Math.round(subtotal * disc / 100));
+      setCouponMsg(t("cart.coupon_applied"));
+    } else {
       setDiscount(0);
-      setCouponMsg(t("general.error"));
-      localStorage.removeItem("appliedCoupon");
+      setCouponMsg(t("cart.coupon_invalid"));
     }
   }
 
@@ -123,6 +100,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
       } else {
         const data = await res.json();
         setTrackedOrder(data);
+        setShowTrackSearch(false);
       }
     } catch {
       setTrackError(t("general.error"));
@@ -240,15 +218,13 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <ShoppingBag className="h-5 w-5 text-primary" />
-                {order || trackedOrder ? t("cart.track_title") : t("cart.drawer_title")}
-                {!order && !trackedOrder && items.length > 0 && <span className="text-sm text-muted-foreground">({items.length})</span>}
+                {t("cart.drawer_title")}
+                {items.length > 0 && <span className="text-sm text-muted-foreground">({items.length})</span>}
               </h2>
               <div className="flex items-center gap-2">
-                {!order && !trackedOrder && (
-                  <button onClick={() => { setShowTrackSearch(!showTrackSearch); setTrackError(""); setTrackedOrder(null); }} className="p-1.5 text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted" title={t("cart.track_order")}>
-                    <Search className="h-4 w-4" />
-                  </button>
-                )}
+                <button onClick={() => { setShowTrackSearch(!showTrackSearch); setTrackError(""); setTrackedOrder(null); }} className="p-1.5 text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted" title={t("cart.track_order")}>
+                  <Search className="h-4 w-4" />
+                </button>
                 <button onClick={onClose} className="p-1 hover:text-primary transition-colors">
                   <X className="h-5 w-5" />
                 </button>
@@ -256,7 +232,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             </div>
 
             {/* Track order search bar */}
-            {showTrackSearch && !order && (
+            {showTrackSearch && (
               <form onSubmit={handleTrackOrder} className="px-4 py-3 border-b border-border">
                 <div className="flex gap-2">
                   <input type="text" value={trackOrderId} onChange={(e) => setTrackOrderId(e.target.value)} placeholder={t("track.order_id")} className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:border-primary bg-background" />
@@ -273,8 +249,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </form>
             )}
 
-            {/* Free shipping progress (only if no order and no tracked order) */}
-            {!order && !trackedOrder && (
+            {/* Free shipping progress (always if no trackedOrder) */}
+            {!trackedOrder && (
               <div className="px-4 py-3 border-b border-border">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
                   <Truck className="h-3.5 w-3.5" />
@@ -292,67 +268,82 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
             )}
 
-            {/* Items / Tracking */}
+            {/* Last order tracking (collapsible, above cart items) */}
+            {order && !trackedOrder && (
+              <div className="border-b border-border">
+                <button
+                  onClick={() => setOrderExpanded(!orderExpanded)}
+                  className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-primary" />
+                    {t("cart.track_title")}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${orderExpanded ? "rotate-180" : ""}`} />
+                </button>
+                {orderExpanded && (
+                  <div className="px-4 pb-3 space-y-3">
+                    {renderTracking({ o: order, isCancelled: orderCancelled, statusIndex: orderStatusIndex })}
+                    <button onClick={() => { localStorage.removeItem("lastOrder"); setLastOrder(null); setItems(getCart()); }} className="block w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors">
+                      {t("cart.new_order")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Items / Tracked order body */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
               {trackedOrder ? (
-                <>{renderTracking({ o: trackedOrder, isCancelled: trackCancelled, statusIndex: trackStatusIndex })}</>
-              ) : order ? (
                 <>
-                  {renderTracking({ o: order, isCancelled: orderCancelled, statusIndex: orderStatusIndex })}
-
-                  {/* New order button */}
-                  <button onClick={() => { localStorage.removeItem("lastOrder"); setLastOrder(null); setItems(getCart()); }} className="block w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors mt-2">
-                    {t("cart.new_order")}
+                  {renderTracking({ o: trackedOrder, isCancelled: trackCancelled, statusIndex: trackStatusIndex })}
+                  <button type="button" onClick={() => { setShowTrackSearch(true); setTrackedOrder(null); setTrackOrderId(""); setTrackError(""); }} className="text-xs text-primary hover:underline">
+                    {t("cart.track_another")}
                   </button>
                 </>
+              ) : items.length === 0 && !order ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground">{t("cart.empty_drawer")}</p>
+                  <button onClick={onClose} className="text-sm text-primary hover:underline">{t("cart.continue_shopping")}</button>
+                </div>
               ) : (
-                <>
-                  {/* Empty state */}
-                  {items.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 gap-3">
-                      <ShoppingBag className="h-12 w-12 text-muted-foreground/30" />
-                      <p className="text-sm text-muted-foreground">{t("cart.empty_drawer")}</p>
-                      <button onClick={onClose} className="text-sm text-primary hover:underline">{t("cart.continue_shopping")}</button>
+                items.map((item, idx) => (
+                  <div key={`${item.productId}-${item.color || ""}-${item.size || ""}-${idx}`} className="flex gap-3 rounded-lg border border-border bg-card p-3">
+                    <div className="h-20 w-20 shrink-0 rounded-lg overflow-hidden bg-muted">
+                      <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                     </div>
-                  ) : (
-                    items.map((item, idx) => (
-                      <div key={`${item.productId}-${item.color || ""}-${item.size || ""}-${idx}`} className="flex gap-3 rounded-lg border border-border bg-card p-3">
-                        <div className="h-20 w-20 shrink-0 rounded-lg overflow-hidden bg-muted">
-                          <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <Link href={`/products/${item.productId}`} className="text-sm font-semibold line-clamp-2 hover:text-primary" onClick={onClose}>
+                        {item.name}
+                      </Link>
+                      {item.color && <span className="text-xs text-muted-foreground">{item.color}</span>}
+                      {item.size && <span className="text-xs text-muted-foreground mr-1">{item.size}</span>}
+                      <div className="flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-0.5 border border-border rounded-lg">
+                          <button onClick={() => updateQuantity(item.productId, item.color, -1)} className="p-1 hover:text-primary transition-colors">
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.productId, item.color, 1)} className="p-1 hover:text-primary transition-colors">
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
                         </div>
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <Link href={`/products/${item.productId}`} className="text-sm font-semibold line-clamp-2 hover:text-primary" onClick={onClose}>
-                            {item.name}
-                          </Link>
-                          {item.color && <span className="text-xs text-muted-foreground">{item.color}</span>}
-                          {item.size && <span className="text-xs text-muted-foreground mr-1">{item.size}</span>}
-                          <div className="flex items-center justify-between pt-1">
-                            <div className="flex items-center gap-0.5 border border-border rounded-lg">
-                              <button onClick={() => updateQuantity(item.productId, item.color, -1)} className="p-1 hover:text-primary transition-colors">
-                                <Minus className="h-3.5 w-3.5" />
-                              </button>
-                              <span className="w-8 text-center text-xs font-semibold">{item.quantity}</span>
-                              <button onClick={() => updateQuantity(item.productId, item.color, 1)} className="p-1 hover:text-primary transition-colors">
-                                <Plus className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-primary">{formatPrice(item.price)} {label}</span>
-                              <button onClick={() => { removeFromCart(item.productId, item.color); setItems(getCart()); }} className="p-1 text-muted-foreground hover:text-red-500 transition-colors">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-primary">{formatPrice(item.price)} {label}</span>
+                          <button onClick={() => { removeFromCart(item.productId, item.color); setItems(getCart()); }} className="p-1 text-muted-foreground hover:text-red-500 transition-colors">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </div>
-                    ))
-                  )}
-                </>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
 
-            {/* Coupon + Footer (only if no order and no tracked order) */}
-            {!order && !trackedOrder && (
+            {/* Coupon + Footer (only if cart has items and no trackedOrder) */}
+            {!trackedOrder && items.length > 0 && (
               <>
                 <div className="px-4 py-3 border-t border-border">
                   <div className="flex items-center gap-2">
