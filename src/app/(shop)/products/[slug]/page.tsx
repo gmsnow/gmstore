@@ -9,6 +9,9 @@ import { ProductReviews } from "@/components/shop/product-reviews";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductCarousel } from "@/components/shop/product-carousel";
 import { ProductTrust } from "@/components/shop/product-trust";
+import { ProductSpecs } from "@/components/shop/product-specs";
+import { DeliveryEstimate } from "@/components/shop/delivery-estimate";
+import { FrequentlyBoughtTogether } from "@/components/shop/frequently-bought-together";
 import { CompareButton } from "@/components/shop/compare-button";
 import { CurrencyToggle } from "@/components/shop/currency-toggle";
 import { CountdownTimer } from "@/components/shop/countdown-timer";
@@ -22,11 +25,16 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const { slug } = await params;
   const locale = await getServerLocale();
   const session = await auth();
+  const serverFavs = session?.user
+    ? await prisma.favorite.findMany({ where: { userId: (session.user as any).id }, select: { productId: true } })
+    : [];
+  const favoriteIds = new Set(serverFavs.map((f) => f.productId));
+
   const product = await prisma.product.findUnique({
     where: { slug },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, stock: true, description: true, descriptionEn: true, videoUrl: true, userId: true, discount: true, dealEnd: true,
+      images: true, colors: true, sizes: true, stock: true, description: true, descriptionEn: true, videoUrl: true, userId: true, discount: true, dealEnd: true, specs: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
     },
   });
@@ -36,7 +44,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { categoryId: product.category.id, id: { not: product.id } },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, featured: true, stock: true, discount: true, dealEnd: true,
+      images: true, colors: true, sizes: true, featured: true, stock: true, discount: true, dealEnd: true,
       brand: true, brandLogo: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
       reviews: { select: { rating: true } },
@@ -47,10 +55,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const cartProduct = { id: product.id, name: localizedName(product, locale), price: Number(product.price), images: product.images, stock: product.stock };
   const sessionUserId = (session?.user as any)?.id;
+  const isLoggedIn = !!sessionUserId;
   const role = (session?.user as any)?.role;
   const isAdmin = role === "ADMIN";
   const isOwner = role === "MERCHANT" && product.userId === sessionUserId;
   const canManage = isAdmin || isOwner;
+  const specs = product.specs as Record<string, string> | null;
+  const lowStock = product.stock > 0 && product.stock <= 5;
 
   return (
     <FadeIn>
@@ -64,27 +75,50 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <DeleteProductButton productId={product.id} redirectTo={isOwner ? "/merchant" : "/admin/products"} />
           </div>
         )}
+
         <div className="grid gap-8 lg:grid-cols-2">
           <ProductGallery images={product.images} videoUrl={product.videoUrl} alt={localizedName(product, locale)} />
           <FadeInUp delay={0.15}>
-            <div className="space-y-6">
+            <div className="space-y-5">
               <Badge>{localizedName(product.category, locale)}</Badge>
               <h1 className="text-3xl font-bold">{localizedName(product, locale)}</h1>
-              <CurrencyToggle priceYer={Number(product.price)} />
+
+              <div className="flex items-center justify-between">
+                {product.discount > 0 ? (
+                  <div>
+                    <CurrencyToggle priceYer={Number(product.price)} />
+                    <p className="text-xs text-muted-foreground">توفير {product.discount}%</p>
+                  </div>
+                ) : (
+                  <CurrencyToggle priceYer={Number(product.price)} />
+                )}
+              </div>
+
               <p className="text-muted-foreground leading-relaxed">{localizedDescription(product, locale)}</p>
+
               {product.dealEnd && new Date(product.dealEnd) > new Date() && (
                 <div className="flex items-center gap-2 text-sm bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
                   <span className="text-muted-foreground">العرض ينتهي خلال:</span>
                   <CountdownTimer target={product.dealEnd.toISOString()} />
                 </div>
               )}
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground"><T k="detail.stock" /></span>
-                <Badge variant={product.stock > 0 ? "success" : "danger"}>
-                  {product.stock > 0 ? `${product.stock}` : <T k="detail.not_available" />}
-                </Badge>
+
+              <DeliveryEstimate />
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground"><T k="detail.stock" /></span>
+                  <Badge variant={product.stock > 0 ? "success" : "danger"}>
+                    {product.stock > 0 ? <T k="detail.in_stock" /> : <T k="detail.not_available" />}
+                  </Badge>
+                </div>
+                {lowStock && (
+                  <p className="text-xs text-amber-600">لم يتبق سوى {product.stock} قطع</p>
+                )}
               </div>
-              <ProductActions product={cartProduct} colors={product.colors} />
+
+              <ProductActions product={cartProduct} colors={product.colors} sizes={product.sizes} stock={product.stock} />
+
               <div className="flex items-center gap-2">
                 <CompareButton productId={product.id} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors" />
                 <span className="text-sm text-muted-foreground"><T k="comparison.add" /></span>
@@ -93,12 +127,22 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </FadeInUp>
         </div>
 
+        {specs && Object.keys(specs).length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold mb-4"><T k="detail.specs" /></h2>
+            <ProductSpecs specs={specs} />
+          </section>
+        )}
+
         <section>
           <h2 className="text-xl font-bold mb-6"><T k="detail.why_trust" /></h2>
           <ProductTrust />
         </section>
 
         <ProductReviews productId={product.id} sessionUserId={sessionUserId} />
+
+        <FrequentlyBoughtTogether productId={product.id} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
+
         {related.length > 0 && (
           <section>
             <h2 className="text-2xl font-bold mb-6"><T k="detail.also_like" /></h2>

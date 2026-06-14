@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 
 interface Props {
@@ -24,6 +24,10 @@ function getYouTubeEmbed(url: string): string | null {
 export function ProductGallery({ images, videoUrl, alt }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  const [zoom, setZoom] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const imgRef = useRef<HTMLDivElement>(null);
+
   const hasVideo = videoUrl && getYouTubeEmbed(videoUrl);
   const allItems = hasVideo
     ? [{ type: "video" as const, src: getYouTubeEmbed(videoUrl!)! }, ...images.map((src) => ({ type: "image" as const, src }))]
@@ -35,6 +39,14 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
     if (Math.abs(offsetX) < 50) return;
     if (offsetX > 0 && selectedIndex > 0) setSelectedIndex(i => i - 1);
     if (offsetX < 0 && selectedIndex < allItems.length - 1) setSelectedIndex(i => i + 1);
+  }
+
+  function handleMouseMove(e: React.MouseEvent) {
+    if (!imgRef.current || !zoom) return;
+    const rect = imgRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPos({ x, y });
   }
 
   function goNext() { setSelectedIndex(i => Math.min(allItems.length - 1, i + 1)); }
@@ -54,7 +66,7 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
 
   return (
     <div className="space-y-4 max-w-full">
-      <div className="aspect-square rounded-xl bg-muted overflow-hidden relative">
+      <div className="aspect-square rounded-xl bg-muted overflow-hidden relative" ref={imgRef} onMouseMove={handleMouseMove}>
         {current?.type === "video" ? (
           <iframe
             src={current.src}
@@ -68,8 +80,10 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
             <AnimatePresence mode="popLayout">
               <motion.div
                 key={selectedIndex}
-                className="h-full w-full cursor-grab active:cursor-grabbing"
-                drag={allItems.length > 1 ? "x" : false}
+                className="h-full w-full cursor-crosshair"
+                onMouseEnter={() => { if (allItems.length > 0) setZoom(true); }}
+                onMouseLeave={() => setZoom(false)}
+                drag={allItems.length > 1 && !zoom ? "x" : false}
                 dragElastic={0}
                 dragMomentum={false}
                 onDragEnd={(_, info) => handleSwipe(info.offset.x)}
@@ -78,14 +92,28 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
                 exit={{ opacity: 0, x: -80 }}
                 transition={{ duration: 0.2 }}
               >
-                <button onClick={() => setFullscreen(true)} className="h-full w-full">
+                <div
+                  className="h-full w-full relative overflow-hidden"
+                  onDoubleClick={() => setFullscreen(true)}
+                >
                   <img
                     src={current?.src}
                     alt={`${alt} ${selectedIndex}`}
-                    className="h-full w-full object-cover pointer-events-none"
+                    className="h-full w-full object-cover pointer-events-none transition-opacity duration-200"
+                    style={zoom ? { transform: "scale(1.3)", transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`, opacity: 0 } : {}}
                     loading="lazy"
                   />
-                </button>
+                  {zoom && (
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        backgroundImage: `url(${current?.src})`,
+                        backgroundSize: "200%",
+                        backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
+                      }}
+                    />
+                  )}
+                </div>
               </motion.div>
             </AnimatePresence>
             <button
@@ -121,12 +149,10 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
             <button
               key={i}
               onClick={() => setSelectedIndex(i)}
-              className={`relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${i === selectedIndex ? "border-primary" : "border-border hover:border-muted-foreground"}`}
+              className={`relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${i === selectedIndex ? "border-primary ring-1 ring-primary" : "border-border hover:border-muted-foreground"}`}
             >
               {item.type === "video" ? (
-                <div className="h-full w-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
-                  ▶
-                </div>
+                <div className="h-full w-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">▶</div>
               ) : (
                 <img src={item.src} alt="" className="h-full w-full object-cover" loading="lazy" />
               )}
@@ -169,22 +195,13 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
               <AnimatePresence mode="popLayout">
                 <motion.div
                   key={selectedIndex}
-                  className="max-h-full max-w-full cursor-grab active:cursor-grabbing"
-                  drag={allItems.length > 1 ? "x" : false}
-                  dragElastic={0}
-                  dragMomentum={false}
-                  onDragEnd={(_, info) => handleSwipe(info.offset.x)}
+                  className="max-h-full max-w-full"
                   initial={{ opacity: 0, x: 120 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -120 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <img
-                    src={current.src}
-                    alt={alt}
-                    className="max-h-[85vh] max-w-full object-contain"
-                    draggable={false}
-                  />
+                  <img src={current.src} alt={alt} className="max-h-[85vh] max-w-full object-contain" draggable={false} />
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -192,11 +209,7 @@ export function ProductGallery({ images, videoUrl, alt }: Props) {
           {allItems.length > 1 && (
             <div className="flex-shrink-0 flex justify-center gap-2 pb-4 pt-2 px-4 overflow-x-auto">
               {allItems.map((item, i) => (
-                <button
-                  key={i}
-                  onClick={(e) => { e.stopPropagation(); setSelectedIndex(i); }}
-                  className={`relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${i === selectedIndex ? "border-white opacity-100" : "border-transparent opacity-50 hover:opacity-80"}`}
-                >
+                <button key={i} onClick={(e) => { e.stopPropagation(); setSelectedIndex(i); }} className={`relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${i === selectedIndex ? "border-white opacity-100" : "border-transparent opacity-50 hover:opacity-80"}`}>
                   <img src={item.src} alt="" className="h-full w-full object-cover" loading="lazy" />
                 </button>
               ))}

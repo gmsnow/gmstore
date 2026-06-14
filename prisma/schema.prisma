@@ -106,6 +106,7 @@ model Product {
   colors      String[]
   sizes       String[]
   colorImages Json?
+  specs       Json?
   videoUrl    String?
   brand       String?
   brandLogo   String?

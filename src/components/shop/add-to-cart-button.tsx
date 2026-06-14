@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Check } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
-export function AddToCartButton({ product, color: selectedColor, colors }: { product: { id: string; name: string; price: number; images: string[]; stock: number }; color?: string; colors?: string[] }) {
+export function AddToCartButton({ product, color: selectedColor, colors, size: selectedSize }: { product: { id: string; name: string; price: number; images: string[]; stock: number }; color?: string; colors?: string[]; size?: string }) {
   const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
@@ -17,7 +17,7 @@ export function AddToCartButton({ product, color: selectedColor, colors }: { pro
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ productId: product.id, name: product.name, price: Number(product.price), image: product.images[0] || "", quantity: 1, color: selectedColor || undefined, colors });
+      cart.push({ productId: product.id, name: product.name, price: Number(product.price), image: product.images[0] || "", quantity: 1, color: selectedColor || undefined, size: selectedSize || undefined, colors });
     }
     localStorage.setItem("cart", JSON.stringify(cart));
     setLoading(false);

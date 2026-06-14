@@ -113,7 +113,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 </div>
               ) : (
                 items.map((item, idx) => (
-                  <div key={`${item.productId}-${item.color || ""}-${idx}`} className="flex gap-3 rounded-lg border border-border bg-card p-3">
+                  <div key={`${item.productId}-${item.color || ""}-${item.size || ""}-${idx}`} className="flex gap-3 rounded-lg border border-border bg-card p-3">
                     <div className="h-20 w-20 shrink-0 rounded-lg overflow-hidden bg-muted">
                       <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                     </div>
@@ -122,6 +122,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                         {item.name}
                       </Link>
                       {item.color && <span className="text-xs text-muted-foreground">{item.color}</span>}
+                      {item.size && <span className="text-xs text-muted-foreground mr-1">{item.size}</span>}
                       <div className="flex items-center justify-between pt-1">
                         <div className="flex items-center gap-0.5 border border-border rounded-lg">
                           <button onClick={() => updateQuantity(item.productId, item.color, -1)} className="p-1 hover:text-primary transition-colors">

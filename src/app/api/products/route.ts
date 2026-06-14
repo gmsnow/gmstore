@@ -95,8 +95,10 @@ export const POST = auth(async (req) => {
         images: body.images ?? [],
         colors: body.colors ?? [],
         colorImages: body.colorImages ?? undefined,
+        sizes: body.sizes ?? [],
         brand: body.brand || null,
         brandLogo: body.brandLogo || null,
+        specs: body.specs ?? undefined,
         videoUrl: body.videoUrl || null,
       },
     });
@@ -139,8 +141,10 @@ export const PATCH = auth(async (req) => {
         images: body.images ?? [],
         colors: body.colors ?? [],
         colorImages: body.colorImages ?? undefined,
+        sizes: body.sizes ?? [],
         brand: body.brand || null,
         brandLogo: body.brandLogo || null,
+        specs: body.specs ?? undefined,
         videoUrl: body.videoUrl || null,
       },
     });

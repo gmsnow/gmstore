@@ -37,7 +37,9 @@ export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string
         colorImages: body.colorImages ?? undefined,
         brand: body.brand || null,
         brandLogo: body.brandLogo || null,
+        specs: body.specs ?? undefined,
         videoUrl: body.videoUrl || null,
+        sizes: body.sizes ?? [],
       },
   });
   return NextResponse.json(updated);

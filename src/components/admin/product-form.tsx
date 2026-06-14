@@ -32,6 +32,12 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
   const [uploadingColor, setUploadingColor] = useState<string | null>(null);
   const [brandLogo, setBrandLogo] = useState<string>(product?.brandLogo ?? "");
   const [uploadingBrand, setUploadingBrand] = useState(false);
+  const [specs, setSpecs] = useState<{ key: string; value: string }[]>(() => {
+    const raw = product?.specs;
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) return Object.entries(raw).map(([k, v]) => ({ key: k, value: String(v) }));
+    return [];
+  });
+  const [sizesStr, setSizesStr] = useState(product?.sizes?.join(", ") ?? "");
   const slugRef = useRef<HTMLSelectElement>(null);
   const [autoSlug, setAutoSlug] = useState(!product?.slug);
   const [slugOptions, setSlugOptions] = useState<{ value: string; label: string; taken?: boolean }[]>(() => {
@@ -158,6 +164,8 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
       brand: form.get("brand"),
       brandLogo: brandLogo || null,
       videoUrl: form.get("videoUrl"),
+      specs: specs.length > 0 ? Object.fromEntries(specs.filter(s => s.key).map(s => [s.key, s.value])) : null,
+      sizes: sizesStr.split(",").map((s: string) => s.trim()).filter(Boolean),
       images,
       colors,
       colorImages,
@@ -227,6 +235,10 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
         <input type="checkbox" name="featured" defaultChecked={product?.featured} className="h-4 w-4" />
         منتج مميز
       </label>
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-foreground">المقاسات (مفصولة بفاصلة)</label>
+        <input type="text" value={sizesStr} onChange={(e) => setSizesStr(e.target.value)} placeholder="S, M, L, XL" className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1" />
+      </div>
       <Input id="brand" name="brand" label="العلامة التجارية" defaultValue={product?.brand} />
       <div className="space-y-2">
         <label className="text-sm font-medium">شعار العلامة التجارية</label>
@@ -243,6 +255,19 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
         )}
       </div>
       <Input id="videoUrl" name="videoUrl" label="رابط الفيديو (Video URL)" defaultValue={product?.videoUrl} placeholder="https://www.youtube.com/watch?v=..." />
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <p className="text-sm font-medium">المواصفات</p>
+          {specs.map((s, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input type="text" value={s.key} onChange={(e) => { const n = [...specs]; n[i] = { ...n[i], key: e.target.value }; setSpecs(n); }} placeholder="الخاصية" className="flex-1 h-8 rounded border border-border bg-background px-2 text-sm" />
+              <input type="text" value={s.value} onChange={(e) => { const n = [...specs]; n[i] = { ...n[i], value: e.target.value }; setSpecs(n); }} placeholder="القيمة" className="flex-1 h-8 rounded border border-border bg-background px-2 text-sm" />
+              <button type="button" onClick={() => setSpecs(specs.filter((_, j) => j !== i))} className="h-8 w-8 rounded bg-red-500 text-white text-xs flex items-center justify-center hover:bg-red-600 transition-colors">X</button>
+            </div>
+          ))}
+          <button type="button" onClick={() => setSpecs([...specs, { key: "", value: "" }])} className="text-sm text-primary hover:underline">+ إضافة مواصفة</button>
+        </CardContent>
+      </Card>
       <Card>
         <CardContent className="p-4 space-y-3">
           <p className="text-sm font-medium">الألوان المتاحة</p>
