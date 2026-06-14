@@ -2,20 +2,23 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 export default function CouponsPage() {
   const [coupons, setCoupons] = useState<any[]>([]);
   const [form, setForm] = useState({ code: "", discount: "", maxUses: "", minAmount: "", expiresAt: "", active: true });
   const [showForm, setShowForm] = useState(false);
-  const router = useRouter();
 
   useEffect(() => { fetch("/api/coupons").then(r => r.json()).then(setCoupons).catch(() => {}); }, []);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     const res = await fetch("/api/coupons", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
-    if (res.ok) { setShowForm(false); setForm({ code: "", discount: "", maxUses: "", minAmount: "", expiresAt: "", active: true }); router.refresh(); }
+    if (res.ok) {
+      setShowForm(false);
+      setForm({ code: "", discount: "", maxUses: "", minAmount: "", expiresAt: "", active: true });
+      const refreshed = await fetch("/api/coupons").then(r => r.json());
+      setCoupons(refreshed);
+    }
   }
 
   async function toggleActive(c: any) {
