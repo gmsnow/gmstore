@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       if (!product) throw new Error(`Product not found: ${item.productId}`);
       const price = Number(product.price);
       total += price * item.quantity;
-      return { productId: item.productId, quantity: item.quantity, price, color: item.color || null, status: "PENDING" };
+      return { productId: item.productId, quantity: item.quantity, price, color: item.color || null, size: item.size || null, status: "PENDING" };
     });
 
     const order = await prisma.order.create({

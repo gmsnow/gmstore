@@ -132,15 +132,16 @@ export default function AdminOrderDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>المنتج</TableHead>
+                    <TableHead>المنتج</TableHead>
                   <TableHead><T k="checkout.qty" /></TableHead>
                   <TableHead><T k="admin.price" /></TableHead>
                   <TableHead>المجموع</TableHead>
+                  <TableHead>المواصفات</TableHead>
                   <TableHead>حالة المنتج</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {order.items?.length > 0 ? order.items.map((item: any) => (
+                  {order.items?.length > 0 ? order.items.map((item: any) => (
                   <TableRow key={item.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -154,13 +155,31 @@ export default function AdminOrderDetailPage() {
                         )}
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate">{item.product?.name || "—"}</p>
-                          {item.color && <p className="text-[10px] text-muted-foreground">{item.color}</p>}
+                          <p className="text-[10px] text-muted-foreground">
+                            {[item.color, item.size].filter(Boolean).join(" · ")}
+                          </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell className="whitespace-nowrap">{Number(item.price).toFixed(2)} ريال</TableCell>
                     <TableCell className="whitespace-nowrap">{(Number(item.price) * item.quantity).toFixed(2)} ريال</TableCell>
+                    <TableCell>
+                      {item.product?.specs ? (
+                        <div className="text-[10px] space-y-0.5 max-w-[200px]">
+                          {Object.entries(
+                            typeof item.product.specs === "object" ? item.product.specs : {}
+                          ).map(([k, v]) => (
+                            <div key={k} className="flex justify-between gap-2">
+                              <span className="text-muted-foreground">{k}</span>
+                              <span className="font-medium">{String(v)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Select
                         value={itemUpdating === item.id ? t("general.loading") : item.status}
@@ -171,7 +190,7 @@ export default function AdminOrderDetailPage() {
                     </TableCell>
                   </TableRow>
                 )) : (
-                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-4">لا توجد منتجات في هذا الطلب</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-4">لا توجد منتجات في هذا الطلب</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -194,12 +213,22 @@ export default function AdminOrderDetailPage() {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{item.product?.name || "—"}</p>
-                  {item.color && (
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                      اللون: <span className="h-3 w-3 rounded-full inline-block border border-border" style={{ backgroundColor: item.color }} />
-                    </p>
-                  )}
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {[item.color && `اللون: ${item.color}`, item.size && `المقاس: ${item.size}`].filter(Boolean).join(" · ")}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.quantity} × {Number(item.price).toFixed(2)} ريال</p>
+                  {item.product?.specs && (
+                    <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
+                      {Object.entries(
+                        typeof item.product.specs === "object" ? item.product.specs : {}
+                      ).map(([k, v]) => (
+                        <div key={k} className="flex justify-between gap-2">
+                          <span>{k}:</span>
+                          <span className="font-medium">{String(v)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <p className="text-sm font-semibold">{(Number(item.price) * item.quantity).toFixed(2)} ريال</p>
               </div>

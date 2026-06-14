@@ -197,6 +197,7 @@ model OrderItem {
   quantity  Int
   price     Decimal    @db.Decimal(10, 2)
   color     String?
+  size      String?
   status    ItemStatus @default(PENDING)
 }
 
