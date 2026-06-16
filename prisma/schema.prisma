@@ -169,6 +169,12 @@ model Product {
   favorites   Favorite[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([price])
+  @@index([brand])
+  @@index([createdAt])
+  @@index([featured])
+  @@index([discount])
 }
 
 model Order {

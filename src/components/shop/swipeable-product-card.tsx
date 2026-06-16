@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, Star, Eye, Share2, Expand } from "lucide-react";
 import { CompareButton } from "@/components/shop/compare-button";
@@ -157,12 +158,13 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                <Link href={`/products/${product.slug}`}>
-                  <img
+                <Link href={`/products/${product.slug}`} className="relative block h-full w-full">
+                  <Image
                     src={images[imgIndex]}
                     alt={product.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 25vw"
                     draggable={false}
                   />
                 </Link>
@@ -172,12 +174,13 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             <Link href={`/products/${product.slug}`} className="flex h-full items-center justify-center text-gray-400 text-sm"><T k="product.no_image" /></Link>
           )}
           {hasHoverImg && (
-            <Link href={`/products/${product.slug}`}>
-              <img
+            <Link href={`/products/${product.slug}`} className="absolute inset-0">
+              <Image
                 src={images[1]}
                 alt={product.name}
-                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-110"
-                loading="lazy"
+                fill
+                className="object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-110"
+                sizes="(max-width: 768px) 50vw, 25vw"
                 draggable={false}
               />
             </Link>
@@ -271,7 +274,7 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
         </div>
 
         {product.brandLogo && (
-          <img src={product.brandLogo} alt={product.brand || ""} className="absolute top-[52px] left-2 z-20 max-h-8 max-w-8 pointer-events-none mix-blend-multiply" />
+          <Image src={product.brandLogo} alt={product.brand || ""} width={32} height={32} className="absolute top-[52px] left-2 z-20 pointer-events-none mix-blend-multiply" />
         )}
 
         {product.colors?.length > 0 && (
