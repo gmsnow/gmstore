@@ -54,7 +54,7 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
       }`}
     >
       <Link href="/" className="flex items-center gap-2">
-        <img src={theme === "dark" ? "/dark.png" : "/light.png"} alt="WANOSTORE" className="h-9 w-auto" />
+        <img src={theme === "dark" ? "/light.png" : "/dark.png"} alt="WANOSTORE" className="h-9 w-auto" />
         <span className="text-lg font-bold text-[var(--primary)]"><T k="nav.store_name" /></span>
       </Link>
       <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
