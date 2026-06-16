@@ -15,6 +15,7 @@ export const ar = {
   "nav.search": "بحث عن منتجات...",
   "nav.favorites": "المفضلة",
   "nav.my_orders": "طلباتي",
+  "nav.account": "حسابي",
   "nav.greeting": "مرحباً",
 
   /* Home */
@@ -429,6 +430,7 @@ export const en: Record<string, string> = {
   "nav.search": "Search products...",
   "nav.favorites": "Favorites",
   "nav.my_orders": "My Orders",
+  "nav.account": "Account",
   "nav.greeting": "Hello",
 
   "home.hero_title": "Shop at the Best Prices",
