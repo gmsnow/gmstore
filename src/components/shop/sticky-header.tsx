@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, Store, LogIn, LayoutDashboard, UserPlus, LogOut, Heart } from "lucide-react";
 import { T } from "@/components/translate";
 import { SearchInput } from "@/components/shop/search-input";
 import { UserGreeting } from "@/components/shop/user-greeting";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "@/components/theme-provider";
 import { LangToggle } from "@/components/lang-toggle";
 import { useCurrency, type Currency } from "@/lib/currency/context";
 import { cartCount } from "@/lib/cart/store";
@@ -14,6 +16,7 @@ import { useCart } from "@/components/shop/cart-context";
 
 
 export function StickyHeader({ session, role, signOutForm }: { session: any; role: string | undefined; signOutForm: React.ReactNode }) {
+  const { theme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const { setOpen } = useCart();
   const [badge, setBadge] = useState(0);
@@ -52,7 +55,13 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
       }`}
     >
       <Link href="/" className="flex items-center gap-2">
-        <img src="/wanologo.png" alt="WANOSTORE" className="h-9 w-auto" />
+        <Image
+          src={theme === "dark" ? "/wanologo-dark.png" : "/wanologo.png"}
+          alt="WANOSTORE"
+          width={36}
+          height={36}
+          className="h-9 w-auto"
+        />
         <span className="text-lg font-bold text-[var(--primary)]"><T k="nav.store_name" /></span>
       </Link>
       <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
