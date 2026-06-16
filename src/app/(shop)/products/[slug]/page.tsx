@@ -21,6 +21,12 @@ import { T } from "@/components/translate";
 import { getServerLocale } from "@/lib/i18n/server";
 import { localizedName, localizedDescription } from "@/lib/i18n/localized";
 
+export const revalidate = 300;
+export async function generateStaticParams() {
+  const products = await prisma.product.findMany({ select: { slug: true }, take: 50, orderBy: { createdAt: "desc" } });
+  return products.map((p) => ({ slug: p.slug }));
+}
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getServerLocale();

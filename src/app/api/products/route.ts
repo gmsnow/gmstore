@@ -29,7 +29,9 @@ export const GET = async (req: Request) => {
         select: listSelect,
         take: Math.min(limit, 50),
       });
-      return NextResponse.json(products.map((p: any) => ({ ...p, price: Number(p.price) })));
+      return NextResponse.json(products.map((p: any) => ({ ...p, price: Number(p.price) })), {
+        headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
+      });
     }
 
     const products = await prisma.product.findMany({
@@ -55,7 +57,9 @@ export const GET = async (req: Request) => {
       _reviewCount: statsMap.get(p.id)?.count || 0,
       price: Number(p.price),
     }));
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error?.message }, { status: 500 });
   }

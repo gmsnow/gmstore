@@ -10,7 +10,9 @@ import { localizedName } from "@/lib/i18n/localized";
 import { ProductFilters } from "@/components/shop/product-filters";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 
-export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; featured?: string; q?: string; sort?: string; minPrice?: string; maxPrice?: string; inStock?: string; brand?: string; color?: string; size?: string; minRating?: string; newArrivals?: string; onSale?: string }> }) {
+export const revalidate = 60;
+
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ category?: string; featured?: string; q?: string; sort?: string; minPrice?: string; maxPrice?: string; inStock?: string; brand?: string; color?: string; size?: string; minRating?: string; newArrivals?: string; onSale?: string; page?: string }> }) {
   const params = await searchParams;
   const locale = await getServerLocale();
   const session = await auth();
@@ -53,17 +55,23 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   else if (params.sort === "discount_asc") { orderBy.discount = "asc"; delete orderBy.createdAt; }
   else if (params.sort === "discount_desc") { orderBy.discount = "desc"; delete orderBy.createdAt; }
 
+  const pageSize = 12;
+  const page = Math.max(1, parseInt(params.page || "1"));
+  const skip = (page - 1) * pageSize;
+
   const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, sizes: true, featured: true, stock: true, discount: true, dealEnd: true, brand: true, brandLogo: true, createdAt: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
 
-  const [products, categories, brands, colorRows, sizeRows, userFavs] = await Promise.all([
-    prisma.product.findMany({ where, select: productSelect, orderBy }),
+  const [products, totalCount, categories, brands, colorRows, sizeRows, userFavs] = await Promise.all([
+    prisma.product.findMany({ where, select: productSelect, orderBy, take: pageSize, skip }),
+    prisma.product.count({ where }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.product.findMany({ where: { brand: { not: null } }, select: { brand: true }, distinct: ["brand"], orderBy: { brand: "asc" } }),
+    prisma.$queryRawUnsafe<{ brand: string }[]>("SELECT DISTINCT brand FROM \"Product\" WHERE brand IS NOT NULL ORDER BY brand"),
     prisma.product.findMany({ select: { colors: true } }),
     prisma.product.findMany({ select: { sizes: true } }),
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
   ]);
-  const uniqueBrands = brands.map((b: any) => b.brand).filter(Boolean);
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const uniqueBrands = Array.isArray(brands) ? brands.map((b: any) => b.brand).filter(Boolean) : [];
   const uniqueColors = [...new Set(colorRows.flatMap((r: any) => r.colors))].sort();
   const uniqueSizes = [...new Set(sizeRows.flatMap((r: any) => r.sizes))].sort();
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
@@ -182,6 +190,40 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
             <p className="col-span-full text-center text-muted-foreground py-12"><T k="products.empty" /></p>
           )}
         </StaggerContainer>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8" dir="ltr">
+            {page > 1 && (
+              <Link
+                href={filterUrl({ page: String(page - 1) })}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
+              >
+                ‹
+              </Link>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <Link
+                key={p}
+                href={filterUrl({ page: String(p) })}
+                className={`inline-flex items-center justify-center h-9 min-w-[2.25rem] rounded-lg border transition-colors text-sm ${
+                  p === page
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-border hover:bg-muted"
+                }`}
+              >
+                {p}
+              </Link>
+            ))}
+            {page < totalPages && (
+              <Link
+                href={filterUrl({ page: String(page + 1) })}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
+              >
+                ›
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </FadeIn>
   );

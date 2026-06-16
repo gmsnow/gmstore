@@ -4,7 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: ReturnType<typeof createPrisma>;
 };
 
-const RETRY_DELAYS = [1000, 2000, 5000];
+const RETRY_DELAYS = [500, 1000];
 
 function isConnectionError(e: unknown): boolean {
   if (!(e instanceof Error)) return false;
@@ -20,8 +20,13 @@ function isConnectionError(e: unknown): boolean {
 }
 
 function createPrisma() {
+  const url = process.env.DATABASE_URL || "";
+  const usePooler = url.includes("verceldb") || url.includes("aws.com") || url.includes("pooler");
   const client = new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    datasources: usePooler ? undefined : {
+      db: { url: process.env.DATABASE_URL_UNPOOLED || url },
+    },
   });
 
   return client.$extends({
