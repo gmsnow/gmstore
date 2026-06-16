@@ -25,7 +25,7 @@ export const GET = auth(async (req, { params }: { params: Promise<{ id: string }
     include: {
       items: {
         where: { productId: { in: productIds } },
-        include: { product: { select: { id: true, name: true, nameEn: true, images: true, price: true } } },
+        include: { product: { select: { id: true, name: true, nameEn: true, images: true, price: true, specs: true, colors: true, sizes: true, discount: true, brand: true, colorImages: true, colorStock: true } } },
       },
     },
   });

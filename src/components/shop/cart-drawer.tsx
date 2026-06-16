@@ -5,7 +5,7 @@ import Link from "next/link";
 import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check, Search, ChevronDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
-import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost, validateCoupon } from "@/lib/cart/store";
+import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost } from "@/lib/cart/store";
 import type { CartItem } from "@/types";
 
 const statusSteps = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
@@ -36,10 +36,29 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     setTrackOrderId("");
     setTrackedOrder(null);
     setTrackError("");
-    try {
-      const raw = localStorage.getItem("lastOrder");
-      setLastOrder(raw ? JSON.parse(raw) : null);
-    } catch { setLastOrder(null); }
+    let cancelled = false;
+    async function loadLastOrder() {
+      const orderId = localStorage.getItem("lastOrderId");
+      if (!orderId) { if (!cancelled) setLastOrder(null); return; }
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+        if (!res.ok) throw new Error();
+        const order = await res.json();
+        if (!cancelled) {
+          if (order?.items?.every((i: any) => i.status === "DELIVERED") || order?.status === "CANCELLED") {
+            localStorage.removeItem("lastOrderId");
+            if (!cancelled) setLastOrder(null);
+          } else {
+            if (!cancelled) setLastOrder(order);
+          }
+        }
+      } catch {
+        if (!cancelled) { try { const raw = localStorage.getItem("lastOrder"); setLastOrder(raw ? JSON.parse(raw) : null); } catch { setLastOrder(null); } }
+      }
+    }
+    loadLastOrder();
+    const interval = setInterval(loadLastOrder, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [open]);
 
   useEffect(() => {
@@ -49,15 +68,27 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   }, [open]);
 
   useEffect(() => {
-    const handler = () => {
+    let cancelled = false;
+    async function handler() {
       if (!open) return;
+      const orderId = localStorage.getItem("lastOrderId");
+      if (!orderId) { if (!cancelled) setLastOrder(null); return; }
       try {
-        const raw = localStorage.getItem("lastOrder");
-        setLastOrder(raw ? JSON.parse(raw) : null);
-      } catch { setLastOrder(null); }
-    };
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+        if (!res.ok) throw new Error();
+        const order = await res.json();
+        if (!cancelled) {
+          if (order?.items?.every((i: any) => i.status === "DELIVERED") || order?.status === "CANCELLED") {
+            localStorage.removeItem("lastOrderId");
+            if (!cancelled) setLastOrder(null);
+          } else {
+            if (!cancelled) setLastOrder(order);
+          }
+        }
+      } catch { if (!cancelled) setLastOrder(null); }
+    }
     window.addEventListener("orderPlaced", handler);
-    return () => window.removeEventListener("orderPlaced", handler);
+    return () => { cancelled = true; window.removeEventListener("orderPlaced", handler); };
   }, [open]);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -75,15 +106,24 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   }
   const label = currency === "usd" ? "$" : currency === "sar" ? "رس" : "ريال";
 
-  function applyCoupon() {
-    const disc = validateCoupon(couponCode);
-    if (disc !== null) {
-      setDiscount(Math.round(subtotal * disc / 100));
-      setCouponMsg(t("cart.coupon_applied"));
-      localStorage.setItem("appliedCoupon", couponCode);
-    } else {
+  async function applyCoupon() {
+    const code = couponCode.trim();
+    if (!code) return;
+    try {
+      const res = await fetch(`/api/coupons/validate/${encodeURIComponent(code)}?subtotal=${subtotal}`);
+      const data = await res.json();
+      if (data.valid) {
+        setDiscount(Math.round(subtotal * data.discount / 100));
+        setCouponMsg(t("cart.coupon_applied"));
+        localStorage.setItem("appliedCoupon", code);
+      } else {
+        setDiscount(0);
+        setCouponMsg(data.error || t("cart.coupon_invalid"));
+        localStorage.removeItem("appliedCoupon");
+      }
+    } catch {
       setDiscount(0);
-      setCouponMsg(t("cart.coupon_invalid"));
+      setCouponMsg(t("cart.coupon_error"));
     }
   }
 

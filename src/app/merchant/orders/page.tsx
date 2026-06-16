@@ -15,10 +15,19 @@ interface OrderItem {
     name: string;
     nameEn: string | null;
     images: string[];
+    price?: number;
+    specs?: Record<string, string> | null;
+    colors?: string[];
+    sizes?: string[];
+    discount?: number;
+    brand?: string | null;
+    colorImages?: Record<string, string> | null;
+    colorStock?: Record<string, number> | null;
   };
   quantity: number;
   price: number;
   color: string | null;
+  size: string | null;
   status: string;
 }
 
@@ -267,8 +276,8 @@ export default function MerchantOrdersPage() {
                           const isUpdating = updatingItems.has(item.id);
                           const StatusIcon = stepIcons[item.status] || Package;
                           return (
-                            <div key={item.id} className="flex items-center gap-3 pt-3 first:pt-0">
-                              <div className="h-12 w-12 rounded-lg border border-border bg-muted overflow-hidden flex-shrink-0">
+                            <div key={item.id} className="flex items-start gap-3 pt-3 first:pt-0">
+                              <div className="h-14 w-14 rounded-lg border border-border bg-muted overflow-hidden flex-shrink-0 relative">
                                 {item.product.images?.[0] ? (
                                   <img
                                     src={item.product.images[0]}
@@ -278,23 +287,23 @@ export default function MerchantOrdersPage() {
                                 ) : (
                                   <Package className="h-5 w-5 m-auto text-muted-foreground/40" />
                                 )}
+                                {item.color && <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background" style={{ backgroundColor: item.color }} />}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">{item.product.name}</p>
-                                <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-                                  <span>
-                                    <T k="checkout.qty" />: {item.quantity}
-                                  </span>
-                                  <span>
-                                    &times; {Number(item.price).toFixed(0)}
-                                  </span>
-                                  {item.color && (
-                                    <>
-                                      <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                                      <span>{item.color}</span>
-                                    </>
-                                  )}
+                                {item.product.brand && <p className="text-[10px] text-muted-foreground mt-0.5">العلامة: {item.product.brand}</p>}
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+                                  <span className="font-medium">{item.quantity} × {Number(item.price).toFixed(0)}</span>
+                                  {item.color && <><span className="w-1 h-1 rounded-full bg-muted-foreground/30" /><span>اللون: {item.color}</span></>}
+                                  {item.size && <><span className="w-1 h-1 rounded-full bg-muted-foreground/30" /><span>المقاس: {item.size}</span></>}
                                 </div>
+                                {item.product.specs && Object.keys(item.product.specs).length > 0 && (
+                                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[10px] text-muted-foreground">
+                                    {Object.entries(item.product.specs).map(([k, v]) => (
+                                      <span key={k}>{k}: <b>{String(v)}</b></span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <Badge

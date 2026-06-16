@@ -20,24 +20,27 @@ export default function CartPage() {
     setItems(cart);
     setMounted(true);
 
-    const orderId = localStorage.getItem("lastOrderId");
-    if (orderId) {
-      fetch(`/api/orders/${encodeURIComponent(orderId)}`)
-        .then((r) => r.ok ? r.json() : null)
-        .then((order) => {
-          if (order && order.items) {
-            if (order.items.every((i: any) => i.status === "DELIVERED")) {
-              localStorage.removeItem("cart");
-              localStorage.removeItem("lastOrderId");
-              setItems([]);
-              setLastOrder(null);
-            } else if (order.status !== "CANCELLED") {
-              setLastOrder(order);
-            }
+    let cancelled = false;
+    async function checkLastOrder() {
+      const orderId = localStorage.getItem("lastOrderId");
+      if (!orderId) return;
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+        if (!res.ok) throw new Error();
+        const order = await res.json();
+        if (!cancelled && order?.items) {
+          if (order.items.every((i: any) => i.status === "DELIVERED") || order.status === "CANCELLED") {
+            localStorage.removeItem("lastOrderId");
+            setLastOrder(null);
+          } else {
+            setLastOrder(order);
           }
-        })
-        .catch(() => {});
+        }
+      } catch {}
     }
+    checkLastOrder();
+    const interval = setInterval(checkLastOrder, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, []);
 
   function updateCart(newItems: CartItem[]) {

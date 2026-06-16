@@ -3,7 +3,6 @@ import type { CartItem } from "@/types";
 const STORAGE_KEY = "cart";
 const FREE_SHIPPING_THRESHOLD = 5000;
 const SHIPPING_COST = 500;
-const VALID_COUPONS: Record<string, number> = { SAVE10: 10, SAVE20: 20 };
 
 export function getCart(): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -48,10 +47,6 @@ export function cartCount(): number {
 
 export function cartSubtotal(): number {
   return getCart().reduce((sum, i) => sum + i.price * i.quantity, 0);
-}
-
-export function validateCoupon(code: string): number | null {
-  return VALID_COUPONS[code.toUpperCase().trim()] ?? null;
 }
 
 export function getFreeShippingThreshold() { return FREE_SHIPPING_THRESHOLD; }

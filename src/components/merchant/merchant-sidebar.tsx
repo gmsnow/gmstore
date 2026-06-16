@@ -1,8 +1,8 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Store, LayoutDashboard, ShoppingBag, Package, Star, Settings, Wallet, ArrowRight, LogOut, Menu, X } from "lucide-react";
+import { Store, LayoutDashboard, ShoppingBag, Package, Star, Settings, Wallet, ArrowRight, LogOut, Menu, X, XCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { T } from "@/components/translate";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -11,6 +11,7 @@ import { LangToggle } from "@/components/lang-toggle";
 const links = [
   { href: "/merchant", labelKey: "merchant.dashboard", icon: LayoutDashboard },
   { href: "/merchant/orders", labelKey: "merchant.orders", icon: ShoppingBag },
+  { href: "/merchant/orders/cancelled", labelKey: "merchant.cancelled_orders", icon: XCircle },
   { href: "/merchant/store", labelKey: "merchant.store_settings", icon: Store },
   { href: "/merchant/reviews", labelKey: "merchant.reviews", icon: Star },
   { href: "/merchant/withdrawals", labelKey: "merchant.withdrawals", icon: Wallet },
@@ -20,18 +21,7 @@ const links = [
 export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }: { children: React.ReactNode; storeName: string; storeNameEn: string; storeLogo?: string | null }) {
   const pathname = usePathname();
   const { direction, t } = useI18n();
-  const navRef = useRef<HTMLElement>(null);
-  const [indicator, setIndicator] = useState({ width: 0, x: 0 });
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    if (!navRef.current) return;
-    const active = navRef.current.querySelector<HTMLAnchorElement>("a[data-active=true]");
-    if (!active) return;
-    const r = active.getBoundingClientRect();
-    const nr = navRef.current.getBoundingClientRect();
-    setIndicator({ width: r.width, x: r.left - nr.left });
-  }, [pathname]);
 
   useEffect(() => { setDrawerOpen(false); }, [pathname]);
 
@@ -77,7 +67,7 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }:
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="flex flex-col gap-2 text-sm flex-1">
+            <nav className="flex flex-col gap-2 text-sm flex-1 overflow-y-auto">
               {links.map((l) => (
                 <Link
                   key={l.href}
@@ -151,12 +141,8 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }:
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
 
-      {/* Mobile bottom nav — same as admin */}
-      <nav ref={navRef} className="mobile-only fixed bottom-4 inset-x-4 z-40 items-center justify-around rounded-2xl border border-border bg-card shadow-lg px-2 py-2" style={{ direction: direction }}>
-        <div
-          className="absolute bottom-2 top-2 rounded-xl bg-primary/10 transition-all duration-300 ease-out"
-          style={{ width: indicator.width, left: indicator.x, opacity: indicator.width > 0 ? 1 : 0 }}
-        />
+      {/* Mobile bottom nav */}
+      <nav className="mobile-only fixed bottom-4 inset-x-4 z-40 items-center rounded-2xl border border-border bg-card shadow-lg px-1 py-2 overflow-x-auto flex-nowrap snap-x snap-mandatory scroll-smooth" style={{ direction: direction }}>
         {links.map((l) => {
           const isActive = pathname === l.href;
           return (
@@ -164,10 +150,12 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo }:
               key={l.href}
               href={l.href}
               data-active={isActive ? "true" : undefined}
-              className={`relative z-10 flex flex-col items-center gap-0.5 px-3 py-1.5 text-[10px] transition-colors min-w-0 flex-1 ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex flex-col items-center gap-0.5 px-1 py-1.5 text-[10px] transition-colors w-1/5 flex-shrink-0 snap-start ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
             >
-              <l.icon className={`h-5 w-5 transition-all ${isActive ? "text-primary scale-110" : ""}`} />
-              <span className="truncate font-medium"><T k={l.labelKey} /></span>
+              <div className={`flex items-center justify-center h-10 w-10 rounded-xl transition-all ${isActive ? "bg-primary/10 scale-110" : ""}`}>
+                <l.icon className={`h-5 w-5 transition-all ${isActive ? "text-primary" : ""}`} />
+              </div>
+              <span className="truncate font-medium w-full text-center"><T k={l.labelKey} /></span>
             </Link>
           );
         })}

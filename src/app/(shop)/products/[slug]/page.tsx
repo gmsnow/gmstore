@@ -34,7 +34,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { slug },
     select: {
       id: true, name: true, nameEn: true, slug: true, price: true,
-      images: true, colors: true, sizes: true, stock: true, description: true, descriptionEn: true, videoUrl: true, userId: true, discount: true, dealEnd: true, specs: true,
+      images: true, colors: true, sizes: true, stock: true, description: true, descriptionEn: true, videoUrl: true, userId: true, discount: true, dealEnd: true, specs: true, colorImages: true, colorStock: true,
       category: { select: { id: true, name: true, nameEn: true, slug: true } },
     },
   });
@@ -117,7 +117,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 )}
               </div>
 
-              <ProductActions product={cartProduct} colors={product.colors} sizes={product.sizes} stock={product.stock} />
+              <ProductActions product={cartProduct} colors={product.colors} sizes={product.sizes} stock={product.stock} colorStock={product.colorStock as Record<string, number> | null} colorImages={product.colorImages as Record<string, string> | null} />
 
               <div className="flex items-center gap-2">
                 <CompareButton productId={product.id} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors" />

@@ -59,6 +59,21 @@ export async function POST(req: Request) {
       include: { items: { include: { product: { select: { name: true, nameEn: true, images: true } } } } },
     });
 
+    for (const item of orderItems) {
+      const product = productMap.get(item.productId);
+      if (product) {
+        const colorStock = (product.colorStock as Record<string, number> | null) || {};
+        const newTotalStock = Number(product.stock) - item.quantity;
+        if (item.color && colorStock[item.color] !== undefined) {
+          colorStock[item.color] = Math.max(0, Number(colorStock[item.color]) - item.quantity);
+        }
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: newTotalStock, colorStock },
+        });
+      }
+    }
+
     logger.info("Order created", { orderId: order.id, shippingCost, discount, total });
     const serialized = {
       ...order,

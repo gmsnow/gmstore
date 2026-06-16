@@ -6,7 +6,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const reviews = await prisma.review.findMany({
     where: { productId: id },
-    include: { user: { select: { name: true } } },
+    include: { user: { select: { id: true, name: true } } },
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(reviews);
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       rating: Number(rating),
       comment,
     },
-    include: { user: { select: { name: true } } },
+    include: { user: { select: { id: true, name: true } } },
   });
 
   return NextResponse.json(review);

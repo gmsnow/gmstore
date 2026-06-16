@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Check } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
-export function AddToCartButton({ product, color: selectedColor, colors, size: selectedSize }: { product: { id: string; name: string; price: number; images: string[]; stock: number }; color?: string; colors?: string[]; size?: string }) {
+export function AddToCartButton({ product, color: selectedColor, colors, size: selectedSize, colorStock }: { product: { id: string; name: string; price: number; images: string[]; stock: number }; color?: string; colors?: string[]; size?: string; colorStock?: Record<string, number> | null }) {
   const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
@@ -27,7 +27,7 @@ export function AddToCartButton({ product, color: selectedColor, colors, size: s
 
   return (
     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-      <Button size="lg" className="w-full md:w-auto relative overflow-hidden" onClick={handleAdd} loading={loading} disabled={product.stock === 0}>
+      <Button size="lg" className="w-full md:w-auto relative overflow-hidden" onClick={handleAdd} loading={loading} disabled={product.stock === 0 || (!!selectedColor && !!colorStock && (colorStock[selectedColor] ?? product.stock) <= 0)}>
         <AnimatePresence mode="wait">
           {added ? (
             <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="flex items-center gap-2">

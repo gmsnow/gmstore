@@ -58,6 +58,7 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
       <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
         <Link href="/products" className="hover:opacity-80 transition-opacity"><T k="nav.products" /></Link>
         <Link href="/categories" className="hover:opacity-80 transition-opacity"><T k="nav.categories" /></Link>
+        <Link href="/orders" className="hover:opacity-80 transition-opacity">طلباتي</Link>
         <Link href="/favorites" className="hover:opacity-80 transition-opacity flex items-center gap-1">
           <Heart className="h-4 w-4 text-rose-500" />
           <T k="nav.favorites" />

@@ -30,6 +30,7 @@ export function MobileNav({ session, role }: { session: any; role: string | unde
     { href: "/products", labelKey: "nav.products", icon: ShoppingBag },
     { href: "/categories", labelKey: "nav.categories", icon: Tags },
     { href: "/favorites", labelKey: "nav.favorites", icon: Heart },
+    { href: "/orders", labelKey: "nav.my_orders", icon: Package },
     { href: "/track", labelKey: "track.nav_link", icon: Package },
   ];
 

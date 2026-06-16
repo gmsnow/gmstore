@@ -60,6 +60,14 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
     return price.toFixed(2);
   }
 
+  function formatOriginalPrice(c: Currency) {
+    const disc = Number(product.discount) || 0;
+    const originalPrice = disc >= 100 ? Number(product.price) * 2 : Number(product.price) / (1 - disc / 100);
+    if (c === "usd") return (originalPrice / USD_TO_YER).toFixed(2);
+    if (c === "sar") return (originalPrice / USD_TO_YER * USD_TO_SAR).toFixed(2);
+    return originalPrice.toFixed(2);
+  }
+
   function cycleCurrency() {
     setLocalCurrency(prev => {
       const base = prev ?? currency;
@@ -322,9 +330,11 @@ export function SwipeableProductCard({ product, isLoggedIn = false, favoriteIds 
             )}
           </div>
 
-          <div className="flex items-center justify-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-[var(--primary)] line-through">{formatPrice("yer")} {currencyLabels.yer}</span>
-          </div>
+          {product.discount > 0 && (
+            <div className="flex items-center justify-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-[var(--primary)] line-through">{formatOriginalPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
+            </div>
+          )}
           <div className="flex items-center justify-center gap-1.5 flex-wrap mt-0.5">
             <span className="text-sm font-bold text-[var(--primary)]">{formatPrice(displayCurrency)} {currencyLabels[displayCurrency]}</span>
           </div>

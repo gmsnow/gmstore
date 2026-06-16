@@ -2,6 +2,32 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const product = await prisma.product.findFirst({
+    where: { OR: [{ id }, { slug: id }] },
+    include: {
+      category: true,
+      reviews: { include: { user: { select: { id: true, name: true, image: true } } }, orderBy: { createdAt: "desc" } },
+    },
+  });
+  if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  const reviewStats = await prisma.review.groupBy({
+    by: ["productId"],
+    where: { productId: product.id },
+    _avg: { rating: true },
+    _count: true,
+  });
+  const stats = reviewStats[0] || {};
+  return NextResponse.json({
+    ...product,
+    price: Number(product.price),
+    _avgRating: (stats._avg as any)?.rating || 0,
+    _reviewCount: (stats as any)?._count || 0,
+    reviews: product.reviews.map((r: any) => ({ ...r, rating: Number(r.rating) })),
+  });
+}
+
 export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string }> }) => {
   const role = (req.auth?.user as any)?.role;
   const userId = (req.auth?.user as any)?.id;
@@ -35,6 +61,7 @@ export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string
         images: body.images ?? [],
         colors: body.colors ?? [],
         colorImages: body.colorImages ?? undefined,
+        colorStock: body.colorStock ?? undefined,
         brand: body.brand || null,
         brandLogo: body.brandLogo || null,
         specs: body.specs ?? undefined,

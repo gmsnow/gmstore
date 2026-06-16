@@ -133,6 +133,7 @@ export default function AdminOrderDetailPage() {
               <TableHeader>
                 <TableRow>
                     <TableHead>المنتج</TableHead>
+                  <TableHead>اللون/المقاس</TableHead>
                   <TableHead><T k="checkout.qty" /></TableHead>
                   <TableHead><T k="admin.price" /></TableHead>
                   <TableHead>المجموع</TableHead>
@@ -148,17 +149,19 @@ export default function AdminOrderDetailPage() {
                         {item.product?.images?.[0] ? (
                           <div className="relative shrink-0">
                             <img src={item.product.images[0]} alt="" className="h-10 w-10 rounded-lg object-cover bg-muted" />
-                            {item.color && <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border border-background" style={{ backgroundColor: item.color }} />}
                           </div>
                         ) : (
                           <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0"><Package className="h-4 w-4 text-muted-foreground" /></div>
                         )}
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate">{item.product?.name || "—"}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {[item.color, item.size].filter(Boolean).join(" · ")}
-                          </p>
                         </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {item.color && <div className="h-5 w-5 rounded-full border border-border shrink-0" style={{ backgroundColor: item.color }} title={item.color} />}
+                        <span className="text-xs">{[item.color && item.color, item.size && `مقاس ${item.size}`].filter(Boolean).join(" - ")}</span>
                       </div>
                     </TableCell>
                     <TableCell>{item.quantity}</TableCell>
@@ -190,7 +193,7 @@ export default function AdminOrderDetailPage() {
                     </TableCell>
                   </TableRow>
                 )) : (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-4">لا توجد منتجات في هذا الطلب</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-4">لا توجد منتجات في هذا الطلب</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -213,9 +216,10 @@ export default function AdminOrderDetailPage() {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{item.product?.name || "—"}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {[item.color && `اللون: ${item.color}`, item.size && `المقاس: ${item.size}`].filter(Boolean).join(" · ")}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {item.color && <div className="h-4 w-4 rounded-full border border-border shrink-0" style={{ backgroundColor: item.color }} title={item.color} />}
+                    <span className="text-xs text-muted-foreground">{item.color && item.color}{item.color && item.size && " - "}{item.size && `مقاس ${item.size}`}</span>
+                  </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.quantity} × {Number(item.price).toFixed(2)} ريال</p>
                   {item.product?.specs && (
                     <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">

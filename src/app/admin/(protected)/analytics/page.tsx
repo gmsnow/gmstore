@@ -4,7 +4,7 @@ import { DollarSign, ShoppingCart, Users, Star, TrendingUp, Package } from "luci
 export default async function AnalyticsPage() {
   const [totalOrders, totalRevenue, totalProducts, totalCustomers, totalReviews, recentOrders] = await Promise.all([
     prisma.order.count(),
-    prisma.order.aggregate({ _sum: { total: true } }),
+    prisma.order.aggregate({ _sum: { total: true }, where: { status: { not: "CANCELLED" } } }),
     prisma.product.count(),
     prisma.user.count({ where: { role: "CUSTOMER" } }),
     prisma.review.count(),

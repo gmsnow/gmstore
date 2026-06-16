@@ -10,8 +10,10 @@ export const GET = auth(async (req) => {
   }
 
   const { searchParams } = new URL(req.url);
-  const skip = parseInt(searchParams.get("skip") || "0");
+  const page = parseInt(searchParams.get("page") || "1");
+  const skip = parseInt(searchParams.get("skip") || String((page - 1) * 20));
   const take = parseInt(searchParams.get("take") || "20");
+  const status = searchParams.get("status");
 
   const productIds = await prisma.product.findMany({
     where: { userId },
@@ -19,29 +21,30 @@ export const GET = auth(async (req) => {
   });
   const ids = productIds.map((p) => p.id);
 
+  const where: any = { items: { some: { productId: { in: ids } } } };
+  if (status) where.status = status;
+
   const [orders, total] = await Promise.all([
     prisma.order.findMany({
-      where: { items: { some: { productId: { in: ids } } } },
+      where,
       include: {
         items: {
           where: { productId: { in: ids } },
-          include: { product: { select: { id: true, name: true, nameEn: true, images: true, price: true } } },
+          include: { product: { select: { id: true, name: true, nameEn: true, images: true, price: true, specs: true, colors: true, sizes: true, discount: true, brand: true, colorImages: true, colorStock: true } } },
         },
       },
       orderBy: { createdAt: "desc" },
       skip,
       take,
     }),
-    prisma.order.count({
-      where: { items: { some: { productId: { in: ids } } } },
-    }),
+    prisma.order.count({ where }),
   ]);
 
   const serialized = orders.map((order) => ({
     ...order,
     total: Number(order.total),
-    items: order.items.map((item) => ({ ...item, price: Number(item.price) })),
+    items: order.items.map((item) => ({ ...item, price: Number(item.price), size: item.size || null })),
   }));
 
-  return NextResponse.json({ orders: serialized, total, skip, take });
+  return NextResponse.json({ orders: serialized, total });
 });

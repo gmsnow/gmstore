@@ -29,6 +29,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
   const [colors, setColors] = useState<string[]>(product?.colors ?? []);
   const [colorInput, setColorInput] = useState("");
   const [colorImages, setColorImages] = useState<Record<string, string>>(product?.colorImages ?? {});
+  const [colorStock, setColorStock] = useState<Record<string, number>>(product?.colorStock ?? {});
   const [uploadingColor, setUploadingColor] = useState<string | null>(null);
   const [brandLogo, setBrandLogo] = useState<string>(product?.brandLogo ?? "");
   const [uploadingBrand, setUploadingBrand] = useState(false);
@@ -90,6 +91,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
   function removeColor(hex: string) {
     setColors((p) => p.filter((c) => c !== hex));
     setColorImages((prev) => { const n = { ...prev }; delete n[hex]; return n; });
+    setColorStock((prev) => { const n = { ...prev }; delete n[hex]; return n; });
   }
 
   async function uploadColorImage(hex: string, file: File) {
@@ -169,6 +171,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
       images,
       colors,
       colorImages,
+      colorStock,
     };
 
     const url = product ? `/api/products/${product.id}` : "/api/products";
@@ -289,6 +292,7 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadColorImage(c, f); }} />
                   </label>
                 )}
+                <input type="number" min="0" value={colorStock[c] ?? 0} onChange={(e) => setColorStock((p) => ({ ...p, [c]: parseInt(e.target.value) || 0 }))} className="h-7 w-16 rounded border border-border bg-background text-center text-xs" placeholder="مخزون" />
               </div>
             ))}
           </div>

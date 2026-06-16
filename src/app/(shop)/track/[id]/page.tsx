@@ -28,14 +28,22 @@ export default function TrackOrderByIdPage() {
   useEffect(() => {
     const id = params.id as string;
     if (!id) return;
-    fetch(`/api/orders/${encodeURIComponent(id)}`)
-      .then(async (res) => {
+    let cancelled = false;
+    async function fetchOrder() {
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(id)}`);
         if (!res.ok) throw new Error(res.status === 404 ? t("track.not_found") : `${t("general.error")} ${res.status}`);
         const data = await res.json();
-        setOrder(data);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+        if (!cancelled) setOrder(data);
+      } catch (err: any) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    fetchOrder();
+    const interval = setInterval(fetchOrder, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [params.id]);
 
   const isCancelled = order?.status === "CANCELLED";
@@ -105,7 +113,7 @@ export default function TrackOrderByIdPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-sm text-muted-foreground">{t("track.id_label")}</p>
-                <p className="font-mono text-sm">{order.id}</p>
+                <p className="font-mono text-sm">{order.id.slice(0, 8)}...</p>
               </div>
             </div>
 

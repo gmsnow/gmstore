@@ -1,18 +1,15 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
-import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, Image as ImageIcon, LogOut, Store, Menu, X, Ticket, BarChart3, Users, Star, Percent } from "lucide-react";
+import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, Image as ImageIcon, LogOut, Store, Menu, X, Ticket, BarChart3, Users, Star, Percent, XCircle, Store as StoreIcon } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
 export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { t, direction } = useI18n();
-  const navRef = useRef<HTMLElement>(null);
-  const [indicator, setIndicator] = useState({ width: 0, x: 0 });
-
   const links = [
     { href: "/admin", labelKey: "admin.home", icon: LayoutDashboard },
     { href: "/admin/analytics", labelKey: "admin.analytics", icon: BarChart3 },
@@ -20,22 +17,15 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     { href: "/admin/categories", labelKey: "admin.categories", icon: Tags },
     { href: "/admin/orders", labelKey: "admin.orders", icon: ShoppingBag },
     { href: "/admin/orders/delivered", labelKey: "admin.delivered_orders", icon: CheckCheck },
+    { href: "/admin/orders/cancelled", labelKey: "admin.cancelled_orders", icon: XCircle },
     { href: "/admin/coupons", labelKey: "admin.coupons", icon: Ticket },
+    { href: "/admin/merchants", labelKey: "admin.merchants", icon: StoreIcon },
     { href: "/admin/customers", labelKey: "admin.customers", icon: Users },
     { href: "/admin/reviews", labelKey: "admin.reviews", icon: Star },
     { href: "/admin/banners", labelKey: "admin.banners", icon: ImageIcon },
   ];
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    if (!navRef.current) return;
-    const active = navRef.current.querySelector<HTMLAnchorElement>("a[data-active=true]");
-    if (!active) return;
-    const r = active.getBoundingClientRect();
-    const nr = navRef.current.getBoundingClientRect();
-    setIndicator({ width: r.width, x: r.left - nr.left });
-  }, [pathname]);
 
   useEffect(() => {
     setDrawerOpen(false);
@@ -79,7 +69,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="flex flex-col gap-2 text-sm flex-1">
+            <nav className="flex flex-col gap-2 text-sm flex-1 overflow-y-auto">
               {links.map((l) => (
                 <Link
                   key={l.href}
@@ -149,11 +139,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav ref={navRef} className="mobile-only fixed bottom-4 inset-x-4 z-40 items-center justify-around rounded-2xl border border-border bg-card shadow-lg px-2 py-2" style={{ direction: direction }}>
-        <div
-          className="absolute bottom-2 top-2 rounded-xl bg-primary/10 transition-all duration-300 ease-out"
-          style={{ width: indicator.width, left: indicator.x, opacity: indicator.width > 0 ? 1 : 0 }}
-        />
+      <nav className="mobile-only fixed bottom-4 inset-x-4 z-40 items-center rounded-2xl border border-border bg-card shadow-lg px-1 py-2 overflow-x-auto flex-nowrap snap-x snap-mandatory scroll-smooth" style={{ direction: direction }}>
         {links.map((l) => {
           const isActive = pathname === l.href;
           return (
@@ -161,10 +147,12 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
               key={l.href}
               href={l.href}
               data-active={isActive ? "true" : undefined}
-              className={`relative z-10 flex flex-col items-center gap-0.5 px-3 py-1.5 text-[10px] transition-colors min-w-0 flex-1 ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex flex-col items-center gap-0.5 px-1 py-1.5 text-[10px] transition-colors w-1/5 flex-shrink-0 snap-start ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
             >
-              <l.icon className={`h-5 w-5 transition-all ${isActive ? "text-primary scale-110" : ""}`} />
-              <span className="truncate font-medium">{t(l.labelKey)}</span>
+              <div className={`flex items-center justify-center h-10 w-10 rounded-xl transition-all ${isActive ? "bg-primary/10 scale-110" : ""}`}>
+                <l.icon className={`h-5 w-5 transition-all ${isActive ? "text-primary" : ""}`} />
+              </div>
+              <span className="truncate font-medium w-full text-center">{t(l.labelKey)}</span>
             </Link>
           );
         })}

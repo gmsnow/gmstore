@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, CheckCheck } from "lucide-react";
+import { Eye, CheckCheck, XCircle } from "lucide-react";
 import { MobileOrderCards } from "@/components/admin/mobile-order-cards";
 import { OrderLocationLink } from "@/components/admin/order-location-link";
 
@@ -43,7 +43,7 @@ function OrderThumbs({ items }: { items: any[] }) {
 
 export default async function AdminOrdersPage() {
   const rawOrders = await prisma.order.findMany({
-    where: { status: { not: "DELIVERED" } },
+    where: { status: { notIn: ["DELIVERED", "CANCELLED"] } },
     include: { items: { include: { product: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -61,6 +61,7 @@ export default async function AdminOrdersPage() {
         <div className="mr-auto flex gap-2">
           <Link href="/admin/orders" className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition-colors">الحالية</Link>
           <Link href="/admin/orders/delivered" className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors"><CheckCheck className="h-4 w-4 ml-1" />المكتملة</Link>
+          <Link href="/admin/orders/cancelled" className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors"><XCircle className="h-4 w-4 ml-1" />الملغية</Link>
         </div>
       </div>
 
