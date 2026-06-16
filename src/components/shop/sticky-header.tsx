@@ -7,6 +7,7 @@ import { T } from "@/components/translate";
 import { SearchInput } from "@/components/shop/search-input";
 import { UserGreeting } from "@/components/shop/user-greeting";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "@/components/theme-provider";
 import { LangToggle } from "@/components/lang-toggle";
 import { useCurrency, type Currency } from "@/lib/currency/context";
 import { cartCount } from "@/lib/cart/store";
@@ -14,6 +15,7 @@ import { useCart } from "@/components/shop/cart-context";
 
 
 export function StickyHeader({ session, role, signOutForm }: { session: any; role: string | undefined; signOutForm: React.ReactNode }) {
+  const { theme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const { setOpen } = useCart();
   const [badge, setBadge] = useState(0);
@@ -52,8 +54,7 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
       }`}
     >
       <Link href="/" className="flex items-center gap-2">
-        <img src="/light.png" alt="WANOSTORE" className="h-9 w-auto dark:hidden" />
-        <img src="/dark.png" alt="WANOSTORE" className="h-9 w-auto hidden dark:block" onError={(e) => { (e.target as HTMLImageElement).src = "/light.png"; }} />
+        <img src={theme === "dark" ? "/dark.png" : "/light.png"} alt="WANOSTORE" className="h-9 w-auto" />
         <span className="text-lg font-bold text-[var(--primary)]"><T k="nav.store_name" /></span>
       </Link>
       <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
