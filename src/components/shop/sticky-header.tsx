@@ -52,8 +52,8 @@ export function StickyHeader({ session, role, signOutForm }: { session: any; rol
       }`}
     >
       <Link href="/" className="flex items-center gap-2">
-        <img src="/wanologo.png" alt="WANOSTORE" className="h-9 w-auto dark:hidden" />
-        <img src="/wanologo-dark.png" alt="WANOSTORE" className="h-9 w-auto hidden dark:block" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+        <img src="/light.png" alt="WANOSTORE" className="h-9 w-auto dark:hidden" />
+        <img src="/dark.png" alt="WANOSTORE" className="h-9 w-auto hidden dark:block" onError={(e) => { (e.target as HTMLImageElement).src = "/light.png"; }} />
         <span className="text-lg font-bold text-[var(--primary)]"><T k="nav.store_name" /></span>
       </Link>
       <nav className="max-md:hidden flex items-center gap-4 text-sm font-medium">
