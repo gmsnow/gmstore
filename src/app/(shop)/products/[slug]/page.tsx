@@ -22,8 +22,9 @@ import { getServerLocale } from "@/lib/i18n/server";
 import { localizedName, localizedDescription } from "@/lib/i18n/localized";
 
 export const revalidate = 300;
+export const dynamicParams = true;
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({ select: { slug: true }, take: 50, orderBy: { createdAt: "desc" } });
+  const products = await prisma.product.findMany({ select: { slug: true }, orderBy: { createdAt: "desc" } });
   return products.map((p) => ({ slug: p.slug }));
 }
 
