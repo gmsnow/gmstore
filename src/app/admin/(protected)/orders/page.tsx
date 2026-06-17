@@ -50,6 +50,9 @@ export default async function AdminOrdersPage() {
 
   const orders = rawOrders.map((o) => ({
     ...o,
+    subtotal: Number(o.subtotal),
+    shippingCost: Number(o.shippingCost),
+    discount: Number(o.discount),
     total: Number(o.total),
     items: o.items.map((i) => ({ ...i, price: Number(i.price) })),
   }));
