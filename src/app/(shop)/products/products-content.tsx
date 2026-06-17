@@ -8,6 +8,7 @@ import { LocalizedName } from "@/components/localized";
 import { getServerLocale } from "@/lib/i18n/server";
 import { localizedName } from "@/lib/i18n/localized";
 import { ProductFilters } from "@/components/shop/product-filters";
+import { CategoryPills } from "@/components/shop/category-pills";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 
 export async function ProductsContent({ searchParams }: { searchParams: Record<string, string | undefined> }) {
@@ -154,23 +155,7 @@ export async function ProductsContent({ searchParams }: { searchParams: Record<s
         <div className="flex flex-wrap gap-2 mb-4">{activeTags}</div>
       )}
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Link
-          href={filterUrl({ category: null, page: null })}
-          className={`rounded-full px-4 py-1.5 text-sm border border-border transition-colors ${!searchParams.category ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"}`}
-        >
-          <T k="products.all" />
-        </Link>
-        {categories.map((c: any) => (
-          <Link
-            key={c.id}
-            href={filterUrl({ category: c.slug, page: null })}
-            className={`rounded-full px-4 py-1.5 text-sm border border-border transition-colors ${searchParams.category === c.slug ? "bg-primary text-primary-foreground border-primary" : "hover:bg-muted"}`}
-          >
-            <LocalizedName item={c} />
-          </Link>
-        ))}
-      </div>
+      <CategoryPills categories={categories as any[]} />
 
       <StaggerContainer className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
         {productList.map((p: any) => (
