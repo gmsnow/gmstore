@@ -272,9 +272,10 @@ export default function MerchantOrdersPage() {
                     {isExpanded && (
                       <div className="mt-3 space-y-2 divide-y divide-border">
                         {order.items.map((item) => {
-                          const nextStatus = getNextStatus(item.status);
+                          const displayStatus = order.status === "CANCELLED" ? "CANCELLED" : item.status;
+                          const nextStatus = getNextStatus(displayStatus);
                           const isUpdating = updatingItems.has(item.id);
-                          const StatusIcon = stepIcons[item.status] || Package;
+                          const StatusIcon = stepIcons[displayStatus] || Package;
                           return (
                             <div key={item.id} className="flex items-start gap-3 pt-3 first:pt-0">
                               <div className="h-14 w-14 rounded-lg border border-border bg-muted overflow-hidden flex-shrink-0 relative">
@@ -307,13 +308,13 @@ export default function MerchantOrdersPage() {
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <Badge
-                                  variant={getStatusBadgeVariant(item.status)}
-                                  className={getStatusBadgeClass(item.status)}
+                                  variant={getStatusBadgeVariant(displayStatus)}
+                                  className={getStatusBadgeClass(displayStatus)}
                                 >
                                   <StatusIcon className="h-3 w-3 me-1" />
-                                  <T k={`track.status_${item.status}`} />
+                                  <T k={`track.status_${displayStatus}`} />
                                 </Badge>
-                                {nextStatus && (
+                                {nextStatus && displayStatus !== "CANCELLED" && (
                                   <Button
                                     size="sm"
                                     variant="ghost"

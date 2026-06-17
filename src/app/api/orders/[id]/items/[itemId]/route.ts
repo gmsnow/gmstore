@@ -27,10 +27,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const allItems = await prisma.orderItem.findMany({ where: { orderId: id } });
     const allDelivered = allItems.every((i) => i.status === "DELIVERED");
+    const allCancelled = allItems.every((i) => i.status === "CANCELLED");
     const anyCancelled = allItems.some((i) => i.status === "CANCELLED");
 
     let orderStatus = "PENDING";
-    if (allDelivered) orderStatus = "DELIVERED";
+    if (allCancelled) orderStatus = "CANCELLED";
+    else if (allDelivered) orderStatus = "DELIVERED";
     else if (anyCancelled && allItems.every((i) => i.status === "DELIVERED" || i.status === "CANCELLED")) orderStatus = "DELIVERED";
     else if (allItems.some((i) => i.status === "SHIPPED")) orderStatus = "SHIPPED";
     else if (allItems.some((i) => i.status === "PROCESSING")) orderStatus = "PROCESSING";
