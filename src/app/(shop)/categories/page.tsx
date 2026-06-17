@@ -7,7 +7,7 @@ import { getServerLocale } from "@/lib/i18n/server";
 import { localizedName } from "@/lib/i18n/localized";
 
 function catImage(cat: { image: string | null }) {
-  return cat.image;
+  return cat.image || "";
 }
 
 export default async function CategoriesPage() {
