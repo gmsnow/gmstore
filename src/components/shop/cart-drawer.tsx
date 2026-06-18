@@ -45,7 +45,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         if (!res.ok) throw new Error();
         const order = await res.json();
         if (!cancelled) {
-          if (order?.items?.every((i: any) => i.status === "DELIVERED") || order?.status === "CANCELLED") {
+          if (order?.items?.every((i: any) => i.status === "DELIVERED" || i.status === "CANCELLED") || order?.status === "CANCELLED") {
             localStorage.removeItem("lastOrderId");
             if (!cancelled) setLastOrder(null);
           } else {
@@ -78,7 +78,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         if (!res.ok) throw new Error();
         const order = await res.json();
         if (!cancelled) {
-          if (order?.items?.every((i: any) => i.status === "DELIVERED") || order?.status === "CANCELLED") {
+          if (order?.items?.every((i: any) => i.status === "DELIVERED" || i.status === "CANCELLED") || order?.status === "CANCELLED") {
             localStorage.removeItem("lastOrderId");
             if (!cancelled) setLastOrder(null);
           } else {
@@ -202,8 +202,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         )}
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground">{t("track.items")} ({(o.items?.filter((i: any) => i.status !== "CANCELLED")?.length || 0)})</p>
-          {(o.items?.filter((i: any) => i.status !== "CANCELLED") || []).map((item: any) => (
+          <p className="text-xs font-semibold text-muted-foreground">{t("track.items")} ({(o.items?.filter((i: any) => i.status !== "CANCELLED" && i.status !== "DELIVERED")?.length || 0)})</p>
+          {(o.items?.filter((i: any) => i.status !== "CANCELLED" && i.status !== "DELIVERED") || []).map((item: any) => (
             <div key={item.id} className="flex gap-3 rounded-lg border border-border bg-card p-3">
               {item.product?.images?.[0] && (
                 <div className="h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-muted">
