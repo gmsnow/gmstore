@@ -1,13 +1,11 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useSession } from "next-auth/react";
 import { T } from "@/components/translate";
 import { User } from "lucide-react";
 
-export function UserGreeting({ userName: propName }: { userName?: string | null }) {
-  const { data: session } = useSession();
-  const name = propName || (session?.user as any)?.name;
+export function UserGreeting({ userName }: { userName?: string | null }) {
+  const name = userName;
   const [showGreeting, setShowGreeting] = useState(false);
 
   const open = useCallback(() => {
