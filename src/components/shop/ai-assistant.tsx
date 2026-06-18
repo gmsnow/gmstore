@@ -5,84 +5,12 @@ import { Bot, X, Send, Sparkles } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
-const replies: [string, string][] = [
-  ["دفع", "طرق الدفع المتاحة:\n💳 الدفع عند الاستلام (كاش)\n💳 بطاقة ائتمان (Visa/Mastercard)\n💳 تحويل بنكي"],
-  ["شراء", "يمكنك تصفح جميع المنتجات: /products. اختر المنتج وأضفه إلى السلة ثم أكمل الطلب."],
-  ["منتجات", "تصفح جميع المنتجات: /products\nيمكنك البحث عن منتج معين بمربع البحث في الأعلى."],
-  ["بيع", "سجل كتاجر: /register واختر 'تاجر' ثم أضف منتجاتك من لوحة التحكم."],
-  ["تاجر", "سجل كتاجر: /register واختر 'تاجر'."],
-  ["سعر", "جميع الأسعار على صفحة كل منتج. تصفح: /products"],
-  ["لون", "اختر اللون عند إضافة المنتج للسلة. يمكنك تغييره لاحقاً من السلة /cart بالضغط على الدائرة الملونة."],
-  ["توصيل", "مدة التوصيل تعتمد على منطقتك. تتبع طلبك: /track"],
-  ["شحن", "مدة التوصيل تعتمد على منطقتك. تتبع طلبك: /track"],
-  ["تتبع", "لتتبع طلبك أدخل رقم الطلب هنا: /track"],
-  ["ترجيع", "للإرجاع تواصل معنا عبر البريد الإلكتروني."],
-  ["استرجاع", "للإرجاع تواصل معنا عبر البريد الإلكتروني."],
-  ["مرتجع", "للإرجاع تواصل معنا عبر البريد الإلكتروني."],
-  ["استبدال", "للإستبدال تواصل معنا عبر البريد الإلكتروني."],
-  ["خصم", "تابع العروض والتخفيضات: /products"],
-  ["عروض", "تابع العروض والتخفيضات: /products"],
-  ["تخفيض", "تابع العروض والتخفيضات: /products"],
-  ["تسجيل", "أنشئ حساب جديد: /register"],
-  ["دخول", "سجل الدخول: /login"],
-  ["حساب", "أنشئ حساب أو سجل دخول: /register أو /login"],
-  ["مساعدة", "أنا هنا لمساعدتك!\n🛍️ /products\n📦 /track\n💳 طرق الدفع\n🚚 التوصيل\n📝 /register"],
-  ["السلام", "وعليكم السلام! كيف أقدر أساعدك؟ 🙂"],
-  ["مرحبا", "مرحباً بك في WANOSTORE! 🙂"],
-  ["تحيه", "أهلاً وسهلاً!"],
-  ["اهلا", "أهلاً وسهلاً!"],
-  ["هلا", "هلا والله! 😊"],
-  ["hello", "Welcome to WANOSTORE! 🙂"],
-  ["hi", "Hi there! Welcome to WANOSTORE!"],
-  ["help", "I'm here to help!\n🛍️ /products\n📦 /track\n💳 Payment\n🚚 Delivery\n📝 /register"],
-  ["product", "Browse all products: /products\nUse search bar to find specific items."],
-  ["order", "Track your order: /track"],
-  ["color", "Select color when adding to cart. Change it later in /cart by clicking the color dot."],
-  ["pay", "Payment methods:\n💳 Cash on delivery\n💳 Credit card (Visa/Mastercard)\n💳 Bank transfer"],
-];
-
-const fallbackReplies = [
-  "أهلاً بك في WANOSTORE!\n🛍️ ابحث عن منتج\n📦 تتبع طلبك\n💳 طرق الدفع\n💡 اكتب سؤالك!",
-  "تصفح المنتجات: /products أو تتبع: /track. هل تبحث عن شيء معين؟",
-  "اكتب ما تبحث عنه. مثلاً:\n- ابحث عن مصباح\n- كيفية الدفع\n- تتبع طلبي",
-  "أنا مساعد WANOSTORE. جرب:\n- أريد شراء...\n- كيف أدفع؟\n- أبي أتتبع طلبي",
-];
-
-function getSmartReply(input: string): string | null {
-  const lower = input.toLowerCase();
-  for (const [word, reply] of replies) {
-    if (lower.includes(word)) return reply;
-  }
-  return null;
-}
-
-async function tryBrowserAI(messages: { role: string; content: string }[]): Promise<string | null> {
-  try {
-    const ai = (window as any).ai;
-    if (!ai?.languageModel) return null;
-    const capabilities = await ai.languageModel.capabilities();
-    if (capabilities.available === "no") return null;
-    const session = await ai.languageModel.create({
-      systemPrompt: "أنت مساعد متجر WANOSTORE للتسوق الإلكتروني باللغة العربية. تساعد العملاء باقتراح المنتجات والإجابة عن أسئلتهم. كن مفيداً وودوداً. أجب دائماً بالعربية.",
-    });
-    const lastMsg = messages[messages.length - 1]?.content || "";
-    const result = await session.prompt(lastMsg);
-    session.destroy();
-    return result;
-  } catch { return null; }
-}
-
 function extractProductQuery(text: string): string | null {
   const patterns = [
-    /ابحث\s+عن\s+(.+)/i,
-    /دور\s+لي\s+(.+)/i,
-    /(?:عندك|عندكم)\s+(.+)/i,
-    /(?:ابي|أبي|بدي|ودي)\s+(.+)/i,
-    /(?:ادور|دور)\s+على\s+(.+)/i,
-    /search\s+(?:for\s+)?(.+)/i,
-    /find\s+(.+)/i,
+    /ابحث\s+عن\s+(.+)/i, /دور\s+لي\s+(.+)/i, /(?:عندك|عندكم)\s+(.+)/i,
+    /(?:ابي|أبي|بدي|ودي)\s+(.+)/i, /(?:ادور|دور)\s+على\s+(.+)/i,
+    /search\s+(?:for\s+)?(.+)/i, /find\s+(.+)/i,
     /(?:looking\s+for|want)\s+(.+)/i,
-    /(?:قصدك|تقصد)\s+(.+)/i,
     /(?:شنو|شو|وش|ماهو)\s+(.+)/i,
   ];
   for (const p of patterns) {
@@ -95,18 +23,18 @@ function extractProductQuery(text: string): string | null {
 function rankProducts(query: string, products: any[]): any[] {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   return products
-      .map((p) => {
-        let score = 0;
-        const searchText = `${p.name} ${p.nameEn || ""} ${p.description} ${p.descriptionEn || ""} ${p.category?.name || ""} ${p.category?.nameEn || ""}`.toLowerCase();
-        for (const word of words) {
-          if (searchText.includes(word)) score += word.length;
-        }
-        if (searchText.includes(query.toLowerCase())) score += 100;
-        return { product: p, score };
-      })
-      .filter((p) => p.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map((p) => p.product);
+    .map((p) => {
+      let score = 0;
+      const searchText = `${p.name} ${p.nameEn || ""} ${p.description || ""} ${p.descriptionEn || ""} ${p.category?.name || ""} ${p.category?.nameEn || ""}`.toLowerCase();
+      for (const word of words) {
+        if (searchText.includes(word)) score += word.length;
+      }
+      if (searchText.includes(query.toLowerCase())) score += 100;
+      return { product: p, score };
+    })
+    .filter((p) => p.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((p) => p.product);
 }
 
 export function AIAssistant() {
@@ -116,7 +44,6 @@ export function AIAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [ready, setReady] = useState(false);
   const allProducts = useRef<any[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -125,16 +52,11 @@ export function AIAssistant() {
   }, [messages]);
 
   useEffect(() => {
-    if (open) {
+    if (open && allProducts.current.length === 0) {
       fetch("/api/products")
         .then((r) => r.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            allProducts.current = data;
-            setReady(true);
-          }
-        })
-        .catch(() => setReady(true));
+        .then((data) => { if (Array.isArray(data)) allProducts.current = data; })
+        .catch(() => {});
     }
   }, [open]);
 
@@ -143,21 +65,15 @@ export function AIAssistant() {
     if (!text || loading) return;
     setInput("");
     const userMsg: Message = { role: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setLoading(true);
 
     try {
-      const allMessages = [...messages, userMsg];
-      const browserResult = await tryBrowserAI(allMessages);
-      if (browserResult) {
-        setMessages((prev) => [...prev, { role: "assistant", content: browserResult }]);
-        setLoading(false);
-        return;
-      }
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: allMessages.map((m) => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({ messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })) }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -176,7 +92,7 @@ export function AIAssistant() {
     if (ranked.length > 0) {
       const top = ranked.slice(0, 5);
       const lines = top.map((p: any) =>
-        `🔸 **${p.name}** — ${Number(p.price).toFixed(2)} ريال${p.colors?.length ? `\n   الألوان: ${p.colors.join(" · ")}` : ""}${p._avgRating ? `\n   ⭐ ${Number(p._avgRating).toFixed(1)}` : ""}\n   /products/${p.slug}`
+        `🔸 **${p.name}** — ${Number(p.price).toFixed(2)} ريال${p.colors?.length ? `\n   الألوان: ${p.colors.join(" · ")}` : ""}\n   /products/${p.slug}`
       );
       const total = ranked.length > 5 ? `\n\nو ${ranked.length - 5} نتائج إضافية، تصفح الكل: /products?q=${encodeURIComponent(productQuery)}` : "";
       setMessages((prev) => [...prev, { role: "assistant", content: `وجدت هذه المنتجات:\n${lines.join("\n\n")}${total}` }]);
@@ -184,12 +100,9 @@ export function AIAssistant() {
       return;
     }
 
-    const smart = getSmartReply(text);
-    const fallback = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
-    const msg = smart || (ready ? fallback : "جاري تحميل المنتجات...");
-    setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: "عذراً، واجهت مشكلة في الإجابة. حاول كتابة السؤال بشكل مختلف أو تصفح المنتجات: /products" }]);
     setLoading(false);
-  }, [input, loading, messages, ready]);
+  }, [input, loading, messages]);
 
   return (
     <>
@@ -220,9 +133,6 @@ export function AIAssistant() {
               </button>
             </div>
             <div className="h-80 overflow-y-auto p-4 space-y-3" style={{ scrollBehavior: "smooth" }}>
-              {!ready && (
-                <div className="text-center text-xs text-muted-foreground py-2">جاري تحميل المنتجات...</div>
-              )}
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
