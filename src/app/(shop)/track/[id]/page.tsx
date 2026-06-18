@@ -118,7 +118,7 @@ export default function TrackOrderByIdPage() {
             </div>
 
             <div className="divide-y divide-border">
-              {order.items.map((item: any, idx: number) => {
+              {order.items.filter((item: any) => item.status !== "CANCELLED").map((item: any, idx: number) => {
                 const currentStatusIndex = statusSteps.indexOf(item.status);
                 return (
                   <div key={item.id} className={`${idx > 0 ? "pt-4" : ""} ${idx < order.items.length - 1 ? "pb-4" : ""}`}>
