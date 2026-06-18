@@ -163,7 +163,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         <div className={`rounded-lg p-3 text-center ${isCancelled ? "bg-red-50 dark:bg-red-950" : "bg-green-50 dark:bg-green-950"}`}>
           <Package className="h-8 w-8 mx-auto mb-1 text-primary" />
           <p className="text-sm font-bold">{t("track.title")}</p>
-          <p className="text-xs text-muted-foreground font-mono mt-0.5">{o.id?.slice(0, 12)}...</p>
+          <p className="text-xs text-muted-foreground font-mono mt-0.5 select-all">{o.id}</p>
           <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-xs font-semibold ${
             isCancelled ? "bg-red-200 text-red-700" :
             o.status === "DELIVERED" ? "bg-green-200 text-green-700" :
