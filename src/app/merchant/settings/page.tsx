@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { User, Bell, Shield, Lock, Mail, Save } from "lucide-react";
+import { User, Lock, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +20,6 @@ export default function MerchantSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  const [notifications, setNotifications] = useState({
-    newOrder: true,
-    lowStock: true,
-    paymentUpdate: false,
-  });
 
   useEffect(() => {
     fetch("/api/merchant/profile")
@@ -78,10 +72,6 @@ export default function MerchantSettingsPage() {
     }
   };
 
-  const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
   if (loading) {
     return (
       <div dir={direction} className="mx-auto max-w-7xl px-4 py-8 space-y-8">
@@ -122,34 +112,6 @@ export default function MerchantSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              {t("merchant.profile_info")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              label={t("merchant.account_name")}
-              value={profile.name}
-              onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
-            />
-            <Input
-              label={t("merchant.account_email")}
-              type="email"
-              value={profile.email}
-              disabled
-            />
-            <Input
-              label={t("merchant.profile_image")}
-              value={profile.image}
-              onChange={(e) => setProfile((prev) => ({ ...prev, image: e.target.value }))}
-              placeholder="https://..."
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
               {t("merchant.change_password")}
             </CardTitle>
@@ -169,39 +131,6 @@ export default function MerchantSettingsPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              {t("merchant.notifications")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-              {([
-              { key: "newOrder" as const, label: t("merchant.notif_new_order") },
-              { key: "lowStock" as const, label: t("merchant.notif_low_stock") },
-              { key: "paymentUpdate" as const, label: t("merchant.notif_payment") },
-            ]).map((item) => (
-              <div key={item.key} className="flex items-center justify-between">
-                <span className="text-sm">{item.label}</span>
-                <button
-                  type="button"
-                  onClick={() => toggleNotification(item.key)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    notifications[item.key] ? "bg-primary" : "bg-border"
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
-                      notifications[item.key] ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
-                </button>
-              </div>
-            ))}
           </CardContent>
         </Card>
 
