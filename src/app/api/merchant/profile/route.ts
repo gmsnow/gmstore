@@ -3,6 +3,24 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 
+export const GET = auth(async (req) => {
+  const role = (req.auth?.user as any)?.role;
+  const userId = (req.auth?.user as any)?.id;
+  if (role !== "MERCHANT") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, image: true, role: true },
+  });
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(user);
+});
+
 export const PUT = auth(async (req) => {
   const role = (req.auth?.user as any)?.role;
   const userId = (req.auth?.user as any)?.id;

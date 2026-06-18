@@ -28,14 +28,16 @@ export default function MerchantSettingsPage() {
   });
 
   useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
+    fetch("/api/merchant/profile")
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to load");
+        return r.json();
+      })
       .then((data) => {
-        const user = data.user || data;
         setProfile({
-          name: user.name || "",
-          email: user.email || "",
-          image: user.image || "",
+          name: data.name || "",
+          email: data.email || "",
+          image: data.image || "",
         });
         setLoading(false);
       })
@@ -126,12 +128,12 @@ export default function MerchantSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
-              label={t("merchant.name")}
+              label={t("merchant.account_name")}
               value={profile.name}
               onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
             />
             <Input
-              label={t("merchant.email")}
+              label={t("merchant.account_email")}
               type="email"
               value={profile.email}
               disabled
@@ -174,14 +176,14 @@ export default function MerchantSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              {t("merchant.notification_preferences")}
+              {t("merchant.notifications")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {([
-              { key: "newOrder" as const, label: t("merchant.new_order_notifications") },
-              { key: "lowStock" as const, label: t("merchant.low_stock_alerts") },
-              { key: "paymentUpdate" as const, label: t("merchant.payment_updates") },
+              {([
+              { key: "newOrder" as const, label: t("merchant.notif_new_order") },
+              { key: "lowStock" as const, label: t("merchant.notif_low_stock") },
+              { key: "paymentUpdate" as const, label: t("merchant.notif_payment") },
             ]).map((item) => (
               <div key={item.key} className="flex items-center justify-between">
                 <span className="text-sm">{item.label}</span>
