@@ -10,6 +10,7 @@ import { LangToggle } from "@/components/lang-toggle";
 
 const links = [
   { href: "/merchant", labelKey: "merchant.dashboard", icon: LayoutDashboard },
+  { href: "/merchant/products", labelKey: "merchant.products_page", icon: Package },
   { href: "/merchant/orders", labelKey: "merchant.orders", icon: ShoppingBag },
   { href: "/merchant/orders/cancelled", labelKey: "merchant.cancelled_orders", icon: XCircle },
   { href: "/merchant/store", labelKey: "merchant.store_settings", icon: Store },

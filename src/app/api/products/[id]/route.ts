@@ -41,9 +41,9 @@ export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
   const body = await req.json();
-  let slug = body.slug;
+  let slug = (body.slug ?? "").normalize("NFC");
   const slugConflict = await prisma.product.findUnique({ where: { slug } });
-  if (slugConflict && slugConflict.id !== id) slug = `${slug}-${Date.now()}`;
+  if (slugConflict && slugConflict.id !== id) slug = `${slug}-${userId.slice(0, 8)}`;
   const updated = await prisma.product.update({
     where: { id },
       data: {

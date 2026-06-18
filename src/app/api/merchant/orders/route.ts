@@ -14,6 +14,7 @@ export const GET = auth(async (req) => {
   const skip = parseInt(searchParams.get("skip") || String((page - 1) * 20));
   const take = parseInt(searchParams.get("take") || "20");
   const status = searchParams.get("status");
+  const cancelled = searchParams.get("cancelled") === "true";
 
   const productIds = await prisma.product.findMany({
     where: { userId },
@@ -40,11 +41,17 @@ export const GET = auth(async (req) => {
     prisma.order.count({ where }),
   ]);
 
-  const serialized = orders.map((order) => ({
-    ...order,
-    total: Number(order.total),
-    items: order.items.map((item) => ({ ...item, price: Number(item.price), size: item.size || null })),
-  }));
+  const serialized = orders
+    .map((order) => ({
+      ...order,
+      total: Number(order.total),
+      items: order.items.map((item) => ({ ...item, price: Number(item.price), size: item.size || null })),
+    }))
+    .map((order) => ({
+      ...order,
+      items: order.items.filter((item) => (cancelled ? item.status === "CANCELLED" : item.status !== "CANCELLED")),
+    }))
+    .filter((order) => order.items.length > 0);
 
-  return NextResponse.json({ orders: serialized, total });
+  return NextResponse.json({ orders: serialized, total: serialized.length });
 });

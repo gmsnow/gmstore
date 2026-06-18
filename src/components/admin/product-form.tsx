@@ -40,16 +40,11 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
   });
   const [sizesStr, setSizesStr] = useState(product?.sizes?.join(", ") ?? "");
   const slugRef = useRef<HTMLSelectElement>(null);
-  const [autoSlug, setAutoSlug] = useState(!product?.slug);
-  const [slugOptions, setSlugOptions] = useState<{ value: string; label: string; taken?: boolean }[]>(() => {
-    if (product?.slug) return [{ value: product.slug, label: product.slug }];
-    return [];
-  });
   const [showCustomSlug, setShowCustomSlug] = useState(false);
 
   function slugify(text: string) {
     return text
-      .normalize("NFKD")
+      .normalize("NFC")
       .replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "")
       .replace(/[^\u0600-\u06FF\w\s-]/g, "")
       .replace(/[\s_]+/g, "-")
@@ -57,21 +52,22 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
       .toLowerCase();
   }
 
+  const [autoSlug, setAutoSlug] = useState(!product?.slug);
+  const [slugOptions, setSlugOptions] = useState<{ value: string; label: string }[]>(product?.slug ? [{ value: product.slug, label: product.slug }] : []);
+
   function handleNameChange(value: string) {
     if (!autoSlug || product) return;
     const base = slugify(value);
     if (!base) { setSlugOptions([]); return; }
     const taken = new Set(existingSlugs);
-    const opts: { value: string; label: string; taken?: boolean }[] = [];
+    const opts: { value: string; label: string }[] = [];
     if (!taken.has(base)) {
       opts.push({ value: base, label: base });
     }
-    for (let i = 1; opts.length < 15 && i <= 50; i++) {
+    for (let i = 1; opts.length < 5 && i <= 50; i++) {
       const v = `${base}-${i}`;
       if (!taken.has(v)) opts.push({ value: v, label: v });
     }
-    opts.push({ value: "", label: "---", disabled: true } as any);
-    opts.push({ value: "__custom__", label: "أخرى (كتابة يدوية)" });
     setSlugOptions(opts);
   }
 
@@ -198,22 +194,40 @@ export function ProductForm({ categories, product, backUrl = "/admin/products", 
         <>
           <div className="space-y-1">
             <label className="text-sm font-medium text-foreground">الرابط (Slug)</label>
-            {showCustomSlug ? (
-              <Input name="slug" label="" placeholder="أكتب الرابط يدوياً..." required />
+            {product ? (
+              <Input name="slug" label="" defaultValue={product.slug} required />
             ) : (
-              <select ref={slugRef} id="slug" name="slug" required onChange={(e) => { if (e.target.value === "__custom__") setShowCustomSlug(true); }} className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1">
-                <option value="">اختر...</option>
-                {slugOptions.map((o, i) => (
-                  <option key={i} value={o.taken ? "" : o.value} disabled={o.taken} className={o.taken ? "text-muted-foreground" : ""}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <>
+                {showCustomSlug ? (
+                  <div className="space-y-2">
+                    <Input name="slug" label="" placeholder="أكتب الرابط يدوياً..." required />
+                    <button type="button" onClick={() => setShowCustomSlug(false)} className="text-xs text-primary hover:underline">عودة للخيارات المقترحة</button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <select ref={slugRef} id="slug" name="slug" required onChange={(e) => { if (e.target.value === "__custom__") setShowCustomSlug(true); }} className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1">
+                      {slugOptions.length === 0 ? (
+                        <option value="">اكتب اسم المنتج أولاً</option>
+                      ) : (
+                        slugOptions.map((o, i) => (
+                          <option key={i} value={o.value}>{o.label}</option>
+                        ))
+                      )}
+                      {slugOptions.length > 0 && (
+                        <>
+                          <option disabled>---</option>
+                          <option value="__custom__">أخرى (كتابة يدوية)</option>
+                        </>
+                      )}
+                    </select>
+                    {slugOptions.length > 0 && (
+                      <p className="text-xs text-muted-foreground">اختر slug من القائمة أو اختر "أخرى" لكتابة رابط مخصص</p>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
-          {!showCustomSlug && existingSlugs.length > 0 && (
-            <p className="text-xs text-muted-foreground">الخيارات المستخدمة معطلة. أسم المنتج يولد خيارات جديدة.</p>
-          )}
         </>
       )}
       <Textarea id="description" name="description" label="الوصف (عربي)" defaultValue={product?.description} />
