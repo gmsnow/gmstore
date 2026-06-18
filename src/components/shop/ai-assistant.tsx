@@ -82,6 +82,13 @@ export function AIAssistant() {
           setLoading(false);
           return;
         }
+      } else {
+        const data = await res.json().catch(() => ({}));
+        if (data.error) {
+          setMessages((prev) => [...prev, { role: "assistant", content: data.error }]);
+          setLoading(false);
+          return;
+        }
       }
     } catch {}
 

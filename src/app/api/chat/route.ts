@@ -102,8 +102,11 @@ export async function POST(req: Request) {
     );
 
     if (!res.ok) {
-      const err = await res.text();
-      return Response.json({ error: err }, { status: res.status });
+      const errText = await res.text();
+      let msg = "عذراً، واجهت مشكلة في الاتصال بالمساعد الذكي";
+      if (res.status === 429) msg = "المساعد الذكي مشغول حالياً بسبب كثافة الاستخدام. حاول مرة أخرى بعد دقيقة.";
+      else if (res.status === 403 || res.status === 401) msg = "المساعد الذكي يحتاج إلى تفعيل. تواصل مع إدارة المتجر.";
+      return Response.json({ error: msg, detail: errText }, { status: res.status });
     }
 
     const data = await res.json();
