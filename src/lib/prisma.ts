@@ -13,10 +13,6 @@ function createPrisma() {
     datasources: usePooler && directUrl ? { db: { url: directUrl } } : undefined,
   });
 
-  if (process.env.NODE_ENV === "production") {
-    client.$connect().catch(() => {});
-  }
-
   return client;
 }
 
