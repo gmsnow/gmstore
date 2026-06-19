@@ -39,14 +39,15 @@ GMStore is a full-stack e-commerce platform (WANO STORE) built with Next.js 16.2
 ## 2. ENVIRONMENT & DEPLOYMENT
 
 ### Files
-- `.env` → Railway production DB, AUTH_SECRET, UPLOADTHING_TOKEN, GEMINI_API_KEY
-- `.env.local` → Local dev DB (`postgresql://postgres:123@localhost:5432/gmstore`)
+- `.env` → Railway production DB, AUTH_SECRET, UPLOADTHING_TOKEN, GEMINI_API_KEY, AUTH_TRUST_HOST=true
+- `.env.local` → Local dev DB (`postgresql://postgres:123@localhost:5432/gmstore`), AUTH_TRUST_HOST=true
 - `.env.example` → Template
 
 ### Vercel Deployment
 - Auto-deploy from GitHub `main` branch (Git-linked)
 - After pushing to `main`, wait ~2 minutes for deploy
 - EPERM errors fix: `Get-Process -Name "node" | Stop-Process -Force` then restart
+- **Must set `AUTH_TRUST_HOST=true`** (required when behind Vercel's proxy or any reverse proxy)
 
 ### Credentials
 - Admin login: `admin@gmstore.com` / `admin123`
@@ -109,6 +110,14 @@ GMStore is a full-stack e-commerce platform (WANO STORE) built with Next.js 16.2
 - `POST /api/auth/token` — Generate JWT with jose (email+password → token)
 - `GET /api/auth/config` — Returns `{ googleEnabled: boolean }`
 - `GET,POST /api/auth/[...nextauth]` — NextAuth catch-all
+
+### ⚠️ Auth Wrapper Pattern (Important)
+Do NOT use `auth()` as a route wrapper (`export const POST = auth(handler)`) for POST/PUT/DELETE routes — NextAuth v5 requires CSRF token for non-GET requests when used as a wrapper, causing 401 errors.
+Instead, call `auth()` as a function inside the handler:
+```
+const session = await auth();
+if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+```
 
 ---
 
@@ -423,7 +432,8 @@ When an individual item's status is updated, the order-level status is recalcula
 - Product images: stored in `Product.images` (String[]) + optional `colorImages` (Json mapping color → URL)
 - Category images: loremflickr (real Flickr photos)
 - Merchant uploads: `public/uploads/merchant/{userId}/` (local); for Vercel production needs Vercel Blob
-- Upload route: `POST /api/upload` (UploadThing)
+- Upload route: `POST /api/upload` (UploadThing) — ~10MB limit via `proxyClientMaxBodySize: 15MB` in next.config.ts + explicit check in route
+- File size: explicit check at 10MB in route; `proxyClientMaxBodySize` in next.config.ts at 15MB; Nginx at 50M (local only)
 
 ---
 
@@ -466,8 +476,20 @@ Then restart dev server.
 
 ### Vercel deploy fails
 - Check build logs on Vercel dashboard
-- Common: missing env vars in Vercel project settings
+- Common: missing env vars in Vercel project settings (especially `AUTH_TRUST_HOST`)
 - Railway DB connection: ensure IP not blocked, DATABASE_URL correct
+
+### 413 / Upload fails on Vercel
+- Vercel serverless has 4.5MB body limit (no workaround). Files >4.5MB must be uploaded directly to UploadThing (client-side), not proxied through Vercel
+- For local: `proxyClientMaxBodySize` in next.config.ts controls the buffer limit
+- Upload route has explicit 10MB check with clear error message
+
+### UntrustedHost (NextAuth v5)
+- `auth()[error] UntrustedHost` — set `AUTH_TRUST_HOST=true` in `.env` and `.env.local`
+- Required when behind any proxy (Vercel, Nginx, Cloudflare, etc.)
+
+### 401 on POST API routes with auth
+- Reminder: Do NOT use `auth()` as route wrapper for POST/PUT/DELETE (CSRF required). Use `const session = await auth()` inside handler instead.
 
 ---
 

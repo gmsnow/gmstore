@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
+  experimental: {
+    proxyClientMaxBodySize: 15728640, // 15MB
+  },
 };
 
 export default nextConfig;

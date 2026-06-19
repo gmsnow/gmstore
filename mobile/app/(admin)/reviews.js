@@ -29,7 +29,7 @@ export default function AdminReviewsPage() {
             <View style={{ padding: 12, gap: 6 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Text key={i} style={{ color: i < item.rating ? "#eab308" : theme.mutedForeground }}>★</Text>
+                  <Text key={i} style={{ color: i < item.rating ? theme.warning : theme.mutedForeground }}>★</Text>
                 ))}
               </View>
               <Text style={{ color: theme.foreground, fontSize: 13 }}>{item.comment}</Text>

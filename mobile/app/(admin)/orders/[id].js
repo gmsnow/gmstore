@@ -1,26 +1,47 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useTheme } from "../../../src/lib/theme";
 import { useI18n } from "../../../src/lib/i18n";
 import { api } from "../../../src/lib/api";
 import { Card } from "../../../src/components/ui/Card";
 import { Badge } from "../../../src/components/ui/Badge";
+import { Button } from "../../../src/components/ui/Button";
 
 const statusBadge = { PENDING: "warning", PROCESSING: "warning", SHIPPED: "success", DELIVERED: "success", CANCELLED: "danger" };
 const statusLabels = { PENDING: "قيد الانتظار", PROCESSING: "قيد المعالجة", SHIPPED: "تم الشحن", DELIVERED: "تم التوصيل", CANCELLED: "ملغي" };
+const itemStatusBadge = { PENDING: "warning", CONFIRMED: "warning", SHIPPED: "success", DELIVERED: "success", CANCELLED: "danger" };
+const itemStatusLabels = { PENDING: "قيد الانتظار", CONFIRMED: "مؤكد", SHIPPED: "تم الشحن", DELIVERED: "تم التوصيل", CANCELLED: "ملغي" };
+
+const nextStatus = { PENDING: "PROCESSING", PROCESSING: "SHIPPED", SHIPPED: "DELIVERED" };
+const nextLabel = { PENDING: "معالجة", PROCESSING: "شحن", SHIPPED: "توصيل" };
 
 export default function AdminOrderDetailPage() {
   const { theme } = useTheme();
   const { t } = useI18n();
   const { id } = useLocalSearchParams();
   const [order, setOrder] = useState(null);
+  const [updating, setUpdating] = useState(false);
 
-  useEffect(() => {
-    api(`/orders/${id}`).then(setOrder);
-  }, [id]);
+  const fetchOrder = () => api(`/orders/${id}`).then(setOrder);
+
+  useEffect(() => { fetchOrder(); }, [id]);
+
+  const handleStatusUpdate = async (status) => {
+    setUpdating(true);
+    try {
+      await api(`/orders/${id}/status`, { method: "POST", body: JSON.stringify({ status }) });
+      fetchOrder();
+    } catch (e) {
+      Alert.alert("Error", e.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (!order) return <ActivityIndicator style={{ marginTop: 100 }} size="large" color={theme.primary} />;
+
+  const next = nextStatus[order.status];
 
   return (
     <ScrollView style={{ flex: 1, padding: 16 }}>
@@ -55,11 +76,20 @@ export default function AdminOrderDetailPage() {
         </View>
       </Card>
 
+      {next && (
+        <Button onPress={() => handleStatusUpdate(next)} loading={updating} style={{ marginBottom: 12 }}>
+          {nextLabel[next]} ← {statusLabels[order.status]}
+        </Button>
+      )}
+
       <Text style={{ fontSize: 16, fontWeight: "600", color: theme.foreground, marginBottom: 8 }}>{t("orders.items")}</Text>
       {order.items?.map((item) => (
         <Card key={item.id} style={{ marginBottom: 8 }}>
           <View style={{ padding: 12, gap: 4 }}>
-            <Text style={{ color: theme.foreground, fontWeight: "500" }}>{item.product?.name || item.productName || "—"}</Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <Text style={{ color: theme.foreground, fontWeight: "500", flex: 1 }}>{item.product?.name || item.productName || "—"}</Text>
+              {item.status && <Badge label={itemStatusLabels[item.status] || item.status} variant={itemStatusBadge[item.status] || "default"} />}
+            </View>
             <View style={{ flexDirection: "row", gap: 12 }}>
               {item.quantity && <Text style={{ color: theme.mutedForeground, fontSize: 12 }}>x{item.quantity}</Text>}
               <Text style={{ color: theme.primary, fontWeight: "600" }}>{Number(item.price || item.product?.price || 0).toFixed(2)} ريال</Text>

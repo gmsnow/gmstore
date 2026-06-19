@@ -1,92 +1,217 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, Image, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView, FlatList, ActivityIndicator, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { useI18n } from "../src/lib/i18n";
 import { useTheme } from "../src/lib/theme";
 import { api, formatPrice, currencyLabel } from "../src/lib/api";
-import { Card } from "../src/components/ui/Card";
+import { localizedName } from "../src/lib/utils";
+import { ShoppingBag, Eye } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { reportScroll } from "../src/lib/scroll-state";
+import HeroSlider from "../src/components/shop/HeroSlider";
+import ProductCard from "../src/components/shop/ProductCard";
+import DealsSection from "../src/components/shop/DealsSection";
+
+const CARD_GAP = 12;
+const PADDING = 16;
+const cardWidth = (Dimensions.get("window").width - PADDING * 2 - CARD_GAP) / 2;
+
+function CategoryGrid({ categories }) {
+  const { t, locale } = useI18n();
+  const { theme } = useTheme();
+  const router = useRouter();
+
+  if (!categories?.length) return null;
+
+  const cols = [];
+  for (let i = 0; i < categories.length; i += 3) {
+    cols.push(categories.slice(i, i + 3));
+  }
+
+  return (
+    <View style={{ paddingHorizontal: 16, marginTop: 24 }}>
+      <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 16 }}>
+        <Text style={{ fontSize: 18, fontWeight: "700", color: theme.foreground, marginBottom: 20 }}>{t("home.categories")}</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 24 }}>
+          {cols.map((col, ci) => (
+            <View key={ci} style={{ gap: 12 }}>
+              {col.map((item) => (
+                <TouchableOpacity key={item.id} onPress={() => router.push(`/products?category=${item.slug || item.id}`)} style={{ alignItems: "center", gap: 4 }}>
+                  <View style={{ width: 60, height: 60, borderRadius: 25, overflow: "hidden", justifyContent: "center", alignItems: "center" }}>
+                    {item.image ? (
+                      <Image source={{ uri: item.image }} style={{ width: 60, height: 60, resizeMode: "cover" }} />
+                    ) : (
+                      <ShoppingBag size={24} color={theme.mutedForeground} />
+                    )}
+                  </View>
+                  <Text numberOfLines={1} style={{ fontSize: 14, fontWeight: "500", color: theme.foreground, textAlign: "center", lineHeight: 18 }}>
+                    {localizedName(item, locale)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
+  );
+}
+
+function ProductSection({ title, products, onSeeAll, loading }) {
+  const { t } = useI18n();
+  const { theme } = useTheme();
+  if (loading) return <View style={{ height: 260 }} />;
+  if (!products?.length) return null;
+  const rows = [];
+  for (let i = 0; i < products.length; i += 2) {
+    rows.push(products.slice(i, i + 2));
+  }
+  return (
+    <View style={{ marginTop: 28 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingHorizontal: PADDING }}>
+        <Text style={{ fontSize: 22, fontWeight: "700", color: theme.foreground }}>{title}</Text>
+        {onSeeAll && (
+          <TouchableOpacity onPress={onSeeAll}>
+            <Text style={{ fontSize: 14, color: theme.primary, textDecorationLine: "underline" }}>{t("home.view_all")}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <View style={{ paddingHorizontal: PADDING, gap: CARD_GAP }}>
+        {rows.map((row, ri) => (
+          <View key={ri} style={{ flexDirection: "row", gap: CARD_GAP }}>
+            {row.map((item) => (
+              <View key={item.id} style={{ width: cardWidth }}>
+                <ProductCard item={item} width={cardWidth} />
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function RecentlyViewed() {
+  const router = useRouter();
+  const { t, locale } = useI18n();
+  const { theme } = useTheme();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    AsyncStorage.getItem("recentlyViewed")
+      .then((data) => {
+        const slugs = data ? JSON.parse(data) : [];
+        if (slugs.length > 0) {
+          return api(`/products?slugs=${slugs.join(",")}`).then(setProducts);
+        }
+        setProducts([]);
+      })
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading || products.length === 0) return null;
+
+  return (
+    <View style={{ paddingHorizontal: 16, marginTop: 28 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <Eye size={20} color={theme.foreground} />
+        <Text style={{ fontSize: 18, fontWeight: "700", color: theme.foreground }}>{t("home.recently_viewed")}</Text>
+      </View>
+      <FlatList
+        horizontal
+        data={products}
+        keyExtractor={(item) => item.id}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 12 }}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => router.push(`/products/${item.slug}`)} style={{ width: 160, backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, overflow: "hidden" }}>
+            <Image source={{ uri: item.images?.[0] }} style={{ width: 160, height: 160, backgroundColor: theme.muted }} />
+            <View style={{ padding: 8, gap: 2 }}>
+              <Text numberOfLines={2} style={{ fontSize: 12, fontWeight: "500", color: theme.foreground }}>{localizedName(item, locale)}</Text>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: theme.primary }}>{formatPrice(Number(item.price))} {currencyLabel.yer}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
+  );
+}
 
 export default function HomePage() {
   const { t, locale } = useI18n();
   const { theme } = useTheme();
   const router = useRouter();
+  const [banners, setBanners] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [featured, setFeatured] = useState([]);
+  const [deals, setDeals] = useState([]);
+  const [bestSellers, setBestSellers] = useState([]);
+  const [latest, setLatest] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 5000);
     Promise.all([
+      api("/banners").catch(() => []),
       api("/categories").catch(() => []),
-      api("/products?limit=10").catch(() => []),
-    ]).then(([cats, prods]) => {
-      setCategories(cats);
-      setProducts(prods);
+      api("/products?featured=true&limit=10").catch(() => []),
+      api("/products?discount=true&limit=10").catch(() => []),
+      api("/products?sort=sales&limit=10").catch(() => []),
+      api("/products?latest=true&limit=10").catch(() => []),
+    ]).then(([b, c, f, d, bs, l]) => {
+      clearTimeout(timer);
+      setBanners(b?.filter((x) => x.active) || []);
+      setCategories(c || []);
+      setFeatured(f || []);
+      setDeals(d || []);
+      setBestSellers(bs || []);
+      setLatest(l || []);
       setLoading(false);
     });
   }, []);
 
-  if (loading) return <ActivityIndicator style={{ marginTop: 100 }} size="large" color={theme.primary} />;
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={[styles.hero, { backgroundColor: theme.primary }]}>
-        <Text style={styles.heroTitle}>{t("home.hero_title")}</Text>
-        <Text style={styles.heroSub}>{t("home.hero_subtitle")}</Text>
-      </View>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: theme.background }}
+      onScroll={(e) => reportScroll(e.nativeEvent.contentOffset.y)}
+      scrollEventThrottle={16}
+    >
+      <HeroSlider slides={banners} />
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.foreground }]}>{t("home.categories")}</Text>
-        <FlatList
-          horizontal
-          data={categories}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => router.push(`/products?category=${item.id}`)} style={styles.catCard}>
-              {item.image && <Image source={{ uri: item.image }} style={styles.catImg} />}
-              <Text style={[styles.catName, { color: theme.foreground }]}>{locale === "en" && item.nameEn ? item.nameEn : item.name}</Text>
-            </TouchableOpacity>
-          )}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
-        />
-      </View>
+      <CategoryGrid categories={categories} />
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.foreground }]}>{t("home.featured")}</Text>
-        <FlatList
-          horizontal
-          data={products}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => router.push(`/products/${item.slug}`)} style={styles.prodCard}>
-              <Image source={{ uri: item.images?.[0] }} style={styles.prodImg} />
-              <View style={styles.prodInfo}>
-                <Text numberOfLines={2} style={[styles.prodName, { color: theme.foreground }]}>{locale === "en" && item.nameEn ? item.nameEn : item.name}</Text>
-                <Text style={[styles.prodPrice, { color: theme.primary }]}>{formatPrice(Number(item.price))} {currencyLabel.yer}</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
-        />
-      </View>
+      <DealsSection products={deals} target={new Date(Date.now() + 86400000).toISOString()} />
+
+      <ProductSection
+        title={t("home.featured")}
+        products={featured}
+        onSeeAll={() => router.push("/products?featured=true")}
+      />
+
+      <ProductSection
+        title={t("home.best_seller")}
+        products={bestSellers}
+      />
+
+      <ProductSection
+        title={t("home.latest")}
+        products={latest}
+        onSeeAll={() => router.push("/products")}
+      />
+
+      <RecentlyViewed />
+
+      <View style={{ height: 100 }} />
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  hero: { padding: 32, alignItems: "center" },
-  heroTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 4 },
-  heroSub: { fontSize: 14, color: "rgba(255,255,255,0.8)" },
-  section: { marginTop: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12, paddingHorizontal: 16 },
-  catCard: { width: 100, alignItems: "center" },
-  catImg: { width: 80, height: 80, borderRadius: 40, marginBottom: 6 },
-  catName: { fontSize: 12, fontWeight: "500", textAlign: "center" },
-  prodCard: { width: 160, borderRadius: 12, overflow: "hidden" },
-  prodImg: { width: 160, height: 160, backgroundColor: "#f1f5f9" },
-  prodInfo: { padding: 8 },
-  prodName: { fontSize: 13, marginBottom: 4 },
-  prodPrice: { fontSize: 14, fontWeight: "700" },
-});

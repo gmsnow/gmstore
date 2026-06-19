@@ -32,7 +32,7 @@ export default function MerchantOrdersPage() {
         data={orders}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => router.push(`/admin/orders/${item.id}`)}>
+          <TouchableOpacity onPress={() => router.push({ pathname: "/(admin)/orders/[id]", params: { id: item.id } })}>
             <Card style={{ marginBottom: 8 }}>
               <View style={{ padding: 12, gap: 4 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>

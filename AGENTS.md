@@ -26,7 +26,7 @@ Full knowledge base: `.opencode/agents/gmstore-agent.md`
 
 ## Rules
 1. Read `node_modules/next/dist/docs/` before writing Next.js code
-2. No `SessionProvider` — server-side auth only via `auth()`
+2. No `SessionProvider` — server-side auth only via `await auth()` (call inside handler, NOT as route wrapper for POST routes)
 3. Slug: `normalize("NFC")` client + server, `userId.slice(0,8)` suffix
 4. `font=raleway` breaks Arabic — omit from placehold.co URLs
 5. `.env` = Railway prod, `.env.local` = localhost dev

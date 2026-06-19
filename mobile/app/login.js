@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useI18n } from "../src/lib/i18n";
 import { useTheme } from "../src/lib/theme";
 import { useAuth } from "../src/lib/auth";
 import { setAuthToken } from "../src/lib/api";
-import { Input } from "../src/components/ui/Input";
 import { Button } from "../src/components/ui/Button";
+import { LogIn, Eye, EyeOff } from "lucide-react-native";
 
 export default function LoginPage() {
   const { t } = useI18n();
@@ -16,8 +16,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert("", t("common.fill_required"));
+      return;
+    }
     setLoading(true);
     try {
       const res = await login(email, password);
@@ -33,19 +38,46 @@ export default function LoginPage() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.foreground }]}>{t("common.login")}</Text>
-      <View style={styles.form}>
-        <Input label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
-        <Input label="Password" value={password} onChangeText={setPassword} secureTextEntry />
-        <Button onPress={handleLogin} loading={loading}>{t("common.login")}</Button>
+    <View style={{ flex: 1, justifyContent: "center", padding: 24, backgroundColor: theme.background }}>
+      <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 24, gap: 16 }}>
+        <Text style={{ fontSize: 24, fontWeight: "700", color: theme.cardForeground, textAlign: "center" }}>{t("common.login")}</Text>
+        <View style={{ gap: 12 }}>
+          <View>
+            <Text style={{ fontSize: 13, fontWeight: "500", color: theme.cardForeground, marginBottom: 4 }}>{t("checkout.email")}</Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholder="example@email.com"
+              placeholderTextColor={theme.mutedForeground}
+              style={{ borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: theme.cardForeground }}
+            />
+          </View>
+          <View>
+            <Text style={{ fontSize: 13, fontWeight: "500", color: theme.cardForeground, marginBottom: 4 }}>{t("common.password")}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingHorizontal: 12 }}>
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                placeholder="••••••••"
+                placeholderTextColor={theme.mutedForeground}
+                style={{ flex: 1, paddingVertical: 10, fontSize: 14, color: theme.cardForeground }}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                {showPassword ? <EyeOff size={18} color={theme.mutedForeground} /> : <Eye size={18} color={theme.mutedForeground} />}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+        <Button onPress={handleLogin} loading={loading} icon={<LogIn size={18} color={theme.primaryForeground} />}>
+          {t("common.login")}
+        </Button>
+        <TouchableOpacity onPress={() => router.push("/register")}>
+          <Text style={{ textAlign: "center", fontSize: 13, color: theme.primary }}>{t("common.no_account")}</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24 },
-  title: { fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 32 },
-  form: { gap: 12 },
-});

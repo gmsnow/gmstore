@@ -1,14 +1,13 @@
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, FlatList, Image, TouchableOpacity, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useI18n } from "../src/lib/i18n";
-import { useTheme } from "../src/lib/theme";
 import { useCart } from "../src/lib/cart";
 import { api, formatPrice, currencyLabel } from "../src/lib/api";
 import { Button } from "../src/components/ui/Button";
-import { Card } from "../src/components/ui/Card";
-import { useState } from "react";
-import { TextInput } from "react-native";
-import { Minus, Plus, Trash2 } from "@expo/vector-icons";
+import { Trash2, Plus, Minus, ShoppingBag, Truck } from "lucide-react-native";
+import { reportScroll } from "../src/lib/scroll-state";
+import { useTheme } from "../src/lib/theme";
 
 export default function CartPage() {
   const { t } = useI18n();
@@ -18,7 +17,7 @@ export default function CartPage() {
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [couponMsg, setCouponMsg] = useState("");
-  const total = subtotal - discount + (isFreeShipping ? 0 : shippingCost);
+  const total = Math.max(0, subtotal - discount + (isFreeShipping ? 0 : shippingCost));
 
   async function handleApplyCoupon() {
     if (!couponCode.trim()) return;
@@ -39,78 +38,98 @@ export default function CartPage() {
     }
   }
 
-  return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.foreground }]}>{t("cart.drawer_title")}</Text>
+  const progress = Math.min(100, (subtotal / freeThreshold) * 100);
 
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <Text style={{ fontSize: 22, fontWeight: "700", color: theme.foreground, padding: 16, paddingBottom: 0 }}>{t("cart.drawer_title")}</Text>
       {items.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={[styles.emptyText, { color: theme.mutedForeground }]}>{t("cart.empty")}</Text>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 16 }}>
+          <ShoppingBag size={48} color={theme.border} />
+          <Text style={{ fontSize: 16, color: theme.mutedForeground }}>{t("cart.empty")}</Text>
           <Button title={t("cart.continue_shopping")} onPress={() => router.push("/products")} variant="outline" />
         </View>
       ) : (
         <FlatList
           data={items}
-          keyExtractor={(item, i) => `${item.productId}-${item.color}-${i}`}
-          renderItem={({ item }) => (
-            <View style={[styles.item, { borderColor: theme.border }]}>
-              <Image source={{ uri: item.image }} style={styles.itemImg} />
-              <View style={styles.itemInfo}>
-                <Text style={[styles.itemName, { color: theme.foreground }]}>{item.name}</Text>
-                {item.color && <Text style={[styles.itemMeta, { color: theme.mutedForeground }]}>{item.color}</Text>}
-                {item.size && <Text style={[styles.itemMeta, { color: theme.mutedForeground }]}>{item.size}</Text>}
-                <View style={styles.qtyRow}>
-                  <TouchableOpacity onPress={() => updateQuantity(item.productId, item.color, -1)} style={styles.qtyBtn}>
-                    <Minus size={14} color={theme.foreground} />
-                  </TouchableOpacity>
-                  <Text style={[styles.qty, { color: theme.foreground }]}>{item.quantity}</Text>
-                  <TouchableOpacity onPress={() => updateQuantity(item.productId, item.color, 1)} style={styles.qtyBtn}>
-                    <Plus size={14} color={theme.foreground} />
-                  </TouchableOpacity>
+          keyExtractor={(item, i) => `${item.productId}-${item.color}-${item.size}-${i}`}
+          contentContainerStyle={{ padding: 16, gap: 12 }}
+          onScroll={(e) => reportScroll(e.nativeEvent.contentOffset.y)}
+          scrollEventThrottle={16}
+          ListHeaderComponent={
+            <>
+              <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 12, gap: 8 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Truck size={18} color={isFreeShipping ? theme.success : theme.primary} />
+                  <Text style={{ fontSize: 13, color: theme.cardForeground, flex: 1 }}>
+                    {isFreeShipping ? t("cart.free_shipping_achieved") : `${t("cart.free_shipping_progress", { amount: `${formatPrice(freeThreshold - subtotal)} ${currencyLabel.yer}` })}`}
+                  </Text>
+                </View>
+                <View style={{ height: 6, backgroundColor: theme.muted, borderRadius: 3, overflow: "hidden" }}>
+                  <View style={{ width: `${progress}%`, height: 6, backgroundColor: isFreeShipping ? theme.success : theme.primary, borderRadius: 3 }} />
                 </View>
               </View>
-              <View style={styles.itemRight}>
-                <Text style={[styles.itemPrice, { color: theme.primary }]}>{formatPrice(item.price)} {currencyLabel.yer}</Text>
-                <TouchableOpacity onPress={() => removeFromCart(item.productId, item.color)}>
-                  <Trash2 size={16} color={theme.destructive} />
-                </TouchableOpacity>
+            </>
+          }
+          renderItem={({ item }) => (
+            <View style={{ flexDirection: "row", backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 12, gap: 12 }}>
+              <Image source={{ uri: item.image }} style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: theme.muted }} />
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", color: theme.cardForeground }}>{item.name}</Text>
+                {item.color && <Text style={{ fontSize: 12, color: theme.mutedForeground }}>اللون: {item.color}</Text>}
+                {item.size && <Text style={{ fontSize: 12, color: theme.mutedForeground }}>المقاس: {item.size}</Text>}
+                <Text style={{ fontSize: 16, fontWeight: "700", color: theme.primary }}>{formatPrice(item.price * item.quantity)} {currencyLabel.yer}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1, borderColor: theme.border, borderRadius: 6 }}>
+                    <TouchableOpacity onPress={() => updateQuantity(item.productId, item.color, -1)} style={{ padding: 6 }}><Minus size={14} color={theme.cardForeground} /></TouchableOpacity>
+                    <Text style={{ fontSize: 14, fontWeight: "600", color: theme.cardForeground, minWidth: 20, textAlign: "center" }}>{item.quantity}</Text>
+                    <TouchableOpacity onPress={() => updateQuantity(item.productId, item.color, 1)} style={{ padding: 6 }}><Plus size={14} color={theme.cardForeground} /></TouchableOpacity>
+                  </View>
+                  <TouchableOpacity onPress={() => removeFromCart(item.productId, item.color)} style={{ padding: 6 }}>
+                    <Trash2 size={16} color={theme.destructive} />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           )}
           ListFooterComponent={
-            <View style={styles.footer}>
-              <View style={styles.couponRow}>
-                <TextInput
-                  value={couponCode}
-                  onChangeText={setCouponCode}
-                  placeholder={t("cart.coupon_placeholder")}
-                  placeholderTextColor={theme.mutedForeground}
-                  style={[styles.couponInput, { borderColor: theme.border, color: theme.foreground }]}
-                />
-                <Button title={t("cart.coupon_apply")} onPress={handleApplyCoupon} />
-              </View>
-              {couponMsg ? <Text style={{ color: discount > 0 ? "green" : "red", fontSize: 12 }}>{couponMsg}</Text> : null}
-              <View style={styles.totalRow}>
-                <Text style={{ color: theme.mutedForeground }}>{t("cart.subtotal")}</Text>
-                <Text style={{ color: theme.foreground, fontWeight: "600" }}>{formatPrice(subtotal)} {currencyLabel.yer}</Text>
-              </View>
-              {discount > 0 && (
-                <View style={styles.totalRow}>
-                  <Text style={{ color: theme.mutedForeground }}>{t("cart.coupon_discount")}</Text>
-                  <Text style={{ color: "green" }}>-{formatPrice(discount)} {currencyLabel.yer}</Text>
+            <View style={{ gap: 12 }}>
+              <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 12, gap: 8 }}>
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <TextInput
+                    value={couponCode}
+                    onChangeText={setCouponCode}
+                    placeholder={t("cart.coupon_placeholder")}
+                    placeholderTextColor={theme.mutedForeground}
+                    style={{ flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingHorizontal: 12, fontSize: 14, color: theme.cardForeground }}
+                  />
+                  <Button title={t("cart.coupon_apply")} onPress={handleApplyCoupon} variant="outline" />
                 </View>
-              )}
-              <View style={styles.totalRow}>
-                <Text style={{ color: theme.mutedForeground }}>{t("cart.shipping")}</Text>
-                <Text style={{ color: isFreeShipping ? "green" : theme.foreground, fontWeight: "600" }}>
-                  {isFreeShipping ? t("cart.free_shipping") : `${formatPrice(shippingCost)} ${currencyLabel.yer}`}
-                </Text>
+                {couponMsg ? <Text style={{ color: discount > 0 ? theme.success : theme.destructive, fontSize: 12 }}>{couponMsg}</Text> : null}
               </View>
-              <View style={[styles.totalRow, { borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 12 }]}>
-                <Text style={{ fontSize: 16, fontWeight: "700", color: theme.foreground }}>{t("cart.total")}</Text>
-                <Text style={{ fontSize: 16, fontWeight: "700", color: theme.primary }}>{formatPrice(total)} {currencyLabel.yer}</Text>
+              <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 16, gap: 8 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <Text style={{ color: theme.mutedForeground, fontSize: 14 }}>{t("cart.subtotal")}</Text>
+                  <Text style={{ color: theme.cardForeground, fontWeight: "600", fontSize: 14 }}>{formatPrice(subtotal)} {currencyLabel.yer}</Text>
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <Text style={{ color: theme.mutedForeground, fontSize: 14 }}>{t("cart.shipping")}</Text>
+                  <Text style={{ color: isFreeShipping ? theme.success : theme.cardForeground, fontWeight: "600", fontSize: 14 }}>
+                    {isFreeShipping ? t("cart.free_shipping") : `${formatPrice(shippingCost)} ${currencyLabel.yer}`}
+                  </Text>
+                </View>
+                {discount > 0 && (
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ color: theme.mutedForeground, fontSize: 14 }}>{t("cart.coupon_discount")}</Text>
+                    <Text style={{ color: theme.success, fontWeight: "600", fontSize: 14 }}>-{formatPrice(discount)} {currencyLabel.yer}</Text>
+                  </View>
+                )}
+                <View style={{ borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 8, flexDirection: "row", justifyContent: "space-between" }}>
+                  <Text style={{ fontSize: 18, fontWeight: "700", color: theme.cardForeground }}>{t("cart.total")}</Text>
+                  <Text style={{ fontSize: 18, fontWeight: "700", color: theme.primary }}>{formatPrice(total)} {currencyLabel.yer}</Text>
+                </View>
+                <Button title={t("cart.checkout")} onPress={() => router.push("/checkout")} style={{ marginTop: 8 }} />
               </View>
-              <Button title={t("cart.checkout")} onPress={() => router.push("/checkout")} style={{ marginTop: 12 }} />
             </View>
           }
         />
@@ -118,24 +137,3 @@ export default function CartPage() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  title: { fontSize: 20, fontWeight: "700", padding: 16, paddingBottom: 0 },
-  empty: { flex: 1, justifyContent: "center", alignItems: "center", gap: 16 },
-  emptyText: { fontSize: 14 },
-  item: { flexDirection: "row", padding: 12, marginHorizontal: 16, marginTop: 12, borderWidth: 1, borderRadius: 12, gap: 12 },
-  itemImg: { width: 64, height: 64, borderRadius: 8, backgroundColor: "#f1f5f9" },
-  itemInfo: { flex: 1, gap: 2 },
-  itemName: { fontSize: 14, fontWeight: "600" },
-  itemMeta: { fontSize: 11 },
-  qtyRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
-  qtyBtn: { padding: 4 },
-  qty: { fontSize: 14, fontWeight: "600", width: 24, textAlign: "center" },
-  itemRight: { alignItems: "flex-end", justifyContent: "space-between" },
-  itemPrice: { fontSize: 14, fontWeight: "700" },
-  footer: { padding: 16, gap: 8 },
-  couponRow: { flexDirection: "row", gap: 8 },
-  couponInput: { flex: 1, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, fontSize: 14 },
-  totalRow: { flexDirection: "row", justifyContent: "space-between" },
-});
