@@ -1,22 +1,40 @@
 import { prisma } from "@/lib/prisma";
-import { Mail, ShoppingBag, Star, Coins } from "lucide-react";
+import { Mail, ShoppingBag, Star, Coins, ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export default async function CustomersPage() {
-  const customers = await prisma.user.findMany({
-    where: { role: "CUSTOMER" },
-    select: {
-      id: true, name: true, email: true, points: true, referralCode: true,
-      orders: { select: { id: true } },
-      reviews: { select: { id: true } },
-      createdAt: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+const PAGE_SIZE = 20;
+
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || "1"));
+  const skip = (page - 1) * PAGE_SIZE;
+
+  const [customers, totalCount] = await Promise.all([
+    prisma.user.findMany({
+      where: { role: "CUSTOMER" },
+      select: {
+        id: true, name: true, email: true, points: true, referralCode: true,
+        orders: { select: { id: true } },
+        reviews: { select: { id: true } },
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      take: PAGE_SIZE,
+      skip,
+    }),
+    prisma.user.count({ where: { role: "CUSTOMER" } }),
+  ]);
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">العملاء</h1>
-      <p className="text-sm text-muted-foreground">إجمالي العملاء: {customers.length}</p>
+      <p className="text-sm text-muted-foreground">إجمالي العملاء: {totalCount}</p>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full text-sm">
@@ -46,6 +64,21 @@ export default async function CustomersPage() {
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {page > 1 && (
+            <Link href={`/admin/customers?page=${page - 1}`}>
+              <Button variant="outline" size="sm"><ChevronRight className="h-4 w-4" /></Button>
+            </Link>
+          )}
+          <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
+          {page < totalPages && (
+            <Link href={`/admin/customers?page=${page + 1}`}>
+              <Button variant="outline" size="sm"><ChevronLeft className="h-4 w-4" /></Button>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }

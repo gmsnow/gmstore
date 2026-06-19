@@ -3,18 +3,34 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { T } from "@/components/translate";
 import { getServerTranslations } from "@/lib/i18n/server";
 import { localizedName } from "@/lib/i18n/localized";
 
-export default async function AdminProductsPage() {
+const PAGE_SIZE = 20;
+
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const { locale, t } = await getServerTranslations();
-  const products = await prisma.product.findMany({
-    include: { category: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || "1"));
+  const skip = (page - 1) * PAGE_SIZE;
+
+  const [products, totalCount] = await Promise.all([
+    prisma.product.findMany({
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+      take: PAGE_SIZE,
+      skip,
+    }),
+    prisma.product.count(),
+  ]);
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <div className="space-y-4">
@@ -64,6 +80,23 @@ export default async function AdminProductsPage() {
           )}
         </TableBody>
       </Table>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-4">
+          {page > 1 && (
+            <Link href={`/admin/products?page=${page - 1}`}>
+              <Button variant="outline" size="sm"><ChevronRight className="h-4 w-4" /></Button>
+            </Link>
+          )}
+          <span className="text-sm text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link href={`/admin/products?page=${page + 1}`}>
+              <Button variant="outline" size="sm"><ChevronLeft className="h-4 w-4" /></Button>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }

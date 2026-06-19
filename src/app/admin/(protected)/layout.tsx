@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { AdminLayoutShell } from "@/components/admin/admin-layout-shell";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   const role = (session?.user as any)?.role;

@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { MerchantSidebar } from "@/components/merchant/merchant-sidebar";
 
+export const dynamic = "force-dynamic";
+
 export default async function MerchantLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   const role = (session?.user as any)?.role;

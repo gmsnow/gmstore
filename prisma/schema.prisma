@@ -175,6 +175,9 @@ model Product {
   @@index([createdAt])
   @@index([featured])
   @@index([discount])
+  @@index([categoryId])
+  @@index([name])
+  @@index([userId])
 }
 
 model Order {
@@ -196,6 +199,11 @@ model Order {
   coupon          Coupon?       @relation(fields: [couponId], references: [id])
   pointsEarned    Int           @default(0)
   createdAt       DateTime      @default(now())
+
+  @@index([userId])
+  @@index([customerEmail])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -224,6 +232,8 @@ model Review {
   createdAt DateTime    @default(now())
 
   @@unique([productId, userId])
+  @@index([reported])
+  @@index([productId])
 }
 
 model Favorite {

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { FadeIn, FadeInUp, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
@@ -10,8 +10,7 @@ import { HeroSlider } from "@/components/shop/hero-slider";
 import { localizedName } from "@/lib/i18n/localized";
 import { getServerLocale } from "@/lib/i18n/server";
 import { DealsSection } from "@/components/shop/deals-section";
-
-const productSelect = { id: true, name: true, nameEn: true, slug: true, price: true, images: true, colors: true, featured: true, stock: true, discount: true, dealEnd: true, brand: true, brandLogo: true, category: { select: { id: true, name: true, nameEn: true, slug: true } }, reviews: { select: { rating: true } } } as const;
+import { getFeaturedProducts, getLatestProducts, getCategories, getBestSellers, getDealProducts, getActiveBanners } from "@/lib/data";
 
 export const revalidate = 60;
 
@@ -22,32 +21,14 @@ export default async function HomePage() {
   const locale = await getServerLocale();
 
   const [rawFeatured, rawLatest, categories, userFavs, banners] = await Promise.all([
-    prisma.product.findMany({ where: { featured: true }, select: productSelect, take: 4 }),
-    prisma.product.findMany({ select: productSelect, orderBy: { createdAt: "desc" }, take: 8 }),
-    prisma.category.findMany({ select: { id: true, name: true, nameEn: true, slug: true, image: true, _count: { select: { products: true } } } }),
+    getFeaturedProducts(),
+    getLatestProducts(),
+    getCategories(),
     isLoggedIn ? prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } }) : [],
-    prisma.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }),
+    getActiveBanners(),
   ]);
-
-  const bestRaw = await prisma.orderItem.groupBy({
-    by: ["productId"],
-    _sum: { quantity: true },
-    orderBy: { _sum: { quantity: "desc" } },
-    take: 8,
-  });
-  const bestIds = bestRaw.map((b) => b.productId);
-  const bestProducts = bestIds.length > 0
-    ? await prisma.product.findMany({ where: { id: { in: bestIds } }, select: productSelect })
-    : [];
-  const bestMap = new Map(bestProducts.map((p) => [p.id, p]));
-  const bestSellers = bestIds.map((id) => bestMap.get(id)).filter(Boolean);
-
-  const rawDeals = await prisma.product.findMany({
-    where: { discount: { gt: 0 } },
-    select: productSelect,
-    orderBy: { discount: "desc" },
-    take: 8,
-  });
+  const bestSellers = await getBestSellers();
+  const rawDeals = await getDealProducts();
 
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
   const featured = (rawFeatured as any[]).map((p: any) => ({ ...p, price: Number(p.price) }));
@@ -73,7 +54,11 @@ export default async function HomePage() {
               {(categories as any[]).map((cat: any) => (
                 <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">
                   <div className="w-[70px] h-[70px] rounded-[25px] overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[60px] max-sm:h-[60px]">
-                    <img src={cat.image || ""} alt={cat.name} className="w-full h-full object-cover" />
+                    {cat.image ? (
+                      <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-muted" />
+                    )}
                   </div>
                   <p className="mt-2 text-sm leading-tight text-[#222] dark:text-foreground">
                     {localizedName(cat, locale)}
@@ -85,7 +70,6 @@ export default async function HomePage() {
         </FadeInUp>
       )}
 
-      {/* Deals section with countdown */}
       {deals.length > 0 && (
         <DealsSection products={deals} target={dealTarget} isLoggedIn={isLoggedIn} favoriteIds={favoriteIds} />
       )}
@@ -108,7 +92,6 @@ export default async function HomePage() {
         </FadeInUp>
       )}
 
-      {/* Best sellers section */}
       {bestList.length > 0 && (
         <FadeInUp>
           <section className="space-y-6">

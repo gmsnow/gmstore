@@ -1,19 +1,35 @@
 import { prisma } from "@/lib/prisma";
-import { Store, Package, Star, Calendar } from "lucide-react";
+import { Store, Package, Star, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export default async function AdminMerchantsPage() {
-  const merchants = await prisma.user.findMany({
-    where: { role: "MERCHANT" },
-    include: {
-      store: true,
-      _count: { select: { products: true, reviews: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+const PAGE_SIZE = 20;
 
-  const totalMerchants = merchants.length;
+export default async function AdminMerchantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || "1"));
+  const skip = (page - 1) * PAGE_SIZE;
+
+  const [merchants, totalMerchants] = await Promise.all([
+    prisma.user.findMany({
+      where: { role: "MERCHANT" },
+      include: {
+        store: true,
+        _count: { select: { products: true, reviews: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: PAGE_SIZE,
+      skip,
+    }),
+    prisma.user.count({ where: { role: "MERCHANT" } }),
+  ]);
+  const totalPages = Math.ceil(totalMerchants / PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -99,6 +115,22 @@ export default async function AdminMerchantsPage() {
           </Card>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {page > 1 && (
+            <Link href={`/admin/merchants?page=${page - 1}`}>
+              <Button variant="outline" size="sm"><ChevronRight className="h-4 w-4" /></Button>
+            </Link>
+          )}
+          <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
+          {page < totalPages && (
+            <Link href={`/admin/merchants?page=${page + 1}`}>
+              <Button variant="outline" size="sm"><ChevronLeft className="h-4 w-4" /></Button>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }

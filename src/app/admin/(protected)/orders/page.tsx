@@ -3,9 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, CheckCheck, XCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, CheckCheck, XCircle } from "lucide-react";
 import { MobileOrderCards } from "@/components/admin/mobile-order-cards";
 import { OrderLocationLink } from "@/components/admin/order-location-link";
+
+const PAGE_SIZE = 20;
 
 const statusLabels: Record<string, string> = {
   PENDING: "قيد الانتظار",
@@ -41,12 +43,26 @@ function OrderThumbs({ items }: { items: any[] }) {
   );
 }
 
-export default async function AdminOrdersPage() {
-  const rawOrders = await prisma.order.findMany({
-    where: { status: { notIn: ["DELIVERED", "CANCELLED"] } },
-    include: { items: { include: { product: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || "1"));
+  const skip = (page - 1) * PAGE_SIZE;
+
+  const [rawOrders, totalCount] = await Promise.all([
+    prisma.order.findMany({
+      where: { status: { notIn: ["DELIVERED", "CANCELLED"] } },
+      include: { items: { include: { product: true } } },
+      orderBy: { createdAt: "desc" },
+      take: PAGE_SIZE,
+      skip,
+    }),
+    prisma.order.count({ where: { status: { notIn: ["DELIVERED", "CANCELLED"] } } }),
+  ]);
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const orders = rawOrders.map((o) => ({
     ...o,
@@ -108,6 +124,21 @@ export default async function AdminOrdersPage() {
           </TableBody>
         </Table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {page > 1 && (
+            <Link href={`/admin/orders?page=${page - 1}`}>
+              <Button variant="outline" size="sm"><ChevronRight className="h-4 w-4" /></Button>
+            </Link>
+          )}
+          <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
+          {page < totalPages && (
+            <Link href={`/admin/orders?page=${page + 1}`}>
+              <Button variant="outline" size="sm"><ChevronLeft className="h-4 w-4" /></Button>
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="md:hidden">
         <MobileOrderCards orders={orders} />
