@@ -24,6 +24,31 @@
 .DS_Store
 *.pem
 
+# tunnel / dev scripts
+*.ps1
+*.vbs
+*.cmd
+tunnel*.js
+lt-*.cjs
+cf-tunnel.cjs
+pinggy.ps1
+start-all.cmd
+web-server.log
+database pass.txt
+
+# expo
+.expo/
+
+# public uploads
+public/uploads/
+
+# seed scripts
+scripts/create-admin.ts
+scripts/seed-fast.ts
+scripts/seed-categories.ts
+scripts/categories-raw.json
+scripts/export-categories.js
+
 # debug
 npm-debug.log*
 yarn-debug.log*
