@@ -84,10 +84,7 @@ export const DELETE = auth(async (req, { params }: { params: Promise<{ id: strin
   if (role !== "ADMIN" && product.userId !== userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const orderCount = await prisma.orderItem.count({ where: { productId: id } });
-  if (orderCount > 0) {
-    return NextResponse.json({ error: "لا يمكن حذف منتج عليه طلبات سابقة" }, { status: 400 });
-  }
+  await prisma.orderItem.deleteMany({ where: { productId: id } });
   await prisma.favorite.deleteMany({ where: { productId: id } });
   await prisma.review.deleteMany({ where: { productId: id } });
   await prisma.product.delete({ where: { id } });
