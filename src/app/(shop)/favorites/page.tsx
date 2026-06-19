@@ -2,16 +2,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { Heart, ArrowLeft, Trash2, Share2 } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { SwipeableProductCard } from "@/components/shop/swipeable-product-card";
 import { T } from "@/components/translate";
 
 export default function FavoritesPage() {
-  const { data: session } = useSession();
-  const userId = (session?.user as any)?.id;
-  const isLoggedIn = !!userId;
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [ids, setIds] = useState<string[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -43,9 +41,12 @@ export default function FavoritesPage() {
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn) fetchServer();
-    else fetchLocal();
-  }, [isLoggedIn, fetchServer, fetchLocal]);
+    fetch("/api/auth/session").then(r => r.json()).then(session => {
+      const uid = (session?.user as any)?.id;
+      if (uid) { setUserId(uid); setIsLoggedIn(true); fetchServer(); }
+      else { setUserId(null); setIsLoggedIn(false); fetchLocal(); }
+    }).catch(() => fetchLocal());
+  }, [fetchServer, fetchLocal]);
 
   useEffect(() => {
     window.addEventListener("favoritesUpdated", isLoggedIn ? fetchServer : fetchLocal);
