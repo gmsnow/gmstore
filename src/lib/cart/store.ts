@@ -2,7 +2,8 @@ import type { CartItem } from "@/types";
 
 const STORAGE_KEY = "cart";
 const FREE_SHIPPING_THRESHOLD = 3000;
-const SHIPPING_COST = 500;
+const BASE_SHIPPING_COST = 200;
+const MAX_SHIPPING_COST = 1500;
 
 export function getCart(): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -50,4 +51,5 @@ export function cartSubtotal(): number {
 }
 
 export function getFreeShippingThreshold() { return FREE_SHIPPING_THRESHOLD; }
-export function getShippingCost() { return SHIPPING_COST; }
+export function getBaseShippingCost() { return BASE_SHIPPING_COST; }
+export function getMaxShippingCost() { return MAX_SHIPPING_COST; }

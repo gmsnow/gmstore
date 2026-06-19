@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { calculateShippingCost, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
-const FREE_SHIPPING_THRESHOLD = 3000;
 const SHIPPING_COST = 500;
 
 export async function POST(req: Request) {
@@ -39,7 +39,13 @@ export async function POST(req: Request) {
       }
     }
 
-    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    let shippingAddressObj: Record<string, any> = {};
+    try { shippingAddressObj = JSON.parse(shippingAddress || "{}"); } catch {}
+    const shippingCost = calculateShippingCost({
+      subtotal,
+      lat: shippingAddressObj.lat ? Number(shippingAddressObj.lat) : undefined,
+      lng: shippingAddressObj.lng ? Number(shippingAddressObj.lng) : undefined,
+    });
     const total = subtotal + shippingCost - discount;
 
     const order = await prisma.order.create({

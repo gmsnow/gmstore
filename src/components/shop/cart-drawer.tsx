@@ -6,7 +6,7 @@ import Image from "next/image";
 import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check, Search, ChevronDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
-import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getShippingCost } from "@/lib/cart/store";
+import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getBaseShippingCost } from "@/lib/cart/store";
 import type { CartItem } from "@/types";
 
 const statusSteps = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
@@ -94,11 +94,11 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
   const threshold = getFreeShippingThreshold();
-  const shippingCost = getShippingCost();
+  const baseShippingCost = getBaseShippingCost();
   const remaining = Math.max(0, threshold - subtotal);
   const isFreeShipping = subtotal >= threshold;
   const progressPct = Math.min(100, (subtotal / threshold) * 100);
-  const total = subtotal - discount + (isFreeShipping ? 0 : shippingCost);
+  const shippingLabel = isFreeShipping ? t("cart.free_shipping") : t("cart.shipping_estimate");
 
   function formatPrice(priceYer: number) {
     if (currency === "usd") return (priceYer / USD_TO_YER).toFixed(2);
@@ -416,13 +416,13 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t("cart.shipping")}</span>
-                    <span className={isFreeShipping ? "text-green-600 font-semibold" : "font-semibold"}>
-                      {isFreeShipping ? t("cart.free_shipping") : `${formatPrice(shippingCost)} ${label}`}
+                    <span className={isFreeShipping ? "text-green-600 font-semibold" : ""}>
+                      {shippingLabel}
                     </span>
                   </div>
                   <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
                     <span>{t("cart.total")}</span>
-                    <span className="text-primary">{formatPrice(total)} {label}</span>
+                    <span className="text-primary">{formatPrice(subtotal - discount)} {label}</span>
                   </div>
                   <Link
                     href="/checkout"
