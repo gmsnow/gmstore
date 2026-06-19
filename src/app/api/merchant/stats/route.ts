@@ -68,7 +68,7 @@ export const GET = auth(async (req) => {
     });
   }
 
-  const feesTotal = Math.round(totalRevenue * 0.1 * 100) / 100;
+  const feesTotal = Math.round(totalRevenue * 0.02 * 100) / 100;
 
   const withdrawals = await prisma.withdrawal.findMany({
     where: { userId, status: "COMPLETED" },

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
-const FREE_SHIPPING_THRESHOLD = 5000;
+const FREE_SHIPPING_THRESHOLD = 3000;
 const SHIPPING_COST = 500;
 
 export async function POST(req: Request) {

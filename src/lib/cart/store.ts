@@ -1,7 +1,7 @@
 import type { CartItem } from "@/types";
 
 const STORAGE_KEY = "cart";
-const FREE_SHIPPING_THRESHOLD = 5000;
+const FREE_SHIPPING_THRESHOLD = 3000;
 const SHIPPING_COST = 500;
 
 export function getCart(): CartItem[] {

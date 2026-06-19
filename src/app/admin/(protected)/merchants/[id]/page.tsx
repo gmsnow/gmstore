@@ -151,7 +151,7 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
         <StatCard icon={DollarSign} label="إجمالي الإيرادات" value={`${stats.totalRevenue.toLocaleString()} ريال`} color="text-green-600" />
         <StatCard icon={ShoppingCart} label="الطلبات" value={stats.totalOrders.toString()} color="text-blue-600" />
         <StatCard icon={Package} label="المنتجات" value={stats.totalProducts.toString()} color="text-orange-600" />
-        <StatCard icon={Percent} label="رسوم المنصة (10%)" value={`${stats.platformFees.toLocaleString()} ريال`} color="text-red-600" />
+        <StatCard icon={Percent} label="رسوم المنصة (2%)" value={`${stats.platformFees.toLocaleString()} ريال`} color="text-red-600" />
         <StatCard icon={CreditCard} label="المسحوبات" value={`${stats.withdrawnAmount.toLocaleString()} ريال`} color="text-purple-600" />
         <StatCard icon={Wallet} label="الرصيد القابل للسحب" value={`${stats.withdrawableBalance.toLocaleString()} ريال`} color="text-emerald-600" />
       </div>

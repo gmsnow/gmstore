@@ -40,7 +40,7 @@ export const POST = auth(async (req) => {
     return NextResponse.json({ error: "Method is required" }, { status: 400 });
   }
 
-  const fee = Math.round(Number(amount) * 0.1 * 100) / 100;
+  const fee = Math.round(Number(amount) * 0.02 * 100) / 100;
 
   const withdrawal = await prisma.withdrawal.create({
     data: {
