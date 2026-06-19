@@ -55,14 +55,14 @@ export default async function AdminMerchantsPage({
             {merchants.length === 0 ? (
               <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">لا يوجد تجار بعد</TableCell></TableRow>
             ) : merchants.map((m) => (
-              <TableRow key={m.id}>
+              <TableRow key={m.id} className="cursor-pointer hover:bg-muted/50">
                 <TableCell>
-                  <div className="flex items-center gap-2">
+                  <Link href={`/admin/merchants/${m.id}`} className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                       {m.name?.[0] || "?"}
                     </div>
-                    <span className="font-medium">{m.name || "—"}</span>
-                  </div>
+                    <span className="font-medium hover:text-primary transition-colors">{m.name || "—"}</span>
+                  </Link>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{m.email}</TableCell>
                 <TableCell>
@@ -93,19 +93,20 @@ export default async function AdminMerchantsPage({
         {merchants.length === 0 ? (
           <Card><CardContent className="p-8 text-center text-muted-foreground">لا يوجد تجار بعد</CardContent></Card>
         ) : merchants.map((m) => (
-          <Card key={m.id}>
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
-                    {m.name?.[0] || "?"}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{m.name || "—"}</p>
-                    <p className="text-xs text-muted-foreground">{m.email}</p>
+          <Link href={`/admin/merchants/${m.id}`} key={m.id}>
+            <Card className="hover:border-primary/50 transition-colors">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                      {m.name?.[0] || "?"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{m.name || "—"}</p>
+                      <p className="text-xs text-muted-foreground">{m.email}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1"><Store className="h-3 w-3" />{m.store?.name || m.store?.nameEn || "لا يوجد متجر"}</span>
                 <span className="flex items-center gap-1"><Package className="h-3 w-3" />{m._count.products} منتج</span>
@@ -113,6 +114,7 @@ export default async function AdminMerchantsPage({
               </div>
             </CardContent>
           </Card>
+          </Link>
         ))}
       </div>
 
