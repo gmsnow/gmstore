@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { T } from "@/components/translate";
@@ -52,7 +53,7 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
     >
       {slides.map((slide, i) => (
         <div key={slide.id} className={`absolute inset-0 transition-opacity duration-500 ${i === current ? "opacity-100" : "opacity-0"}`}>
-          <img src={slide.image} alt="" className="w-full h-full object-cover" />
+          <Image src={slide.image} alt="" fill className="object-cover" sizes="100vw" priority={i === 0} />
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
         </div>
       ))}

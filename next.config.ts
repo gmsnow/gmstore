@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**" },
     ],
+    formats: ["image/avif"],
   },
   experimental: {
     proxyClientMaxBodySize: 15728640,

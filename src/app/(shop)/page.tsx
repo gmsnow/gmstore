@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -25,9 +26,9 @@ async function CategoriesSection({ locale }: { locale: Locale }) {
       <div className="grid grid-flow-col grid-rows-3 gap-x-6 gap-y-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         {(categories as any[]).map((cat: any) => (
           <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">
-            <div className="w-[70px] h-[70px] rounded-[25px] overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[60px] max-sm:h-[60px]">
+            <div className="w-[70px] h-[70px] rounded-[25px] overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[60px] max-sm:h-[60px] relative">
               {cat.image ? (
-                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                <Image src={cat.image} alt={cat.name} fill className="object-cover" sizes="70px" />
               ) : (
                 <div className="w-full h-full bg-muted" />
               )}

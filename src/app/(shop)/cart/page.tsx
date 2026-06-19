@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -111,9 +112,9 @@ export default function CartPage() {
                   >
                     <Card>
                       <CardContent className="flex gap-4 p-4">
-                        <div className="h-20 w-20 flex-shrink-0 rounded-lg bg-muted overflow-hidden">
+                        <div className="h-20 w-20 flex-shrink-0 rounded-lg bg-muted overflow-hidden relative">
                           {item.image ? (
-                            <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                            <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />
                           ) : (
                             <div className="flex h-full items-center justify-center text-muted-foreground text-xs">{t("product.no_image")}</div>
                           )}

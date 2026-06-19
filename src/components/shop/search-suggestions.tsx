@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Search, Mic, X, Clock, TrendingUp, ImageIcon } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
@@ -143,9 +144,9 @@ export function SearchSuggestions({ query, onSelect, onClose, closeSearch }: {
             <div className="max-h-[360px] overflow-y-auto">
               {results.map(p => (
                 <Link key={p.id} href={`/products/${p.slug}`} onClick={() => go(`/products/${p.slug}`)} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted transition-colors border-b border-border/50 last:border-0">
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden relative">
                     {p.images?.[0] ? (
-                      <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
+                      <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="40px" />
                     ) : (
                       <ImageIcon className="h-5 w-5 text-muted-foreground" />
                     )}

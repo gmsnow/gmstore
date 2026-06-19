@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import Image from "next/image";
 import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check, Search, ChevronDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
@@ -206,8 +207,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           {(o.items?.filter((i: any) => i.status !== "CANCELLED" && i.status !== "DELIVERED") || []).map((item: any) => (
             <div key={item.id} className="flex gap-3 rounded-lg border border-border bg-card p-3">
               {item.product?.images?.[0] && (
-                <div className="h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-muted">
-                  <img src={item.product.images[0]} alt="" className="h-full w-full object-cover" />
+                <div className="h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-muted relative">
+                  <Image src={item.product.images[0]} alt="" fill className="object-cover" sizes="56px" />
                 </div>
               )}
               <div className="flex-1 min-w-0 space-y-0.5">
@@ -351,8 +352,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               ) : (
                 items.map((item, idx) => (
                   <div key={`${item.productId}-${item.color || ""}-${item.size || ""}-${idx}`} className="flex gap-3 rounded-lg border border-border bg-card p-3">
-                    <div className="h-20 w-20 shrink-0 rounded-lg overflow-hidden bg-muted">
-                      <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                    <div className="h-20 w-20 shrink-0 rounded-lg overflow-hidden bg-muted relative">
+                      <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
                       <Link href={`/products/${item.productId}`} className="text-sm font-semibold line-clamp-2 hover:text-primary" onClick={onClose}>
