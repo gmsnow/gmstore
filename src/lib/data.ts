@@ -65,3 +65,35 @@ export async function getActiveBanners() {
     prisma.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } })
   ), 300_000);
 }
+
+const fullProductSelect = {
+  id: true, name: true, nameEn: true, slug: true, price: true,
+  images: true, colors: true, sizes: true, stock: true, description: true,
+  descriptionEn: true, videoUrl: true, userId: true, discount: true,
+  dealEnd: true, specs: true, colorImages: true, colorStock: true,
+  category: { select: { id: true, name: true, nameEn: true, slug: true } },
+} as const;
+
+export async function getProductBySlug(slug: string) {
+  return withTtl(`product:${slug}`, cache(() =>
+    prisma.product.findUnique({ where: { slug }, select: fullProductSelect })
+  ));
+}
+
+const relatedProductSelect = {
+  id: true, name: true, nameEn: true, slug: true, price: true,
+  images: true, colors: true, sizes: true, featured: true, stock: true,
+  discount: true, dealEnd: true, brand: true, brandLogo: true,
+  category: { select: { id: true, name: true, nameEn: true, slug: true } },
+  reviews: { select: { rating: true } },
+} as const;
+
+export async function getRelatedProducts(categoryId: string, excludeId: string) {
+  return withTtl(`related:${categoryId}`, cache(() =>
+    prisma.product.findMany({
+      where: { categoryId, id: { not: excludeId } },
+      select: relatedProductSelect,
+      take: 8,
+    })
+  ));
+}
