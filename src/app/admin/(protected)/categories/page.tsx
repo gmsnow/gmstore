@@ -2,8 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { DeleteCategoryButton } from "@/components/admin/delete-category-button";
+import { resetCategories } from "@/lib/reset-categories-action";
 
 export default async function AdminCategoriesPage() {
   const categories = await prisma.category.findMany({
@@ -15,9 +16,16 @@ export default async function AdminCategoriesPage() {
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl sm:text-2xl font-bold">الفئات</h1>
-        <Link href="/admin/categories/new">
-          <Button size="sm" className="w-full sm:w-auto"><Plus className="ml-2 h-4 w-4" />إضافة فئة</Button>
-        </Link>
+        <div className="flex gap-2">
+          <form action={resetCategories}>
+            <Button type="submit" variant="outline" size="sm" className="w-full sm:w-auto text-red-500 border-red-300 hover:bg-red-50">
+              <RefreshCw className="ml-2 h-4 w-4" />إعادة تعيين الكل
+            </Button>
+          </form>
+          <Link href="/admin/categories/new">
+            <Button size="sm" className="w-full sm:w-auto"><Plus className="ml-2 h-4 w-4" />إضافة فئة</Button>
+          </Link>
+        </div>
       </div>
       <Table>
         <TableHeader>
