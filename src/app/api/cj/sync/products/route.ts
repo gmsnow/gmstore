@@ -29,6 +29,15 @@ export const POST = auth(async (req) => {
       if (data.pageNumber >= data.totalPages) break;
     }
 
+    // Build category name → ID map from synced CJ categories
+    const allCats = await prisma.category.findMany({ select: { id: true, nameEn: true, slug: true } });
+    const catByName = new Map<string, string>();
+    for (const c of allCats) {
+      const key = (c.nameEn || c.slug || "").toLowerCase().trim();
+      if (key) catByName.set(key, c.id);
+    }
+    const fallbackCatId = allCats[0]?.id || "";
+
     let imported = 0;
     let failed = 0;
 
@@ -82,7 +91,7 @@ export const POST = auth(async (req) => {
           sizes,
           stock: 999,
           userId: null,
-          categoryId: body.categoryId || undefined,
+          categoryId: catByName.get((detail.categoryName || "").toLowerCase().trim()) || fallbackCatId,
         };
 
         const product = existingProduct

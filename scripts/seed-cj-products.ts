@@ -65,6 +65,15 @@ async function main() {
     if (page >= data.totalPages) break;
   }
 
+  // Build category lookup table once
+  const allCats = await prisma.category.findMany({ select: { id: true, nameEn: true, slug: true } });
+  const catByName = new Map<string, string>();
+  for (const c of allCats) {
+    const key = (c.nameEn || c.slug || "").toLowerCase().trim();
+    if (key) catByName.set(key, c.id);
+  }
+  const fallbackCatId = allCats[0]?.id || "";
+
   console.log(`\n📋 Total products to import: ${allResults.length}`);
   let imported = 0;
   let failed = 0;
@@ -119,7 +128,7 @@ async function main() {
         sizes,
         stock: 999,
         userId: null,
-        categoryId: args.categoryId || undefined,
+        categoryId: catByName.get((detail.categoryName || "").toLowerCase().trim()) || fallbackCatId,
       };
 
       const product = existingProduct
