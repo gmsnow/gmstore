@@ -4,6 +4,10 @@ import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+export async function GET() {
+  return NextResponse.json({ message: "استخدم POST" });
+}
+
 export async function POST() {
   const session = await auth();
   if (!session || (session.user as any)?.role !== "ADMIN") {
@@ -13,7 +17,6 @@ export async function POST() {
     await prisma.cjProductMapping.deleteMany();
     await prisma.review.deleteMany();
     await prisma.orderItem.deleteMany();
-    await prisma.cartItem.deleteMany();
     await prisma.favorite.deleteMany();
     await prisma.product.deleteMany();
     await prisma.cjLog.deleteMany();

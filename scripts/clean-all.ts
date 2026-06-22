@@ -5,7 +5,6 @@ async function main() {
   await p.cjProductMapping.deleteMany();
   await p.review.deleteMany();
   await p.orderItem.deleteMany();
-  await p.cartItem.deleteMany();
   await p.favorite.deleteMany();
   await p.product.deleteMany();
   await p.cjLog.deleteMany();
