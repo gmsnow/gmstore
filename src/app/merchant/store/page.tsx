@@ -17,6 +17,8 @@ interface StoreProfile {
   phone: string;
   email: string;
   address: string;
+  lat: string;
+  lng: string;
   whatsapp: string;
   telegram: string;
   instagram: string;
@@ -36,6 +38,8 @@ const emptyProfile: StoreProfile = {
   phone: "",
   email: "",
   address: "",
+  lat: "",
+  lng: "",
   whatsapp: "",
   telegram: "",
   instagram: "",
@@ -314,6 +318,48 @@ export default function MerchantStorePage() {
               value={profile.address}
               onChange={(e) => update("address", e.target.value)}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              موقع المتجر (لتحديد تكلفة الشحن)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label="خط العرض (Latitude)"
+                type="number"
+                step="any"
+                value={profile.lat}
+                onChange={(e) => update("lat", e.target.value)}
+                placeholder="مثال: 15.3694"
+              />
+              <Input
+                label="خط الطول (Longitude)"
+                type="number"
+                step="any"
+                value={profile.lng}
+                onChange={(e) => update("lng", e.target.value)}
+                placeholder="مثال: 44.1910"
+              />
+            </div>
+            {profile.lat && profile.lng && (
+              <div className="rounded-lg overflow-hidden border border-border h-48">
+                <iframe
+                  src={`https://maps.google.com/maps?q=${profile.lat},${profile.lng}&z=14&output=embed`}
+                  className="w-full h-full"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              يمكنك الحصول على الإحداثيات من Google Maps: اضغط على موقعك بزر الفأرة الأيمن ثم اختر "ما هذا؟"
+            </p>
           </CardContent>
         </Card>
 

@@ -15,7 +15,10 @@ export async function POST(req: Request) {
     }
 
     const productIds = items.map((i: any) => i.productId);
-    const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      include: { user: { include: { store: { select: { lat: true, lng: true } } } } },
+    });
     const productMap = new Map(products.map((p: any) => [p.id, p]));
 
     let subtotal = 0;
@@ -41,10 +44,17 @@ export async function POST(req: Request) {
 
     let shippingAddressObj: Record<string, any> = {};
     try { shippingAddressObj = JSON.parse(shippingAddress || "{}"); } catch {}
+
+    const uniqueMerchantStores = products
+      .map((p) => p.user?.store)
+      .filter((s): s is { lat: any; lng: any } => s != null && s.lat != null && s.lng != null);
+    const store = uniqueMerchantStores.length > 0 ? uniqueMerchantStores[0] : null;
     const shippingCost = calculateShippingCost({
       subtotal,
       lat: shippingAddressObj.lat ? Number(shippingAddressObj.lat) : undefined,
       lng: shippingAddressObj.lng ? Number(shippingAddressObj.lng) : undefined,
+      storeLat: store ? Number(store.lat) : undefined,
+      storeLng: store ? Number(store.lng) : undefined,
     });
     const total = subtotal + shippingCost - discount;
 

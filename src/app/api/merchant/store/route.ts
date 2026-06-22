@@ -41,6 +41,8 @@ export const PUT = auth(async (req) => {
   for (const key of allowed) {
     if (body[key] !== undefined) data[key] = body[key];
   }
+  if (body.lat !== undefined) data.lat = body.lat;
+  if (body.lng !== undefined) data.lng = body.lng;
 
   const store = await getOrCreateStore(userId);
   const updated = await prisma.store.update({
@@ -69,6 +71,8 @@ export const PATCH = auth(async (req) => {
   for (const key of allowed) {
     if (body[key] !== undefined) data[key] = body[key];
   }
+  if (body.lat !== undefined) data.lat = body.lat;
+  if (body.lng !== undefined) data.lng = body.lng;
 
   const store = await getOrCreateStore(userId);
   const updated = await prisma.store.update({

@@ -21,9 +21,9 @@ async function CategoriesSection({ locale }: { locale: Locale }) {
   const categories = await getCategories();
   if (categories.length === 0) return null;
   return (
-    <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card">
-      <h2 className="text-lg font-bold mb-5">الفئات</h2>
-      <div className="grid grid-flow-col grid-rows-3 gap-x-6 gap-y-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+    <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card lg:-mx-8 lg:px-8 lg:rounded-none">
+      <h2 className="text-lg font-bold mb-5 lg:mb-8">الفئات</h2>
+      <div className="grid grid-flow-col grid-rows-3 gap-x-6 gap-y-3 overflow-x-auto pb-1 lg:gap-x-12 lg:gap-y-5" style={{ scrollbarWidth: 'none' }}>
         {(categories as any[]).map((cat: any) => (
           <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">
             <div className="w-[70px] h-[70px] rounded-[25px] overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[60px] max-sm:h-[60px] relative">

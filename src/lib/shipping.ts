@@ -22,14 +22,22 @@ export function getWarehouseCoords() {
   return { lat: WAREHOUSE_LAT, lng: WAREHOUSE_LNG };
 }
 
-export function calculateShippingCost(params: { subtotal: number; lat?: number; lng?: number }): number {
-  const { subtotal, lat, lng } = params;
+export function calculateShippingCost(params: {
+  subtotal: number;
+  lat?: number;
+  lng?: number;
+  storeLat?: number;
+  storeLng?: number;
+}): number {
+  const { subtotal, lat, lng, storeLat, storeLng } = params;
 
   if (subtotal >= FREE_SHIPPING_THRESHOLD) return 0;
-
   if (lat == null || lng == null) return BASE_SHIPPING_COST;
 
-  const distance = haversineDistance(WAREHOUSE_LAT, WAREHOUSE_LNG, lat, lng);
+  const fromLat = storeLat ?? WAREHOUSE_LAT;
+  const fromLng = storeLng ?? WAREHOUSE_LNG;
+
+  const distance = haversineDistance(fromLat, fromLng, lat, lng);
   const cost = Math.round(BASE_SHIPPING_COST + distance * COST_PER_KM);
 
   return Math.min(cost, MAX_SHIPPING_COST);

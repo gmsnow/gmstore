@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
-import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, Image as ImageIcon, LogOut, Store, Menu, X, Ticket, BarChart3, Users, Star, Percent, XCircle, Store as StoreIcon } from "lucide-react";
+import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, Image as ImageIcon, LogOut, Store, Menu, X, Ticket, BarChart3, Users, Star, Percent, XCircle, Store as StoreIcon, Globe } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
 export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
@@ -23,6 +23,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     { href: "/admin/customers", labelKey: "admin.customers", icon: Users },
     { href: "/admin/reviews", labelKey: "admin.reviews", icon: Star },
     { href: "/admin/banners", labelKey: "admin.banners", icon: ImageIcon },
+    { href: "/admin/cj", labelKey: "admin.cj", icon: Globe },
   ];
 
   const [drawerOpen, setDrawerOpen] = useState(false);
