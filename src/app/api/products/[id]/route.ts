@@ -53,7 +53,7 @@ export const PATCH = auth(async (req, { params }: { params: Promise<{ id: string
         description: body.description,
         descriptionEn: body.descriptionEn || null,
         price: parseFloat(body.price),
-        categoryId: body.categoryId,
+        categoryId: body.categoryId || null,
         stock: parseInt(body.stock) || 0,
         discount: parseInt(body.discount) || 0,
         dealEnd: body.dealEnd ? new Date(body.dealEnd) : null,

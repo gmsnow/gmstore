@@ -158,8 +158,8 @@ model Product {
   videoUrl    String?
   brand       String?
   brandLogo   String?
-  categoryId  String
-  category    Category    @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  category    Category?   @relation(fields: [categoryId], references: [id])
   userId      String?
   user        User?       @relation(fields: [userId], references: [id])
   stock       Int         @default(0)
