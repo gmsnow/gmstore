@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
-const p = new PrismaClient();
+export const dynamic = "force-dynamic";
 
-type CatInput = { name: string; nameEn: string; children?: CatInput[] };
-
-const CATEGORIES: CatInput[] = [
+const CATEGORIES = [
   {
     name: "إلكترونيات", nameEn: "Electronics", children: [
       { name: "هواتف ذكية", nameEn: "Smartphones", children: [
@@ -499,16 +499,16 @@ function slugify(s: string) {
   return s
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/['’]/g, "")
+    .replace(/['']/g, "")
     .replace(/[^a-zA-Z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .toLowerCase();
 }
 
-async function createTree(items: CatInput[], parentId: string | null = null) {
+async function createTree(items: any[], parentId: string | null = null) {
   for (const item of items) {
     const slug = slugify(item.nameEn);
-    const cat = await p.category.create({
+    const cat = await prisma.category.create({
       data: {
         name: item.name,
         nameEn: item.nameEn,
@@ -517,19 +517,23 @@ async function createTree(items: CatInput[], parentId: string | null = null) {
         image: `https://placehold.co/400x300/EEE/999?text=${encodeURIComponent(item.nameEn)}`,
       },
     });
-    console.log(`  ${parentId ? "  " : ""}${item.nameEn} (${slug})`);
     if (item.children) {
       await createTree(item.children, cat.id);
     }
   }
 }
 
-async function main() {
-  await p.category.deleteMany();
-  console.log("Seeding categories...");
-  await createTree(CATEGORIES);
-  const count = await p.category.count();
-  console.log(`Done! ${count} categories created.`);
-  await p.$disconnect();
+export async function POST() {
+  const session = await auth();
+  if (!session || (session.user as any)?.role !== "ADMIN") {
+    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+  }
+  try {
+    await prisma.category.deleteMany();
+    await createTree(CATEGORIES);
+    const count = await prisma.category.count();
+    return NextResponse.json({ success: true, count, message: `تم إنشاء ${count} فئة` });
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message }, { status: 500 });
+  }
 }
-main().catch((e) => { console.error(e); p.$disconnect(); process.exit(1); });
