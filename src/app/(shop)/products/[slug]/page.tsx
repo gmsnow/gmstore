@@ -114,7 +114,8 @@ async function ProductDetails({ slug, locale, sessionUserId, isLoggedIn, isAdmin
   );
 }
 
-async function RelatedSection({ productId, categoryId }: { productId: string; categoryId: string }) {
+async function RelatedSection({ productId, categoryId }: { productId: string; categoryId: string | null }) {
+  if (!categoryId) return null;
   const relatedRaw = await getRelatedProducts(categoryId, productId);
   if (relatedRaw.length === 0) return null;
   const related = relatedRaw.map(r => ({ ...r, price: Number(r.price) }));

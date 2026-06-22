@@ -23,8 +23,8 @@ export async function RecommendedForYou({ userId, isLoggedIn, favoriteIds }: { u
   ]);
 
   const catIds = new Set([
-    ...favCats.map((f) => f.product.categoryId).filter(Boolean),
-    ...orderCats.flatMap((o) => o.items.map((i) => i.product.categoryId).filter(Boolean)),
+    ...favCats.map((f) => f.product.categoryId).filter((id): id is string => !!id),
+    ...orderCats.flatMap((o) => o.items.map((i) => i.product.categoryId).filter((id): id is string => !!id)),
   ]);
 
   if (catIds.size === 0) return null;
