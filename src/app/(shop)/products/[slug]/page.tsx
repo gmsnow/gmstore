@@ -164,7 +164,8 @@ function SectionSkeleton() {
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug.normalize("NFC");
   const locale = await getServerLocale();
   const session = await auth();
   const sessionUserId = (session?.user as any)?.id;

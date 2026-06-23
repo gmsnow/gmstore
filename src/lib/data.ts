@@ -76,7 +76,7 @@ const fullProductSelect = {
 
 export async function getProductBySlug(slug: string) {
   return withTtl(`product:${slug}`, cache(() =>
-    prisma.product.findUnique({ where: { slug }, select: fullProductSelect })
+    prisma.product.findUnique({ where: { slug: slug.normalize("NFC") }, select: fullProductSelect })
   ));
 }
 
