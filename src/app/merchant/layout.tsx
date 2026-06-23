@@ -11,10 +11,10 @@ export default async function MerchantLayout({ children }: { children: React.Rea
   if (!session || role !== "MERCHANT") redirect("/login");
 
   const userId = (session.user as any).id;
-  const store = await prisma.store.findUnique({ where: { userId }, select: { name: true, nameEn: true, logo: true } });
+  const store = await prisma.store.findUnique({ where: { userId }, select: { name: true, nameEn: true, logo: true, slug: true } });
 
   return (
-    <MerchantSidebar storeName={store?.name || ""} storeNameEn={store?.nameEn || ""} storeLogo={store?.logo}>
+    <MerchantSidebar storeName={store?.name || ""} storeNameEn={store?.nameEn || ""} storeLogo={store?.logo} storeSlug={store?.slug}>
       {children}
     </MerchantSidebar>
   );

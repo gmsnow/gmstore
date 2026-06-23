@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { auth } from "@/lib/auth";
 import { calculateShippingCost } from "@/lib/shipping";
 
 function extractAddressParts(raw: string) {
@@ -23,6 +24,16 @@ export async function POST(req: Request) {
       },
     });
     const productMap = new Map(products.map((p: any) => [p.id, p]));
+
+    const session = await auth();
+    const sessionUserId = (session?.user as any)?.id;
+    const sessionRole = (session?.user as any)?.role;
+    if (sessionRole === "MERCHANT") {
+      const ownProducts = products.filter((p: any) => p.userId === sessionUserId);
+      if (ownProducts.length > 0) {
+        return NextResponse.json({ error: "لا يمكنك شراء منتجاتك الخاصة" }, { status: 403 });
+      }
+    }
 
     let subtotal = 0;
     const orderItems = items.map((item: any) => {
