@@ -78,7 +78,18 @@ export const POST = auth(async (req) => {
       return NextResponse.json({ error: "يرجى اختيار فئة" }, { status: 400 });
     }
 
-    let slug = (body.slug ?? "").normalize("NFC");
+    let slug = (body.slug ?? "").normalize("NFC").replace(/[^\w-]/g, "").toLowerCase();
+    if (!slug) {
+      slug = (body.name ?? "product")
+        .normalize("NFC")
+        .replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "")
+        .replace(/[^\u0600-\u06FF\w\s-]/g, "")
+        .replace(/[\s_]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .toLowerCase()
+        .slice(0, 80);
+      if (!slug) slug = `product-${Date.now()}`;
+    }
     const existing = await prisma.product.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${userId.slice(0, 8)}`;
 
