@@ -24,6 +24,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     { href: "/admin/reviews", labelKey: "admin.reviews", icon: Star },
     { href: "/admin/banners", labelKey: "admin.banners", icon: ImageIcon },
     { href: "/admin/cj", labelKey: "admin.cj", icon: Globe },
+    { href: "/admin/cj/orders", labelKey: "admin.cj_orders", icon: ShoppingBag },
   ];
 
   const [drawerOpen, setDrawerOpen] = useState(false);

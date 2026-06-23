@@ -298,6 +298,25 @@ model CjProductMapping {
   createdAt    DateTime @default(now())
 }
 
+model CjOrderMapping {
+  id           String   @id @default(cuid())
+  orderId      String
+  orderItemId  String?
+  productId    String?
+  cjProductId  String?
+  cjVid        String?
+  cjOrderCode  String?
+  cjLineItemId String?
+  status       String   @default("PENDING")
+  trackingUrl  String?
+  trackingNo   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([cjOrderCode])
+}
+
 model Coupon {
   id        String    @id @default(cuid())
   code      String    @unique

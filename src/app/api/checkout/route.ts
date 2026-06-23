@@ -1,23 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { calculateShippingCost, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
+import { calculateShippingCost } from "@/lib/shipping";
+import { createCjOrder, ensureValidToken } from "@/lib/cj-dropshipping";
 
-const SHIPPING_COST = 500;
+function extractAddressParts(raw: string) {
+  const obj: Record<string, string> = {};
+  try { Object.assign(obj, JSON.parse(raw || "{}")); } catch {}
+  return obj;
+}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { customerName, customerEmail, customerPhone, shippingAddress, items, couponCode } = body;
-
-    if (!items?.length) {
-      return NextResponse.json({ error: "السلة فارغة" }, { status: 400 });
-    }
+    if (!items?.length) return NextResponse.json({ error: "السلة فارغة" }, { status: 400 });
 
     const productIds = items.map((i: any) => i.productId);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      include: { user: { include: { store: { select: { lat: true, lng: true } } } } },
+      include: {
+        user: { include: { store: { select: { lat: true, lng: true } } } },
+      },
     });
     const productMap = new Map(products.map((p: any) => [p.id, p]));
 
@@ -32,7 +36,6 @@ export async function POST(req: Request) {
 
     let discount = 0;
     let couponId: string | undefined;
-
     if (couponCode) {
       const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
       if (coupon && coupon.active && (!coupon.expiresAt || coupon.expiresAt > new Date()) && (!coupon.maxUses || coupon.usedCount < coupon.maxUses) && (!coupon.minAmount || Number(coupon.minAmount) <= subtotal)) {
@@ -42,17 +45,15 @@ export async function POST(req: Request) {
       }
     }
 
-    let shippingAddressObj: Record<string, any> = {};
-    try { shippingAddressObj = JSON.parse(shippingAddress || "{}"); } catch {}
-
-    const uniqueMerchantStores = products
+    const addressObj = extractAddressParts(shippingAddress);
+    const uniqueStores = products
       .map((p) => p.user?.store)
       .filter((s): s is { lat: any; lng: any } => s != null && s.lat != null && s.lng != null);
-    const store = uniqueMerchantStores.length > 0 ? uniqueMerchantStores[0] : null;
+    const store = uniqueStores.length > 0 ? uniqueStores[0] : null;
     const shippingCost = calculateShippingCost({
       subtotal,
-      lat: shippingAddressObj.lat ? Number(shippingAddressObj.lat) : undefined,
-      lng: shippingAddressObj.lng ? Number(shippingAddressObj.lng) : undefined,
+      lat: addressObj.lat ? Number(addressObj.lat) : undefined,
+      lng: addressObj.lng ? Number(addressObj.lng) : undefined,
       storeLat: store ? Number(store.lat) : undefined,
       storeLng: store ? Number(store.lng) : undefined,
     });
@@ -60,33 +61,99 @@ export async function POST(req: Request) {
 
     const order = await prisma.order.create({
       data: {
-        customerName,
-        customerEmail,
-        customerPhone,
-        shippingAddress,
-        subtotal,
-        shippingCost,
-        discount,
-        total,
-        couponId,
-        status: "PENDING",
+        customerName, customerEmail, customerPhone, shippingAddress,
+        subtotal, shippingCost, discount, total, couponId, status: "PENDING",
         items: { create: orderItems },
       },
-      include: { items: { include: { product: { select: { name: true, nameEn: true, images: true } } } } },
+      include: { items: true },
     });
 
     for (const item of orderItems) {
       const product = productMap.get(item.productId);
       if (product) {
         const colorStock = (product.colorStock as Record<string, number> | null) || {};
-        const newTotalStock = Number(product.stock) - item.quantity;
+        const newStock = Number(product.stock) - item.quantity;
         if (item.color && colorStock[item.color] !== undefined) {
           colorStock[item.color] = Math.max(0, Number(colorStock[item.color]) - item.quantity);
         }
         await prisma.product.update({
           where: { id: item.productId },
-          data: { stock: newTotalStock, colorStock },
+          data: { stock: newStock, colorStock },
         });
+      }
+    }
+
+    // ── CJ Order Submission ──
+    const cjMappings = await prisma.cjProductMapping.findMany({
+      where: { productId: { in: productIds } },
+    });
+    if (cjMappings.length > 0) {
+      try {
+        const cjSettings = await prisma.cjSettings.findFirst();
+        if (cjSettings?.apiKey) {
+          await ensureValidToken(cjSettings.apiKey);
+
+          const countryMapping: Record<string, string> = {
+            "اليمن": "YE", "Yemen": "YE",
+            "السعودية": "SA", "Saudi Arabia": "SA",
+            "الإمارات": "AE", "UAE": "AE",
+          };
+          const countryName = addressObj.country || "Yemen";
+          const countryCode = countryMapping[countryName] || "YE";
+          const province = addressObj.province || addressObj.city || "";
+          const city = addressObj.city || "";
+          const zip = addressObj.zip || "";
+
+          // Build CJ products array
+          const cjProducts: { vid: string; quantity: number; storeLineItemId: string }[] = [];
+          const itemMapping: { orderItemId: string; productId: string; cjProductId: string; vid: string | null }[] = [];
+
+          for (const item of order.items) {
+            const mapping = cjMappings.find((m) => m.productId === item.productId);
+            if (mapping) {
+              const vid = mapping.cjVariantSku || mapping.cjProductId;
+              cjProducts.push({ vid, quantity: item.quantity, storeLineItemId: item.id });
+              itemMapping.push({ orderItemId: item.id, productId: item.productId, cjProductId: mapping.cjProductId, vid });
+            }
+          }
+
+          if (cjProducts.length > 0) {
+            const cjAddress = [addressObj.street || addressObj.address || "", addressObj.address2 || ""].filter(Boolean).join(", ") || shippingAddress;
+            const cjResult = await createCjOrder({
+              orderNumber: order.id,
+              shippingCountryCode: countryCode,
+              shippingCountry: countryName,
+              shippingProvince: province,
+              shippingCity: city,
+              shippingZip: zip,
+              shippingPhone: customerPhone,
+              shippingCustomerName: customerName,
+              shippingAddress: cjAddress,
+              email: customerEmail,
+              remark: `GMStore order ${order.id}`,
+              payType: "3",
+              logisticName: "CJ Standard Shipping",
+              products: cjProducts,
+            });
+
+            // Store CJ order mappings
+            await prisma.cjOrderMapping.createMany({
+              data: itemMapping.map((im) => ({
+                orderId: order.id,
+                orderItemId: im.orderItemId,
+                productId: im.productId,
+                cjProductId: im.cjProductId,
+                cjVid: im.vid,
+                cjOrderCode: cjResult.orderCode,
+                status: "SUBMITTED",
+              })),
+            });
+            logger.info("CJ order submitted", { orderId: order.id, cjOrderCode: cjResult.orderCode });
+          }
+        }
+      } catch (cjError) {
+        logger.error("CJ order submission failed", { orderId: order.id, error: String(cjError) });
+        // Don't fail the checkout; log the error
       }
     }
 

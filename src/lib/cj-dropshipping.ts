@@ -329,3 +329,69 @@ export async function getCjInventoryByVid(vid: string): Promise<any> {
   const json = await cjFetch("/product/stock/queryByVid", { params: { vid } });
   return json.data;
 }
+
+// ── Orders ──
+
+export interface CjCreateOrderProduct {
+  vid: string;
+  quantity: number;
+  storeLineItemId?: string;
+}
+
+export interface CjCreateOrderParams {
+  orderNumber: string;
+  shippingCountryCode: string;
+  shippingCountry: string;
+  shippingProvince: string;
+  shippingCity: string;
+  shippingCounty?: string;
+  shippingPhone: string;
+  shippingCustomerName: string;
+  shippingAddress: string;
+  shippingAddress2?: string;
+  shippingZip?: string;
+  email?: string;
+  remark?: string;
+  payType?: string;
+  logisticName?: string;
+  products: CjCreateOrderProduct[];
+}
+
+export interface CjCreateOrderResult {
+  orderCode: string;
+  cjPayUrl?: string;
+}
+
+export async function createCjOrder(params: CjCreateOrderParams): Promise<CjCreateOrderResult> {
+  const json = await cjFetch<CjCreateOrderResult>("/shopping/order/createOrderV2", {
+    method: "POST",
+    body: JSON.stringify({ ...params, payType: params.payType || "3", orderFlow: 1 }),
+  });
+  return json.data;
+}
+
+export async function getCjOrderList(params: {
+  page?: number;
+  size?: number;
+  orderCode?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: number;
+}): Promise<any> {
+  const json = await cjFetch<any>("/shopping/order/getOrderList", { params: params as any });
+  return json.data;
+}
+
+export async function getCjOrderDetail(orderCode: string): Promise<any> {
+  const json = await cjFetch<any>("/shopping/order/getOrderDetail", { params: { orderCode } });
+  return json.data;
+}
+
+export async function calculateCjFreight(params: {
+  vid: string;
+  quantity: number;
+  shippingCountryCode: string;
+}): Promise<any> {
+  const json = await cjFetch<any>("/logistics/freight/calculate", { params: params as any });
+  return json.data;
+}
