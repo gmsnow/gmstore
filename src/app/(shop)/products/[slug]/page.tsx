@@ -57,6 +57,7 @@ async function ProductDetails({ slug, locale, sessionUserId, isLoggedIn, isAdmin
         colorStock={product.colorStock as Record<string, number> | null}
         colorImages={product.colorImages as Record<string, string> | null}
         cartProduct={cartProduct}
+        isOwner={isOwner}
       >
         <FadeInUp delay={0.15}>
           <Badge>{localizedName(product.category, locale)}</Badge>
