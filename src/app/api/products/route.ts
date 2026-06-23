@@ -78,8 +78,8 @@ export const POST = auth(async (req) => {
       return NextResponse.json({ error: "يرجى اختيار فئة" }, { status: 400 });
     }
 
-    let slug = (body.slug ?? "").normalize("NFC").replace(/[^\w-]/g, "").toLowerCase();
-    if (!slug) {
+    let slug = (body.slug ?? "").normalize("NFC").replace(/[^\u0600-\u06FF\w-]/g, "").toLowerCase();
+    if (!slug || /^[-]+$/.test(slug)) {
       slug = (body.name ?? "product")
         .normalize("NFC")
         .replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "")
@@ -137,7 +137,8 @@ export const PATCH = auth(async (req) => {
     if (role !== "ADMIN" && product.userId !== userId) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
-    let slug = (body.slug ?? "").normalize("NFC");
+    let slug = (body.slug ?? "").normalize("NFC").replace(/[^\u0600-\u06FF\w-]/g, "").toLowerCase();
+    if (!slug || /^[-]+$/.test(slug)) slug = (body.name ?? "product").normalize("NFC").replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "").replace(/[^\u0600-\u06FF\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase().slice(0, 80);
     const slugConflict = await prisma.product.findUnique({ where: { slug } });
     if (slugConflict && slugConflict.id !== body.id) slug = `${slug}-${userId.slice(0, 8)}`;
     const updated = await prisma.product.update({
