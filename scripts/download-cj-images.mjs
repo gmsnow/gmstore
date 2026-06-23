@@ -50,12 +50,22 @@ async function main() {
 
   if (!fs.existsSync(OUTPUT)) fs.mkdirSync(OUTPUT, { recursive: true });
 
+  function extractImgUrls(html) {
+    if (!html) return [];
+    const urls = [];
+    const regex = /<img[^>]+src=["']([^"']+)["']/gi;
+    let m;
+    while ((m = regex.exec(html)) !== null) urls.push(m[1]);
+    return urls;
+  }
+
   let downloaded = 0, failed = 0, skipped = 0;
 
   for (const product of products) {
     const folder = path.join(OUTPUT, `${sanitize(product.nameEn || product.name)}-${product.id.slice(0, 8)}`);
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
 
+    // main images
     for (let i = 0; i < product.images.length; i++) {
       const url = product.images[i];
       if (!url) continue;
@@ -66,11 +76,36 @@ async function main() {
 
       try {
         await download(url, dest);
-        console.log(`  OK ${sanitize(product.nameEn || product.name)}/${i + 1}`);
+        console.log(`  IMG ${sanitize(product.nameEn || product.name)}/${i + 1}`);
         downloaded++;
       } catch (err) {
         console.log(`  FAIL ${sanitize(product.nameEn || product.name)}/${i + 1}: ${err.message}`);
         failed++;
+      }
+    }
+
+    // description images
+    const descHtml = [product.description, product.descriptionEn].filter(Boolean).join(" ");
+    const descUrls = extractImgUrls(descHtml);
+    if (descUrls.length > 0) {
+      const descFolder = path.join(folder, "desc-images");
+      if (!fs.existsSync(descFolder)) fs.mkdirSync(descFolder, { recursive: true });
+
+      for (let i = 0; i < descUrls.length; i++) {
+        const url = descUrls[i];
+        const ext = url.split(".").pop()?.split("?")[0] || "jpg";
+        const dest = path.join(descFolder, `desc-${i + 1}.${ext}`);
+
+        if (fs.existsSync(dest)) { skipped++; continue; }
+
+        try {
+          await download(url, dest);
+          console.log(`  DESC ${sanitize(product.nameEn || product.name)}/${i + 1}`);
+          downloaded++;
+        } catch (err) {
+          console.log(`  FAIL DESC ${sanitize(product.nameEn || product.name)}/${i + 1}: ${err.message}`);
+          failed++;
+        }
       }
     }
   }

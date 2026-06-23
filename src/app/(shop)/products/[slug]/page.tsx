@@ -66,7 +66,9 @@ async function ProductDetails({ slug, locale, sessionUserId, isLoggedIn, isAdmin
               )}
             </div>
 
-            <p className="text-muted-foreground leading-relaxed">{localizedDescription(product, locale)}</p>
+            {localizedDescription(product, locale) ? (
+              <div className="text-muted-foreground leading-relaxed space-y-3 [&_img]:max-w-full [&_img]:rounded-lg [&_img]:h-auto [&_p]:mb-2" dangerouslySetInnerHTML={{ __html: localizedDescription(product, locale)! }} />
+            ) : null}
 
             {product.dealEnd && new Date(product.dealEnd) > new Date() && (
               <div className="flex items-center gap-2 text-sm bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">

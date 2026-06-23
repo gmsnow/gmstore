@@ -13,7 +13,7 @@ export async function GET() {
   const ids = mappings.map((m) => m.productId);
   const products = await prisma.product.findMany({
     where: { id: { in: ids } },
-    select: { id: true, name: true, nameEn: true, images: true },
+    select: { id: true, name: true, nameEn: true, images: true, description: true, descriptionEn: true },
   });
   return NextResponse.json(products);
 }
