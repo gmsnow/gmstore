@@ -40,7 +40,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "npx prisma generate && npx prisma db push --skip-generate"
+    "postinstall": "npx prisma generate && npx prisma db push --skip-generate --accept-data-loss"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
