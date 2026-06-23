@@ -370,12 +370,10 @@ export async function resetCategories() {
   if (!session || (session.user as any)?.role !== "ADMIN") {
     throw new Error("غير مصرح");
   }
-  await prisma.cjProductMapping.deleteMany();
   await prisma.review.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.favorite.deleteMany();
   await prisma.product.deleteMany();
-  await prisma.cjLog.deleteMany();
   await prisma.category.deleteMany();
   await createTree(CATEGORIES);
   revalidatePath("/admin/categories");

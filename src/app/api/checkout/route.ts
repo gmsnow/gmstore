@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { calculateShippingCost } from "@/lib/shipping";
-import { createCjOrder, ensureValidToken } from "@/lib/cj-dropshipping";
 
 function extractAddressParts(raw: string) {
   const obj: Record<string, string> = {};
@@ -80,80 +79,6 @@ export async function POST(req: Request) {
           where: { id: item.productId },
           data: { stock: newStock, colorStock },
         });
-      }
-    }
-
-    // ── CJ Order Submission ──
-    const cjMappings = await prisma.cjProductMapping.findMany({
-      where: { productId: { in: productIds } },
-    });
-    if (cjMappings.length > 0) {
-      try {
-        const cjSettings = await prisma.cjSettings.findFirst();
-        if (cjSettings?.apiKey) {
-          await ensureValidToken(cjSettings.apiKey);
-
-          const countryMapping: Record<string, string> = {
-            "اليمن": "YE", "Yemen": "YE",
-            "السعودية": "SA", "Saudi Arabia": "SA",
-            "الإمارات": "AE", "UAE": "AE",
-          };
-          const countryName = addressObj.country || "Yemen";
-          const countryCode = countryMapping[countryName] || "YE";
-          const province = addressObj.province || addressObj.city || "";
-          const city = addressObj.city || "";
-          const zip = addressObj.zip || "";
-
-          // Build CJ products array
-          const cjProducts: { vid: string; quantity: number; storeLineItemId: string }[] = [];
-          const itemMapping: { orderItemId: string; productId: string; cjProductId: string; vid: string | null }[] = [];
-
-          for (const item of order.items) {
-            const mapping = cjMappings.find((m) => m.productId === item.productId);
-            if (mapping) {
-              const vid = mapping.cjVariantSku || mapping.cjProductId;
-              cjProducts.push({ vid, quantity: item.quantity, storeLineItemId: item.id });
-              itemMapping.push({ orderItemId: item.id, productId: item.productId, cjProductId: mapping.cjProductId, vid });
-            }
-          }
-
-          if (cjProducts.length > 0) {
-            const cjAddress = [addressObj.street || addressObj.address || "", addressObj.address2 || ""].filter(Boolean).join(", ") || shippingAddress;
-            const cjResult = await createCjOrder({
-              orderNumber: order.id,
-              shippingCountryCode: countryCode,
-              shippingCountry: countryName,
-              shippingProvince: province,
-              shippingCity: city,
-              shippingZip: zip,
-              shippingPhone: customerPhone,
-              shippingCustomerName: customerName,
-              shippingAddress: cjAddress,
-              email: customerEmail,
-              remark: `GMStore order ${order.id}`,
-              payType: "3",
-              logisticName: "CJ Standard Shipping",
-              products: cjProducts,
-            });
-
-            // Store CJ order mappings
-            await prisma.cjOrderMapping.createMany({
-              data: itemMapping.map((im) => ({
-                orderId: order.id,
-                orderItemId: im.orderItemId,
-                productId: im.productId,
-                cjProductId: im.cjProductId,
-                cjVid: im.vid,
-                cjOrderCode: cjResult.orderCode,
-                status: "SUBMITTED",
-              })),
-            });
-            logger.info("CJ order submitted", { orderId: order.id, cjOrderCode: cjResult.orderCode });
-          }
-        }
-      } catch (cjError) {
-        logger.error("CJ order submission failed", { orderId: order.id, error: String(cjError) });
-        // Don't fail the checkout; log the error
       }
     }
 

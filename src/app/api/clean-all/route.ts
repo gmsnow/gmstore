@@ -14,12 +14,10 @@ export async function POST() {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
   try {
-    await prisma.cjProductMapping.deleteMany();
     await prisma.review.deleteMany();
     await prisma.orderItem.deleteMany();
     await prisma.favorite.deleteMany();
     await prisma.product.deleteMany();
-    await prisma.cjLog.deleteMany();
     await prisma.category.deleteMany();
     return NextResponse.json({ success: true, message: "تم حذف جميع المنتجات والفئات" });
   } catch (error: any) {
