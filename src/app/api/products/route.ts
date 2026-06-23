@@ -91,7 +91,7 @@ export const POST = auth(async (req) => {
       if (!slug) slug = `product-${Date.now()}`;
     }
     const existing = await prisma.product.findUnique({ where: { slug } });
-    if (existing) slug = `${slug}-${userId.slice(0, 8)}`;
+    if (existing) slug = `${slug}-${Date.now()}`;
 
     const product = await prisma.product.create({
       data: {
@@ -140,7 +140,7 @@ export const PATCH = auth(async (req) => {
     let slug = (body.slug ?? "").normalize("NFC").replace(/[^\u0600-\u06FF\w-]/g, "").toLowerCase();
     if (!slug || /^[-]+$/.test(slug)) slug = (body.name ?? "product").normalize("NFC").replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "").replace(/[^\u0600-\u06FF\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase().slice(0, 80);
     const slugConflict = await prisma.product.findUnique({ where: { slug } });
-    if (slugConflict && slugConflict.id !== body.id) slug = `${slug}-${userId.slice(0, 8)}`;
+    if (slugConflict && slugConflict.id !== body.id) slug = `${slug}-${Date.now()}`;
     const updated = await prisma.product.update({
       where: { id: body.id },
       data: {
