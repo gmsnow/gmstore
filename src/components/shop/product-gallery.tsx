@@ -7,6 +7,8 @@ interface Props {
   images: string[];
   videoUrl?: string | null;
   alt: string;
+  selectedColor?: string;
+  colorImages?: Record<string, string> | null;
 }
 
 function getYouTubeEmbed(url: string): string | null {
@@ -21,17 +23,20 @@ function getYouTubeEmbed(url: string): string | null {
   return null;
 }
 
-export function ProductGallery({ images, videoUrl, alt }: Props) {
+export function ProductGallery({ images, videoUrl, alt, selectedColor, colorImages }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const imgRef = useRef<HTMLDivElement>(null);
 
+  const colorImg = selectedColor && colorImages?.[selectedColor];
+  const displayImages = colorImg ? [colorImg, ...images] : images;
+
   const hasVideo = videoUrl && getYouTubeEmbed(videoUrl);
   const allItems = hasVideo
-    ? [{ type: "video" as const, src: getYouTubeEmbed(videoUrl!)! }, ...images.map((src) => ({ type: "image" as const, src }))]
-    : images.map((src) => ({ type: "image" as const, src }));
+    ? [{ type: "video" as const, src: getYouTubeEmbed(videoUrl!)! }, ...displayImages.map((src) => ({ type: "image" as const, src }))]
+    : displayImages.map((src) => ({ type: "image" as const, src }));
 
   const current = allItems[selectedIndex];
 

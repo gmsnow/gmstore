@@ -6,9 +6,8 @@ import { auth } from "@/lib/auth";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ProductActions } from "@/components/shop/product-actions";
+import { ProductDisplay } from "@/components/shop/product-display";
 import { ProductReviews } from "@/components/shop/product-reviews";
-import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductCarousel } from "@/components/shop/product-carousel";
 import { ProductTrust } from "@/components/shop/product-trust";
 import { ProductSpecs } from "@/components/shop/product-specs";
@@ -48,56 +47,61 @@ async function ProductDetails({ slug, locale, sessionUserId, isLoggedIn, isAdmin
         </div>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <ProductGallery images={product.images} videoUrl={product.videoUrl} alt={localizedName(product, locale)} />
+      <ProductDisplay
+        images={product.images}
+        videoUrl={product.videoUrl}
+        alt={localizedName(product, locale)}
+        colors={product.colors}
+        sizes={product.sizes}
+        stock={product.stock}
+        colorStock={product.colorStock as Record<string, number> | null}
+        colorImages={product.colorImages as Record<string, string> | null}
+        cartProduct={cartProduct}
+      >
         <FadeInUp delay={0.15}>
-          <div className="space-y-5">
-            <Badge>{localizedName(product.category, locale)}</Badge>
-            <h1 className="text-3xl font-bold">{localizedName(product, locale)}</h1>
+          <Badge>{localizedName(product.category, locale)}</Badge>
+          <h1 className="text-3xl font-bold">{localizedName(product, locale)}</h1>
 
-            <div className="flex items-center justify-between">
-              {product.discount > 0 ? (
-                <div>
-                  <CurrencyToggle priceYer={Number(product.price)} />
-                  <p className="text-xs text-muted-foreground">توفير {product.discount}%</p>
-                </div>
-              ) : (
+          <div className="flex items-center justify-between">
+            {product.discount > 0 ? (
+              <div>
                 <CurrencyToggle priceYer={Number(product.price)} />
-              )}
-            </div>
-
-            <p className="text-muted-foreground leading-relaxed">{localizedDescription(product, locale)}</p>
-
-            {product.dealEnd && new Date(product.dealEnd) > new Date() && (
-              <div className="flex items-center gap-2 text-sm bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
-                <span className="text-muted-foreground">العرض ينتهي خلال:</span>
-                <CountdownTimer target={product.dealEnd.toISOString()} />
+                <p className="text-xs text-muted-foreground">توفير {product.discount}%</p>
               </div>
+            ) : (
+              <CurrencyToggle priceYer={Number(product.price)} />
             )}
+          </div>
 
-            <DeliveryEstimate />
+          <p className="text-muted-foreground leading-relaxed">{localizedDescription(product, locale)}</p>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground"><T k="detail.stock" /></span>
-                <Badge variant={product.stock > 0 ? "success" : "danger"}>
-                  {product.stock > 0 ? <T k="detail.in_stock" /> : <T k="detail.not_available" />}
-                </Badge>
-              </div>
-              {lowStock && (
-                <p className="text-xs text-amber-600">لم يتبق سوى {product.stock} قطع</p>
-              )}
+          {product.dealEnd && new Date(product.dealEnd) > new Date() && (
+            <div className="flex items-center gap-2 text-sm bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
+              <span className="text-muted-foreground">العرض ينتهي خلال:</span>
+              <CountdownTimer target={product.dealEnd.toISOString()} />
             </div>
+          )}
 
-            <ProductActions product={cartProduct} colors={product.colors} sizes={product.sizes} stock={product.stock} colorStock={product.colorStock as Record<string, number> | null} colorImages={product.colorImages as Record<string, string> | null} />
+          <DeliveryEstimate />
 
-            <div className="flex items-center gap-2">
-              <CompareButton productId={product.id} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors" />
-              <span className="text-sm text-muted-foreground"><T k="comparison.add" /></span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground"><T k="detail.stock" /></span>
+              <Badge variant={product.stock > 0 ? "success" : "danger"}>
+                {product.stock > 0 ? <T k="detail.in_stock" /> : <T k="detail.not_available" />}
+              </Badge>
             </div>
+            {lowStock && (
+              <p className="text-xs text-amber-600">لم يتبق سوى {product.stock} قطع</p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <CompareButton productId={product.id} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted transition-colors" />
+            <span className="text-sm text-muted-foreground"><T k="comparison.add" /></span>
           </div>
         </FadeInUp>
-      </div>
+      </ProductDisplay>
 
       {specs && Object.keys(specs).length > 0 && (
         <section>

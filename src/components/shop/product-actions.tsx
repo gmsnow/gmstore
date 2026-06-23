@@ -10,6 +10,7 @@ export function ProductActions({
   stock,
   colorStock,
   colorImages,
+  onColorChange,
 }: {
   product: { id: string; name: string; price: number; images: string[]; stock: number };
   colors: string[];
@@ -17,6 +18,7 @@ export function ProductActions({
   stock: number;
   colorStock?: Record<string, number> | null;
   colorImages?: Record<string, string> | null;
+  onColorChange?: (color: string) => void;
 }) {
   const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
@@ -40,7 +42,7 @@ export function ProductActions({
                 <div key={c} className="relative">
                   <button
                     type="button"
-                    onClick={() => !outOfStock && setSelectedColor(c)}
+                    onClick={() => { if (!outOfStock) { setSelectedColor(c); onColorChange?.(c); } }}
                     disabled={outOfStock}
                     className={`h-8 w-8 rounded-full border-2 transition-all ${selectedColor === c ? "border-foreground scale-110 ring-2 ring-foreground/20" : outOfStock ? "border-border opacity-30 cursor-not-allowed" : "border-border hover:scale-105"}`}
                     style={{ backgroundColor: c }}
