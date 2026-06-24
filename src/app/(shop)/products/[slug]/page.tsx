@@ -13,11 +13,14 @@ import { T } from "@/components/translate";
 import { getServerLocale } from "@/lib/i18n/server";
 import { localizedName, localizedDescription } from "@/lib/i18n/localized";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug.normalize("NFC");
   const locale = await getServerLocale();
   const session = await auth();
-  const product = await prisma.product.findUnique({
+  const product = await prisma.product.findFirst({
     where: { slug },
     include: { category: true },
   });
