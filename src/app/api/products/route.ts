@@ -78,18 +78,8 @@ export const POST = auth(async (req) => {
       return NextResponse.json({ error: "يرجى اختيار فئة" }, { status: 400 });
     }
 
-    let slug = (body.slug ?? "").normalize("NFC").replace(/[^\u0600-\u06FF\w-]/g, "").toLowerCase();
-    if (!slug || /^[-]+$/.test(slug)) {
-      slug = (body.name ?? "product")
-        .normalize("NFC")
-        .replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "")
-        .replace(/[^\u0600-\u06FF\w\s-]/g, "")
-        .replace(/[\s_]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .toLowerCase()
-        .slice(0, 80);
-      if (!slug) slug = `product-${Date.now()}`;
-    }
+    let slug = (body.slug ?? "").normalize("NFC");
+    if (!slug) slug = `product-${Date.now()}`;
     const existing = await prisma.product.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${Date.now()}`;
 
@@ -137,8 +127,8 @@ export const PATCH = auth(async (req) => {
     if (role !== "ADMIN" && product.userId !== userId) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
-    let slug = (body.slug ?? "").normalize("NFC").replace(/[^\u0600-\u06FF\w-]/g, "").toLowerCase();
-    if (!slug || /^[-]+$/.test(slug)) slug = (body.name ?? "product").normalize("NFC").replace(/[\u064e\u064f\u0650\u0651\u0652]/g, "").replace(/[^\u0600-\u06FF\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase().slice(0, 80);
+    let slug = (body.slug ?? "").normalize("NFC");
+    if (!slug) slug = `product-${Date.now()}`;
     const slugConflict = await prisma.product.findUnique({ where: { slug } });
     if (slugConflict && slugConflict.id !== body.id) slug = `${slug}-${Date.now()}`;
     const updated = await prisma.product.update({
