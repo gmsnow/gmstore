@@ -78,8 +78,7 @@ export const POST = auth(async (req) => {
       return NextResponse.json({ error: "يرجى اختيار فئة" }, { status: 400 });
     }
 
-    let slug = (body.slug ?? "").normalize("NFC");
-    if (!slug) slug = `product-${Date.now()}`;
+    let slug = body.slug;
     const existing = await prisma.product.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${Date.now()}`;
 
@@ -127,8 +126,7 @@ export const PATCH = auth(async (req) => {
     if (role !== "ADMIN" && product.userId !== userId) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
-    let slug = (body.slug ?? "").normalize("NFC");
-    if (!slug) slug = `product-${Date.now()}`;
+    let slug = body.slug;
     const slugConflict = await prisma.product.findUnique({ where: { slug } });
     if (slugConflict && slugConflict.id !== body.id) slug = `${slug}-${Date.now()}`;
     const updated = await prisma.product.update({
