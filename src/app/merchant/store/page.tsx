@@ -325,26 +325,26 @@ export default function MerchantStorePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              موقع المتجر (لتحديد تكلفة الشحن)
+              {t("merchant.store_location")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
-                label="خط العرض (Latitude)"
+                label={t("merchant.latitude")}
                 type="number"
                 step="any"
                 value={profile.lat}
                 onChange={(e) => update("lat", e.target.value)}
-                placeholder="مثال: 15.3694"
+                placeholder={t("merchant.lat_placeholder")}
               />
               <Input
-                label="خط الطول (Longitude)"
+                label={t("merchant.longitude")}
                 type="number"
                 step="any"
                 value={profile.lng}
                 onChange={(e) => update("lng", e.target.value)}
-                placeholder="مثال: 44.1910"
+                placeholder={t("merchant.lng_placeholder")}
               />
             </div>
             {profile.lat && profile.lng && (
@@ -358,7 +358,7 @@ export default function MerchantStorePage() {
               </div>
             )}
             <p className="text-xs text-muted-foreground">
-              يمكنك الحصول على الإحداثيات من Google Maps: اضغط على موقعك بزر الفأرة الأيمن ثم اختر "ما هذا؟"
+              {t("merchant.coords_help")}
             </p>
           </CardContent>
         </Card>

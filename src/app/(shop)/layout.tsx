@@ -6,6 +6,7 @@ import { MobileNav } from "@/components/shop/mobile-nav";
 import { StickyHeader } from "@/components/shop/sticky-header";
 import { CartProvider } from "@/components/shop/cart-context";
 import { AIAssistantWrapper } from "@/components/shop/ai-assistant-wrapper";
+import { ContactSupportWrapper } from "@/components/shop/contact-support-wrapper";
 import { CurrencyProvider } from "@/lib/currency/context";
 import { PageTransition } from "@/components/page-transition";
 import { ComparisonBar } from "@/components/shop/comparison-bar";
@@ -37,6 +38,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
           <PageTransition>{children}</PageTransition>
         </main>
         <AIAssistantWrapper />
+        <ContactSupportWrapper />
         <ComparisonBar />
         <footer className="border-t border-border bg-muted py-8">
           <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">

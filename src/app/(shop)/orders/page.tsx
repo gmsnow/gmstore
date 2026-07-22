@@ -45,8 +45,8 @@ export default function MyOrdersPage() {
     <div dir={direction} className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
       <div className="text-center space-y-2">
         <ShoppingBag className="h-10 w-10 mx-auto text-primary" />
-        <h1 className="text-2xl font-bold">طلباتي السابقة</h1>
-        <p className="text-sm text-muted-foreground">أدخل بريدك الإلكتروني لعرض جميع طلباتك</p>
+        <h1 className="text-2xl font-bold">{t("orders.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("orders.description")}</p>
       </div>
 
       <form onSubmit={searchOrders} className="flex gap-3 max-w-md mx-auto">
@@ -54,10 +54,10 @@ export default function MyOrdersPage() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="البريد الإلكتروني"
+          placeholder={t("orders.email_placeholder")}
           required
         />
-        <Button type="submit" loading={loading}><Search className="h-4 w-4 ml-2" />بحث</Button>
+        <Button type="submit" loading={loading}><Search className="h-4 w-4 ml-2" />{t("orders.search")}</Button>
       </form>
 
       {searched && orders && (
@@ -66,7 +66,7 @@ export default function MyOrdersPage() {
             <Card>
               <CardContent className="p-12 text-center text-muted-foreground">
                 <Package className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                <p>لا توجد طلبات سابقة لهذا البريد</p>
+                <p>{t("orders.no_orders")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -93,7 +93,7 @@ export default function MyOrdersPage() {
                       </div>
                     </div>
                     <div className="text-end">
-                      <p className="text-lg font-bold">{Number(order.total).toFixed(0)} ريال</p>
+                      <p className="text-lg font-bold">{Number(order.total).toFixed(0)} {t("merchant.currency")}</p>
                     </div>
                   </div>
 
@@ -108,11 +108,11 @@ export default function MyOrdersPage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{item.product?.name || "منتج"}</p>
+                          <p className="text-sm font-medium truncate">{item.product?.name || t("product.name_fallback")}</p>
                           <p className="text-xs text-muted-foreground">
                             {item.quantity} × {Number(item.price).toFixed(0)}
                             {item.color && <> · {item.color}</>}
-                            {item.size && <> · مقاس {item.size}</>}
+                            {item.size && <> · {t("detail.sizes")} {item.size}</>}
                           </p>
                         </div>
                       </div>
@@ -121,7 +121,7 @@ export default function MyOrdersPage() {
 
                   <div className="mt-4">
                     <Link href={`/track/${order.id}`}>
-                      <Button variant="outline" size="sm">تتبع الطلب</Button>
+                      <Button variant="outline" size="sm">{t("orders.track")}</Button>
                     </Link>
                   </div>
                 </CardContent>

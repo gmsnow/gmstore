@@ -17,14 +17,13 @@ interface Withdrawal {
   updatedAt: string;
 }
 
-const statusConfig: Record<string, { label: string; variant: "warning" | "success" | "danger" | "default"; icon: typeof Clock }> = {
-  PENDING: { label: "قيد الانتظار", variant: "warning", icon: Clock },
-  APPROVED: { label: "تمت الموافقة", variant: "success", icon: CheckCircle },
-  REJECTED: { label: "مرفوض", variant: "danger", icon: XCircle },
-};
-
 export default function MerchantWithdrawalsPage() {
   const { t, direction } = useI18n();
+  const statusConfig: Record<string, { label: string; variant: "warning" | "success" | "danger" | "default"; icon: typeof Clock }> = {
+    PENDING: { label: t("merchant.status_PENDING"), variant: "warning", icon: Clock },
+    APPROVED: { label: t("merchant.status_APPROVED"), variant: "success", icon: CheckCircle },
+    REJECTED: { label: t("merchant.status_REJECTED"), variant: "danger", icon: XCircle },
+  };
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);

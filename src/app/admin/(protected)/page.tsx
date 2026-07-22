@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Tags, ShoppingBag, DollarSign, TrendingUp, Calendar, CheckCircle } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion-wrappers";
 import { T } from "@/components/translate";
+import { getServerTranslations } from "@/lib/i18n/server";
 
 interface MonthlyIncome {
   month: string;
@@ -32,6 +33,7 @@ function IncomeBarChart({ data, maxIncome }: { data: MonthlyIncome[]; maxIncome:
 }
 
 export default async function AdminDashboard() {
+  const { locale } = await getServerTranslations();
   const now = new Date();
 
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -40,7 +42,8 @@ export default async function AdminDashboard() {
   startOfWeek.setHours(0, 0, 0, 0);
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const fmt = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", { month: "long" });
+  const monthNames = Array.from({ length: 12 }, (_, i) => fmt.format(new Date(2024, i, 1)));
 
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
@@ -107,14 +110,14 @@ export default async function AdminDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="h-5 w-5 text-primary" />الدخل الشهري (آخر 6 أشهر)</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="h-5 w-5 text-primary" /><T k="admin.monthly_income" /></CardTitle>
           </CardHeader>
           <CardContent>
             <IncomeBarChart data={monthlyData} maxIncome={maxIncome} />
           </CardContent>
         </Card>
 
-        <h2 className="text-xl font-semibold">الدخل</h2>
+        <h2 className="text-xl font-semibold"><T k="admin.income_title" /></h2>
         <StaggerContainer className="grid gap-4 md:grid-cols-3">
           {incomeStats.map((s) => (
             <StaggerItem key={s.titleKey}>
@@ -124,7 +127,7 @@ export default async function AdminDashboard() {
                   <s.icon className={`h-5 w-5 ${s.color}`} />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold">{s.value.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">ريال</span></p>
+                  <p className="text-3xl font-bold">{s.value.toFixed(2)} <span className="text-sm font-normal text-muted-foreground"><T k="admin.currency_rial" /></span></p>
                 </CardContent>
               </Card>
             </StaggerItem>

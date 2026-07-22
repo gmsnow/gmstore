@@ -223,7 +223,11 @@ When an individual item's status is updated, the order-level status is recalcula
 
 ### Product Pages
 - `/products` — Product listing with filters, sort, pagination (12/page)
-- `/products/[slug]` — Product detail with `dynamicParams = true`, `generateStaticParams` fetches all slugs
+- `/products/[slug]` — Product detail page (server component)
+  - Uses `ProductPriceSection` client component for currency toggle
+  - Uses `ProductColors` client component for color selection
+  - Sections: image gallery, price + currency toggle, colors, stock status, description, specs table, trust badges (2×2 grid), FAQ accordion
+  - `dynamicParams = true`, `generateStaticParams` fetches all slugs
 - `/comparison` — Compare up to 4 products
 
 ### Product Features
@@ -232,6 +236,10 @@ When an individual item's status is updated, the order-level status is recalcula
 - Discount + deal timer (dealEnd DateTime, featured boolean)
 - Brands with brandLogo
 - Specs as JSON (flexible key-value pairs)
+### Product Page Files
+- `src/app/(shop)/products/[slug]/page.tsx` — Server component with full layout
+- `src/app/(shop)/products/[slug]/price-section.tsx` — "use client" price + currency toggle
+- `src/app/(shop)/products/[slug]/colors.tsx` — "use client" color swatch picker
 
 ---
 
@@ -424,9 +432,14 @@ When an individual item's status is updated, the order-level status is recalcula
 
 ### Category Tree
 - Self-referencing: `Category.parentId` → `Category.id`
-- 376 categories seeded with Arabic names + English translations
-- Images from loremflickr (`https://loremflickr.com/400/400/{query}?lock={hash}`)
+- 214 categories seeded (22 main + 192 subcategories) with Arabic names + English translations
+- Images: `public/image/category/` — 2 PNG (`electronic.png`, `phone-case.png`) + 46 AVIF (Unspash photos)
+- Using a specific image requires knowing the filename; currently only `electronic.png` → electronics, `phone-case.png` → telephones
+- **Reran seed**: Old 373 categories deleted, replaced with 214 structured categories
+- Category drill-down UI: Homepage shows main categories → `/categories?parent=slug` shows subcategories with breadcrumbs
+- Admin categories page includes parent column with "رئيسي" badge
 - `font=raleway` does NOT support Arabic → placehold.co without `&font=raleway`
+- `categoryId` is `String?` (optional) in schema — allows deleting and reseeding categories without losing products
 
 ### Images
 - Product images: stored in `Product.images` (String[]) + optional `colorImages` (Json mapping color → URL)

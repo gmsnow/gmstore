@@ -1,5 +1,6 @@
 "use client";
 import { MapPin } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface Props {
   lat?: number | null;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function OrderMap({ lat, lng }: Props) {
+  const { t } = useI18n();
   const displayLat = lat ?? 24.7136;
   const displayLng = lng ?? 46.6753;
 
@@ -20,7 +22,7 @@ export function OrderMap({ lat, lng }: Props) {
         allowFullScreen
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
-        title="موقع العميل"
+        title={t("admin.customer_location")}
       />
       <a
         href={`https://www.google.com/maps?q=${displayLat},${displayLng}`}
@@ -28,7 +30,7 @@ export function OrderMap({ lat, lng }: Props) {
         rel="noopener noreferrer"
         className="flex items-center gap-1.5 text-xs text-primary hover:underline"
       >
-        <MapPin className="h-3.5 w-3.5" /> عرض على Google Maps
+        <MapPin className="h-3.5 w-3.5" /> {t("admin.view_on_google_maps")}
       </a>
     </div>
   );

@@ -30,7 +30,7 @@ export function SearchSuggestions({ query, onSelect, onClose, closeSearch }: {
   query: string; onSelect?: () => void; onClose?: () => void; closeSearch?: () => void;
 }) {
   const router = useRouter();
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [listening, setListening] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
@@ -163,7 +163,7 @@ export function SearchSuggestions({ query, onSelect, onClose, closeSearch }: {
 
           {results.length === 0 && query.trim().length >= 1 && (
             <p className="px-4 py-6 text-sm text-muted-foreground text-center">
-              {"لا توجد نتائج"}
+              {t("products.no_results")}
             </p>
           )}
         </div>
@@ -172,9 +172,9 @@ export function SearchSuggestions({ query, onSelect, onClose, closeSearch }: {
       <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-muted/30">
         <button onClick={startVoice} className={`flex items-center gap-1.5 text-xs ${listening ? "text-[var(--primary)]" : "text-muted-foreground"} hover:text-[var(--primary)] transition-colors`}>
           <Mic className={`h-3.5 w-3.5 ${listening ? "animate-pulse" : ""}`} />
-          {listening ? "جاري الاستماع..." : "بحث صوتي"}
+          {listening ? t("products.voice_listening") : t("products.voice_search")}
         </button>
-        <span className="text-[10px] text-muted-foreground">↵ لتأكيد البحث</span>
+        <span className="text-[10px] text-muted-foreground">↵ {t("products.search_confirm")}</span>
       </div>
     </div>
   );

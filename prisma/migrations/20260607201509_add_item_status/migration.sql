@@ -1,5 +1,0 @@
--- CreateEnum
-CREATE TYPE "ItemStatus" AS ENUM ('PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED');
-
--- AlterTable
-ALTER TABLE "OrderItem" ADD COLUMN     "status" "ItemStatus" NOT NULL DEFAULT 'PENDING';

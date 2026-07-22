@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { Mail, ShoppingBag, Star, Coins, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { T } from "@/components/translate";
+import { getServerTranslations } from "@/lib/i18n/server";
 
 const PAGE_SIZE = 20;
 
@@ -10,6 +12,7 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
+  const { t } = await getServerTranslations();
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1"));
   const skip = (page - 1) * PAGE_SIZE;
@@ -33,20 +36,20 @@ export default async function CustomersPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">العملاء</h1>
-      <p className="text-sm text-muted-foreground">إجمالي العملاء: {totalCount}</p>
+      <h1 className="text-2xl font-bold"><T k="admin.customers" /></h1>
+      <p className="text-sm text-muted-foreground"><T k="admin.total_customers" />: {totalCount}</p>
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-start p-3">الاسم</th>
-              <th className="text-start p-3">البريد</th>
-              <th className="text-start p-3"><ShoppingBag className="h-3.5 w-3.5 inline" /> الطلبات</th>
-              <th className="text-start p-3"><Star className="h-3.5 w-3.5 inline" /> التقييمات</th>
-              <th className="text-start p-3"><Coins className="h-3.5 w-3.5 inline" /> النقاط</th>
-              <th className="text-start p-3">كود الإحالة</th>
-              <th className="text-start p-3">التاريخ</th>
+              <th className="text-start p-3">{t("admin.name")}</th>
+              <th className="text-start p-3">{t("auth.email")}</th>
+              <th className="text-start p-3"><ShoppingBag className="h-3.5 w-3.5 inline" /> {t("admin.orders")}</th>
+              <th className="text-start p-3"><Star className="h-3.5 w-3.5 inline" /> {t("admin.reviews")}</th>
+              <th className="text-start p-3"><Coins className="h-3.5 w-3.5 inline" /> {t("admin.points")}</th>
+              <th className="text-start p-3">{t("admin.referral_code")}</th>
+              <th className="text-start p-3">{t("admin.date")}</th>
             </tr>
           </thead>
           <tbody>

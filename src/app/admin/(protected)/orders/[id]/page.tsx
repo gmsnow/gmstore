@@ -14,14 +14,6 @@ import { useI18n } from "@/lib/i18n/provider";
 
 const itemStatuses = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
 
-const statusLabels: Record<string, string> = {
-  PENDING: "قيد الانتظار",
-  PROCESSING: "قيد المعالجة",
-  SHIPPED: "تم الشحن",
-  DELIVERED: "تم التوصيل",
-  CANCELLED: "ملغي",
-};
-
 const statusVariant: Record<string, "warning" | "success" | "danger" | "default"> = {
   PENDING: "warning",
   PROCESSING: "warning",
@@ -30,10 +22,8 @@ const statusVariant: Record<string, "warning" | "success" | "danger" | "default"
   CANCELLED: "danger",
 };
 
-const statusOptions = itemStatuses.map((s) => ({ value: s, label: statusLabels[s] }));
-
-function StatusBadge({ status }: { status: string }) {
-  return <Badge variant={statusVariant[status] || "default"}>{statusLabels[status] || status}</Badge>;
+function StatusBadge({ status, t }: { status: string; t: (k: string) => string }) {
+  return <Badge variant={statusVariant[status] || "default"}>{t(`orders.status_${status}`)}</Badge>;
 }
 
 export default function AdminOrderDetailPage() {
@@ -71,7 +61,7 @@ export default function AdminOrderDetailPage() {
   }
 
   if (loading) return <div className="animate-pulse h-40 bg-muted rounded" />;
-  if (!order) return <p className="text-destructive">الطلب غير موجود</p>;
+  if (!order) return <p className="text-destructive">{t("admin.order_not_found")}</p>;
   console.log("items count:", order.items?.length, "items:", order.items?.map((i: any) => ({ id: i.id?.slice(0,8), status: i.status, price: typeof i.price, qty: i.quantity })));
 
   let address: Record<string, string> = {};
@@ -86,7 +76,7 @@ export default function AdminOrderDetailPage() {
         <Link href="/admin/orders">
           <Button variant="outline" size="sm"><ArrowRight className="h-4 w-4" /></Button>
         </Link>
-        <h1 className="text-xl md:text-2xl font-bold">{t("admin.order_detail") || "تفاصيل الطلب"}</h1>
+        <h1 className="text-xl md:text-2xl font-bold">{t("admin.order_detail")}</h1>
         <span className="mr-auto font-mono text-[10px] md:text-xs text-muted-foreground break-all max-w-[120px] md:max-w-none">{order.id}</span>
       </div>
 
@@ -99,7 +89,7 @@ export default function AdminOrderDetailPage() {
             {address.notes && <p><span className="font-medium text-muted-foreground"><T k="checkout.notes" />:</span> {address.notes}</p>}
             {lat && lng && (
               <a href={`https://www.google.com/maps?q=${lat},${lng}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary text-xs mt-2">
-                <MapPin className="h-3.5 w-3.5" /> عرض على الخريطة
+                <MapPin className="h-3.5 w-3.5" /> {t("admin.view_map")}
               </a>
             )}
           </CardContent>
@@ -115,12 +105,12 @@ export default function AdminOrderDetailPage() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-sm md:text-base">موقع العميل</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm md:text-base">{t("admin.customer_location")}</CardTitle></CardHeader>
         <CardContent>
           {lat && lng ? (
             <OrderMap lat={lat} lng={lng} />
           ) : (
-            <p className="text-xs text-muted-foreground">لم يتم تحديد موقع على الخريطة</p>
+            <p className="text-xs text-muted-foreground">{t("admin.no_map_location")}</p>
           )}
         </CardContent>
       </Card>
@@ -132,13 +122,13 @@ export default function AdminOrderDetailPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                    <TableHead>المنتج</TableHead>
-                  <TableHead>اللون/المقاس</TableHead>
+                    <TableHead>{t("admin.product_name")}</TableHead>
+                  <TableHead>{t("admin.color_size")}</TableHead>
                   <TableHead><T k="checkout.qty" /></TableHead>
                   <TableHead><T k="admin.price" /></TableHead>
-                  <TableHead>المجموع</TableHead>
-                  <TableHead>المواصفات</TableHead>
-                  <TableHead>حالة المنتج</TableHead>
+                  <TableHead>{t("admin.total")}</TableHead>
+                  <TableHead>{t("admin.specifications")}</TableHead>
+                  <TableHead>{t("admin.item_status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -161,12 +151,12 @@ export default function AdminOrderDetailPage() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {item.color && <div className="h-5 w-5 rounded-full border border-border shrink-0" style={{ backgroundColor: item.color }} title={item.color} />}
-                        <span className="text-xs">{[item.color && item.color, item.size && `مقاس ${item.size}`].filter(Boolean).join(" - ")}</span>
+                        <span className="text-xs">{[item.color && item.color, item.size && `${t("admin.size_prefix")} ${item.size}`].filter(Boolean).join(" - ")}</span>
                       </div>
                     </TableCell>
                     <TableCell>{item.quantity}</TableCell>
-                    <TableCell className="whitespace-nowrap">{Number(item.price).toFixed(2)} ريال</TableCell>
-                    <TableCell className="whitespace-nowrap">{(Number(item.price) * item.quantity).toFixed(2)} ريال</TableCell>
+                    <TableCell className="whitespace-nowrap">{Number(item.price).toFixed(2)} {t("admin.currency_rial")}</TableCell>
+                    <TableCell className="whitespace-nowrap">{(Number(item.price) * item.quantity).toFixed(2)} {t("admin.currency_rial")}</TableCell>
                     <TableCell>
                       {item.product?.specs ? (
                         <div className="text-[10px] space-y-0.5 max-w-[200px]">
@@ -187,13 +177,13 @@ export default function AdminOrderDetailPage() {
                       <Select
                         value={itemUpdating === item.id ? t("general.loading") : item.status}
                         onChange={(e) => updateItemStatus(item.id, e.target.value)}
-                        options={statusOptions}
+                        options={itemStatuses.map((s) => ({ value: s, label: t(`orders.status_${s}`) }))}
                         className="w-36"
                       />
                     </TableCell>
                   </TableRow>
                 )) : (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-4">لا توجد منتجات في هذا الطلب</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-4">{t("admin.no_items_in_order")}</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -218,9 +208,9 @@ export default function AdminOrderDetailPage() {
                   <p className="text-sm font-medium truncate">{item.product?.name || "—"}</p>
                   <div className="flex items-center gap-2 mt-1">
                     {item.color && <div className="h-4 w-4 rounded-full border border-border shrink-0" style={{ backgroundColor: item.color }} title={item.color} />}
-                    <span className="text-xs text-muted-foreground">{item.color && item.color}{item.color && item.size && " - "}{item.size && `مقاس ${item.size}`}</span>
+                    <span className="text-xs text-muted-foreground">{item.color && item.color}{item.color && item.size && " - "}{item.size && `${t("admin.size_prefix")} ${item.size}`}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.quantity} × {Number(item.price).toFixed(2)} ريال</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.quantity} × {Number(item.price).toFixed(2)} {t("admin.currency_rial")}</p>
                   {item.product?.specs && (
                     <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
                       {Object.entries(
@@ -234,33 +224,33 @@ export default function AdminOrderDetailPage() {
                     </div>
                   )}
                 </div>
-                <p className="text-sm font-semibold">{(Number(item.price) * item.quantity).toFixed(2)} ريال</p>
+                <p className="text-sm font-semibold">{(Number(item.price) * item.quantity).toFixed(2)} {t("admin.currency_rial")}</p>
               </div>
               <div className="flex items-center justify-between gap-2 pt-1">
-                <StatusBadge status={item.status} />
-                <Select
-                  value={itemUpdating === item.id ? t("general.loading") : item.status}
-                  onChange={(e) => updateItemStatus(item.id, e.target.value)}
-                  options={statusOptions}
-                  className="w-28 text-xs"
-                />
+                <StatusBadge status={item.status} t={t} />
+                  <Select
+                    value={itemUpdating === item.id ? t("general.loading") : item.status}
+                    onChange={(e) => updateItemStatus(item.id, e.target.value)}
+                    options={itemStatuses.map((s) => ({ value: s, label: t(`orders.status_${s}`) }))}
+                    className="w-28 text-xs"
+                  />
               </div>
             </CardContent>
           </Card>
-        )) : (
-          <div className="text-center text-muted-foreground py-8">لا توجد منتجات في هذا الطلب</div>
+        )        ) : (
+          <div className="text-center text-muted-foreground py-8">{t("admin.no_items_in_order")}</div>
         )}
       </div>
 
       <div className="text-left space-y-1">
-        <p className="text-sm text-muted-foreground">المجموع الفرعي: {Number(order.subtotal || order.total).toFixed(2)} ريال</p>
-        <p className="text-sm text-muted-foreground">التوصيل: {Number(order.shippingCost) === 0 ? "مجاني" : `${Number(order.shippingCost).toFixed(2)} ريال`}</p>
-        {Number(order.discount) > 0 && <p className="text-sm text-green-600">الخصم: -{Number(order.discount).toFixed(2)} ريال</p>}
+        <p className="text-sm text-muted-foreground">{t("admin.subtotal")}: {Number(order.subtotal || order.total).toFixed(2)} {t("admin.currency_rial")}</p>
+        <p className="text-sm text-muted-foreground">{t("admin.shipping")}: {Number(order.shippingCost) === 0 ? t("admin.free") : `${Number(order.shippingCost).toFixed(2)} ${t("admin.currency_rial")}`}</p>
+        {Number(order.discount) > 0 && <p className="text-sm text-green-600">{t("admin.discount")}: -{Number(order.discount).toFixed(2)} {t("admin.currency_rial")}</p>}
         <p className="text-lg md:text-xl font-bold pt-2 border-t border-border">
-          الإجمالي: {Number(order.total).toFixed(2)} ريال
+          {t("admin.total")}: {Number(order.total).toFixed(2)} {t("admin.currency_rial")}
         </p>
         <p className="text-[11px] md:text-xs text-muted-foreground mt-1">
-          تاريخ الطلب: {new Date(order.createdAt).toLocaleDateString("ar-SA")}
+          {t("admin.order_date")}: {new Date(order.createdAt).toLocaleDateString("ar-SA")}
         </p>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LangToggle } from "@/components/lang-toggle";
-import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, Image as ImageIcon, LogOut, Store, Menu, X, Ticket, BarChart3, Users, Star, Percent, XCircle, Store as StoreIcon, Globe } from "lucide-react";
+import { LayoutDashboard, Package, Tags, ShoppingBag, CheckCheck, Image as ImageIcon, LogOut, Store, Menu, X, Ticket, BarChart3, Users, Star, Percent, XCircle, Store as StoreIcon, Globe, MessageCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 
 export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
@@ -22,6 +22,7 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     { href: "/admin/merchants", labelKey: "admin.merchants", icon: StoreIcon },
     { href: "/admin/customers", labelKey: "admin.customers", icon: Users },
     { href: "/admin/reviews", labelKey: "admin.reviews", icon: Star },
+    { href: "/admin/chat", labelKey: "admin.chat", icon: MessageCircle },
     { href: "/admin/banners", labelKey: "admin.banners", icon: ImageIcon },
   ];
 

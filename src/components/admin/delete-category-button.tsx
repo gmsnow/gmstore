@@ -3,11 +3,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import { useI18n } from "@/lib/i18n/provider";
 
 export function DeleteCategoryButton({ categoryId }: { categoryId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { t } = useI18n();
 
   async function handleDelete() {
     setLoading(true);
@@ -17,7 +19,7 @@ export function DeleteCategoryButton({ categoryId }: { categoryId: string }) {
       router.refresh();
       setOpen(false);
     } catch {
-      alert("فشل الحذف");
+      alert(t("admin.delete_failed"));
     } finally {
       setLoading(false);
     }
@@ -25,12 +27,12 @@ export function DeleteCategoryButton({ categoryId }: { categoryId: string }) {
 
   return (
     <>
-      <Button variant="danger" size="sm" onClick={() => setOpen(true)}>حذف</Button>
-      <Modal open={open} onClose={() => setOpen(false)} title="تأكيد الحذف">
-        <p className="mb-4 text-sm text-muted-foreground">هل أنت متأكد من حذف هذه الفئة؟</p>
+      <Button variant="danger" size="sm" onClick={() => setOpen(true)}>{t("admin.delete")}</Button>
+      <Modal open={open} onClose={() => setOpen(false)} title={t("admin.confirm_delete_title")}>
+        <p className="mb-4 text-sm text-muted-foreground">{t("admin.confirm_delete_category")}</p>
         <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
-          <Button variant="danger" loading={loading} onClick={handleDelete}>حذف</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>{t("admin.cancel")}</Button>
+          <Button variant="danger" loading={loading} onClick={handleDelete}>{t("admin.delete")}</Button>
         </div>
       </Modal>
     </>

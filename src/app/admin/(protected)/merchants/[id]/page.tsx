@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useI18n } from "@/lib/i18n/provider";
 
 type Store = {
   id: string; name: string | null; nameEn: string | null; slug: string | null;
@@ -98,6 +99,7 @@ function ProductRow({ p }: { p: Product }) {
 export default function MerchantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const { t } = useI18n();
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -122,7 +124,7 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
     );
   }
 
-  if (!data) return <div className="text-center py-12 text-muted-foreground">فشل تحميل البيانات</div>;
+  if (!data) return <div className="text-center py-12 text-muted-foreground">{t("admin.failed_load")}</div>;
 
   const { merchant, store, stats, products, monthlySales, recentOrders } = data;
   const paginatedProducts = products.slice((page - 1) * pageSize, page * pageSize);
@@ -140,62 +142,62 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
             {merchant.name?.[0] || "?"}
           </div>
           <div>
-            <h1 className="text-xl font-bold">{merchant.name || "تاجر"}</h1>
+            <h1 className="text-xl font-bold">{merchant.name || t("admin.merchant")}</h1>
             <p className="text-sm text-muted-foreground">{merchant.email}</p>
           </div>
         </div>
-        <Badge variant="outline" className="mr-auto">تاجر</Badge>
+        <Badge variant="outline" className="mr-auto">{t("admin.merchant")}</Badge>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard icon={DollarSign} label="إجمالي الإيرادات" value={`${stats.totalRevenue.toLocaleString()} ريال`} color="text-green-600" />
-        <StatCard icon={ShoppingCart} label="الطلبات" value={stats.totalOrders.toString()} color="text-blue-600" />
-        <StatCard icon={Package} label="المنتجات" value={stats.totalProducts.toString()} color="text-orange-600" />
-        <StatCard icon={Percent} label="رسوم المنصة (2%)" value={`${stats.platformFees.toLocaleString()} ريال`} color="text-red-600" />
-        <StatCard icon={CreditCard} label="المسحوبات" value={`${stats.withdrawnAmount.toLocaleString()} ريال`} color="text-purple-600" />
-        <StatCard icon={Wallet} label="الرصيد القابل للسحب" value={`${stats.withdrawableBalance.toLocaleString()} ريال`} color="text-emerald-600" />
+        <StatCard icon={DollarSign} label={t("admin.total_revenue")} value={`${stats.totalRevenue.toLocaleString()} ${t("admin.currency_rial")}`} color="text-green-600" />
+        <StatCard icon={ShoppingCart} label={t("admin.orders")} value={stats.totalOrders.toString()} color="text-blue-600" />
+        <StatCard icon={Package} label={t("admin.products")} value={stats.totalProducts.toString()} color="text-orange-600" />
+        <StatCard icon={Percent} label={t("admin.platform_fee")} value={`${stats.platformFees.toLocaleString()} ${t("admin.currency_rial")}`} color="text-red-600" />
+        <StatCard icon={CreditCard} label={t("admin.withdrawals")} value={`${stats.withdrawnAmount.toLocaleString()} ${t("admin.currency_rial")}`} color="text-purple-600" />
+        <StatCard icon={Wallet} label={t("admin.withdrawable_balance")} value={`${stats.withdrawableBalance.toLocaleString()} ${t("admin.currency_rial")}`} color="text-emerald-600" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2"><Store className="h-5 w-5" />المتجر</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2"><Store className="h-5 w-5" />{t("admin.store")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {store ? (
               <div className="grid sm:grid-cols-2 gap-3">
-                <StoreField icon={Store} label="الاسم" value={store.name || store.nameEn} />
-                <StoreField icon={Globe} label="الرابط المختصر" value={store.slug || null} />
-                <StoreField icon={Phone} label="الهاتف" value={store.phone} />
-                <StoreField icon={Mail} label="البريد" value={store.email} />
-                <StoreField icon={MapPin} label="العنوان" value={store.address} />
-                <StoreField icon={Calendar} label="تاريخ التسجيل" value={new Date(merchant.registeredAt).toLocaleDateString("ar-SA")} />
-                {store.whatsapp && <StoreField icon={ExternalLink} label="واتساب" value={store.whatsapp} href={`https://wa.me/${store.whatsapp}`} />}
-                {store.telegram && <StoreField icon={ExternalLink} label="تيليجرام" value={store.telegram} />}
-                {store.instagram && <StoreField icon={ExternalLink} label="انستغرام" value={store.instagram} />}
-                {store.facebook && <StoreField icon={ExternalLink} label="فيسبوك" value={store.facebook} />}
+                <StoreField icon={Store} label={t("admin.category_name")} value={store.name || store.nameEn} />
+                <StoreField icon={Globe} label={t("admin.slug")} value={store.slug || null} />
+                <StoreField icon={Phone} label={t("admin.phone")} value={store.phone} />
+                <StoreField icon={Mail} label={t("admin.email_label")} value={store.email} />
+                <StoreField icon={MapPin} label={t("admin.address")} value={store.address} />
+                <StoreField icon={Calendar} label={t("admin.registration_date")} value={new Date(merchant.registeredAt).toLocaleDateString("ar-SA")} />
+                {store.whatsapp && <StoreField icon={ExternalLink} label={t("admin.whatsapp")} value={store.whatsapp} href={`https://wa.me/${store.whatsapp}`} />}
+                {store.telegram && <StoreField icon={ExternalLink} label={t("admin.telegram")} value={store.telegram} />}
+                {store.instagram && <StoreField icon={ExternalLink} label={t("admin.instagram")} value={store.instagram} />}
+                {store.facebook && <StoreField icon={ExternalLink} label={t("admin.facebook")} value={store.facebook} />}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">لا يوجد متجر مسجل</p>
+              <p className="text-muted-foreground text-sm">{t("admin.no_store_registered")}</p>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="h-5 w-5" />المبيعات الشهرية</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="h-5 w-5" />{t("admin.monthly_sales")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {monthlySales.map((m) => (
               <div key={m.month} className="space-y-1">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{m.month}</span>
-                  <span className="font-medium">{m.revenue.toLocaleString()} ريال</span>
+                  <span className="font-medium">{m.revenue.toLocaleString()} {t("admin.currency_rial")}</span>
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
                   <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(m.revenue / maxRevenue) * 100}%` }} />
                 </div>
-                <p className="text-xs text-muted-foreground">{m.orders} طلب</p>
+                <p className="text-xs text-muted-foreground">{m.orders} {t("admin.orders")}</p>
               </div>
             ))}
           </CardContent>
@@ -204,24 +206,24 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><Package className="h-5 w-5" />المنتجات ({products.length})</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2"><Package className="h-5 w-5" />{t("admin.products")} ({products.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="max-md:hidden">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>المنتج</TableHead>
-                  <TableHead>السعر</TableHead>
-                  <TableHead>المخزون</TableHead>
-                  <TableHead>مباع</TableHead>
-                  <TableHead>الإيرادات</TableHead>
-                  <TableHead>التقييم</TableHead>
+                  <TableHead>{t("admin.product_name")}</TableHead>
+                  <TableHead>{t("admin.price")}</TableHead>
+                  <TableHead>{t("admin.stock")}</TableHead>
+                  <TableHead>{t("admin.sold")}</TableHead>
+                  <TableHead>{t("admin.revenue")}</TableHead>
+                  <TableHead>{t("admin.review_rating")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedProducts.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">لا يوجد منتجات</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">{t("admin.no_products")}</TableCell></TableRow>
                 ) : paginatedProducts.map(p => <ProductRow key={p.id} p={p} />)}
               </TableBody>
             </Table>
@@ -229,7 +231,7 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
 
           <div className="md:hidden space-y-2">
             {paginatedProducts.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">لا يوجد منتجات</p>
+              <p className="text-center text-muted-foreground py-4">{t("admin.no_products")}</p>
             ) : paginatedProducts.map(p => (
               <Card key={p.id}>
                 <CardContent className="p-3 space-y-2">
@@ -239,14 +241,14 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{p.price.toLocaleString()} ريال</p>
+                      <p className="text-xs text-muted-foreground">{p.price.toLocaleString()} {t("admin.currency_rial")}</p>
                     </div>
                     <Badge variant={p.stock > 0 ? "success" : "danger"}>{p.stock}</Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs text-center">
-                    <div><p className="font-medium">{p.totalSold}</p><p className="text-muted-foreground">مباع</p></div>
-                    <div><p className="font-medium text-green-600">{p.revenue.toLocaleString()}</p><p className="text-muted-foreground">ريال</p></div>
-                    <div><p className="font-medium">{p.avgRating > 0 ? p.avgRating.toFixed(1) : "—"}</p><p className="text-muted-foreground">تقييم</p></div>
+                    <div><p className="font-medium">{p.totalSold}</p><p className="text-muted-foreground">{t("admin.sold")}</p></div>
+                    <div><p className="font-medium text-green-600">{p.revenue.toLocaleString()}</p><p className="text-muted-foreground">{t("admin.currency_rial")}</p></div>
+                    <div><p className="font-medium">{p.avgRating > 0 ? p.avgRating.toFixed(1) : "—"}</p><p className="text-muted-foreground">{t("admin.review_rating")}</p></div>
                   </div>
                 </CardContent>
               </Card>
@@ -266,17 +268,17 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
       {recentOrders.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2"><ShoppingCart className="h-5 w-5" />آخر الطلبات</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2"><ShoppingCart className="h-5 w-5" />{t("admin.recent_orders")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="rounded-xl border border-border overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="text-start p-3">العميل</th>
-                    <th className="text-start p-3">المنتجات</th>
-                    <th className="text-start p-3">المبلغ</th>
-                    <th className="text-start p-3">التاريخ</th>
+                    <th className="text-start p-3">{t("admin.customer")}</th>
+                    <th className="text-start p-3">{t("admin.products")}</th>
+                    <th className="text-start p-3">{t("admin.amount")}</th>
+                    <th className="text-start p-3">{t("admin.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -284,7 +286,7 @@ export default function MerchantDetailPage({ params }: { params: Promise<{ id: s
                     <tr key={o.id} className="border-t border-border">
                       <td className="p-3">{o.customerName}</td>
                       <td className="p-3 text-muted-foreground">{o.items.map(i => i.product?.name || i.product?.nameEn || "").join(", ").slice(0, 40)}</td>
-                      <td className="p-3 font-medium">{Number(o.total).toLocaleString()} ريال</td>
+                      <td className="p-3 font-medium">{Number(o.total).toLocaleString()} {t("admin.currency_rial")}</td>
                       <td className="p-3 text-muted-foreground">{new Date(o.createdAt).toLocaleDateString("ar-SA")}</td>
                     </tr>
                   ))}

@@ -19,7 +19,7 @@ const links = [
   { href: "/merchant/settings", labelKey: "merchant.account_settings", icon: Settings },
 ];
 
-function StoreLink({ storeSlug, direction }: { storeSlug?: string | null; direction: string }) {
+function StoreLink({ storeSlug, direction, t }: { storeSlug?: string | null; direction: string; t: (key: string) => string }) {
   if (!storeSlug) return null;
   return (
     <Link
@@ -28,7 +28,7 @@ function StoreLink({ storeSlug, direction }: { storeSlug?: string | null; direct
       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-primary/10 text-primary`}
     >
       <Eye className="h-4 w-4" />
-      <span>عرض المتجر</span>
+      <span>{t("merchant.view_store")}</span>
       <ArrowRight className={`h-3 w-3 ${direction === "rtl" ? "rotate-180" : ""}`} />
     </Link>
   );
@@ -94,7 +94,7 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo, s
                   <l.icon className="h-4 w-4" /> <T k={l.labelKey} />
                 </Link>
               ))}
-              <StoreLink storeSlug={storeSlug} direction={direction} />
+              <StoreLink storeSlug={storeSlug} direction={direction} t={t} />
             </nav>
             <div className="pt-8 space-y-1 border-t border-border">
               <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
@@ -135,7 +135,7 @@ export function MerchantSidebar({ children, storeName, storeNameEn, storeLogo, s
               <l.icon className="h-4 w-4" /> <T k={l.labelKey} />
             </Link>
           ))}
-          <StoreLink storeSlug={storeSlug} direction={direction} />
+          <StoreLink storeSlug={storeSlug} direction={direction} t={t} />
         </nav>
         <div className="mt-auto pt-8 space-y-1 border-t border-border">
           <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">

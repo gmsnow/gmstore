@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { T } from "@/components/translate";
+import { getServerTranslations } from "@/lib/i18n/server";
 
 const PAGE_SIZE = 20;
 
@@ -16,7 +18,8 @@ export default async function AdminMerchantsPage({
   const page = Math.max(1, parseInt(params.page || "1"));
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [merchants, totalMerchants] = await Promise.all([
+  const [{ t }, merchants, totalMerchants] = await Promise.all([
+    getServerTranslations(),
     prisma.user.findMany({
       where: { role: "MERCHANT" },
       include: {
@@ -35,7 +38,7 @@ export default async function AdminMerchantsPage({
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Store className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">التجار</h1>
+        <h1 className="text-2xl font-bold"><T k="admin.merchants" /></h1>
         <span className="text-sm text-muted-foreground">({totalMerchants})</span>
       </div>
 
@@ -43,17 +46,17 @@ export default async function AdminMerchantsPage({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>اسم التاجر</TableHead>
-              <TableHead>البريد الإلكتروني</TableHead>
-              <TableHead>اسم المتجر</TableHead>
-              <TableHead>المنتجات</TableHead>
-              <TableHead>التقييمات</TableHead>
-              <TableHead>تاريخ التسجيل</TableHead>
+              <TableHead><T k="admin.merchant_name" /></TableHead>
+              <TableHead><T k="auth.email" /></TableHead>
+              <TableHead><T k="admin.store_name" /></TableHead>
+              <TableHead><T k="admin.products" /></TableHead>
+              <TableHead><T k="admin.reviews" /></TableHead>
+              <TableHead><T k="admin.registration_date" /></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {merchants.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">لا يوجد تجار بعد</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8"><T k="admin.no_merchants" /></TableCell></TableRow>
             ) : merchants.map((m) => (
               <TableRow key={m.id} className="cursor-pointer hover:bg-muted/50">
                 <TableCell>
@@ -91,7 +94,7 @@ export default async function AdminMerchantsPage({
 
       <div className="md:hidden space-y-3">
         {merchants.length === 0 ? (
-          <Card><CardContent className="p-8 text-center text-muted-foreground">لا يوجد تجار بعد</CardContent></Card>
+          <Card><CardContent className="p-8 text-center text-muted-foreground"><T k="admin.no_merchants" /></CardContent></Card>
         ) : merchants.map((m) => (
           <Link href={`/admin/merchants/${m.id}`} key={m.id}>
             <Card className="hover:border-primary/50 transition-colors">
@@ -108,8 +111,8 @@ export default async function AdminMerchantsPage({
                   </div>
                 </div>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Store className="h-3 w-3" />{m.store?.name || m.store?.nameEn || "لا يوجد متجر"}</span>
-                <span className="flex items-center gap-1"><Package className="h-3 w-3" />{m._count.products} منتج</span>
+                <span className="flex items-center gap-1"><Store className="h-3 w-3" />{m.store?.name || m.store?.nameEn || t("admin.no_store")}</span>
+                <span className="flex items-center gap-1"><Package className="h-3 w-3" />{m._count.products} {t("admin.products")}</span>
                 <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{m.createdAt.toLocaleDateString("ar-SA")}</span>
               </div>
             </CardContent>

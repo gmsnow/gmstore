@@ -6,7 +6,7 @@ import Image from "next/image";
 import { X, Minus, Plus, Trash2, ShoppingBag, Ticket, Truck, Package, ChevronUp, Check, Search, ChevronDown } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
 import { useCurrency, USD_TO_YER, USD_TO_SAR, type Currency } from "@/lib/currency/context";
-import { getCart, removeFromCart, updateQuantity, cartSubtotal, getFreeShippingThreshold, getBaseShippingCost } from "@/lib/cart/store";
+import { getCart, removeFromCart, updateQuantity, cartSubtotal, getShippingCost } from "@/lib/cart/store";
 import type { CartItem } from "@/types";
 
 const statusSteps = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED"];
@@ -93,12 +93,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   }, [open]);
 
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const threshold = getFreeShippingThreshold();
-  const baseShippingCost = getBaseShippingCost();
-  const remaining = Math.max(0, threshold - subtotal);
-  const isFreeShipping = subtotal >= threshold;
-  const progressPct = Math.min(100, (subtotal / threshold) * 100);
-  const shippingLabel = isFreeShipping ? t("cart.free_shipping") : t("cart.shipping_estimate");
+  const shippingCost = getShippingCost();
 
   function formatPrice(priceYer: number) {
     if (currency === "usd") return (priceYer / USD_TO_YER).toFixed(2);
@@ -291,21 +286,12 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </form>
             )}
 
-            {/* Free shipping progress (always if no trackedOrder) */}
+            {/* Flat shipping fee notice */}
             {!trackedOrder && (
               <div className="px-4 py-3 border-b border-border">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Truck className="h-3.5 w-3.5" />
-                  {isFreeShipping
-                    ? <span className="text-green-600 font-semibold">{t("cart.free_shipping_achieved")}</span>
-                    : <span>{t("cart.free_shipping_progress").replace("{amount}", `${formatPrice(remaining)} ${label}`)}</span>
-                  }
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${isFreeShipping ? "bg-green-500" : "bg-primary"}`}
-                    style={{ width: `${progressPct}%` }}
-                  />
+                  <span>الشحن: {formatPrice(shippingCost)} {label} لجميع الطلبات</span>
                 </div>
               </div>
             )}
@@ -416,9 +402,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t("cart.shipping")}</span>
-                    <span className={isFreeShipping ? "text-green-600 font-semibold" : ""}>
-                      {shippingLabel}
-                    </span>
+                    <span>{formatPrice(shippingCost)} {label}</span>
                   </div>
                   <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
                     <span>{t("cart.total")}</span>

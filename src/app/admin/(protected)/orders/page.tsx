@@ -6,16 +6,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChevronLeft, ChevronRight, Eye, CheckCheck, XCircle } from "lucide-react";
 import { MobileOrderCards } from "@/components/admin/mobile-order-cards";
 import { OrderLocationLink } from "@/components/admin/order-location-link";
+import { T } from "@/components/translate";
+import { getServerTranslations } from "@/lib/i18n/server";
 
 const PAGE_SIZE = 20;
 
-const statusLabels: Record<string, string> = {
-  PENDING: "قيد الانتظار",
-  PROCESSING: "قيد المعالجة",
-  SHIPPED: "تم الشحن",
-  DELIVERED: "تم التوصيل",
-  CANCELLED: "ملغي",
-};
+function statusLabel(t: (k: string) => string, status: string) {
+  return t(`orders.status_${status}`);
+}
 
 const statusVariant: Record<string, "warning" | "success" | "danger" | "default"> = {
   PENDING: "warning",
@@ -52,7 +50,8 @@ export default async function AdminOrdersPage({
   const page = Math.max(1, parseInt(params.page || "1"));
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [rawOrders, totalCount] = await Promise.all([
+  const [{ t }, rawOrders, totalCount] = await Promise.all([
+    getServerTranslations(),
     prisma.order.findMany({
       where: { status: { notIn: ["DELIVERED", "CANCELLED"] } },
       include: { items: { include: { product: true } } },
@@ -76,11 +75,11 @@ export default async function AdminOrdersPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <h1 className="text-2xl font-bold">الطلبات</h1>
+        <h1 className="text-2xl font-bold"><T k="admin.orders" /></h1>
         <div className="mr-auto flex gap-2">
-          <Link href="/admin/orders" className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition-colors">الحالية</Link>
-          <Link href="/admin/orders/delivered" className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors"><CheckCheck className="h-4 w-4 ml-1" />المكتملة</Link>
-          <Link href="/admin/orders/cancelled" className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors"><XCircle className="h-4 w-4 ml-1" />الملغية</Link>
+          <Link href="/admin/orders" className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition-colors"><T k="admin.current_orders" /></Link>
+          <Link href="/admin/orders/delivered" className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors"><CheckCheck className="h-4 w-4 ml-1" /><T k="admin.orders_completed" /></Link>
+          <Link href="/admin/orders/cancelled" className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors"><XCircle className="h-4 w-4 ml-1" /><T k="admin.cancelled_orders" /></Link>
         </div>
       </div>
 
@@ -88,19 +87,19 @@ export default async function AdminOrdersPage({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>رقم الطلب</TableHead>
-              <TableHead>العميل</TableHead>
-              <TableHead>المنتجات</TableHead>
-              <TableHead>المجموع</TableHead>
-              <TableHead>الحالة</TableHead>
-              <TableHead>التاريخ</TableHead>
-              <TableHead>الموقع</TableHead>
+              <TableHead><T k="admin.order_id" /></TableHead>
+              <TableHead><T k="admin.customer" /></TableHead>
+              <TableHead><T k="admin.products" /></TableHead>
+              <TableHead><T k="admin.total" /></TableHead>
+              <TableHead><T k="admin.status" /></TableHead>
+              <TableHead><T k="admin.date" /></TableHead>
+              <TableHead><T k="admin.location" /></TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {orders.length === 0 && (
-              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground">لا توجد طلبات بعد</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground"><T k="admin.no_orders" /></TableCell></TableRow>
             )}
             {orders.map((o) => (
               <TableRow key={o.id}>
@@ -110,8 +109,8 @@ export default async function AdminOrdersPage({
                   <div className="text-xs text-muted-foreground">{o.customerEmail}</div>
                 </TableCell>
                 <TableCell><OrderThumbs items={o.items} /></TableCell>
-                <TableCell>{Number(o.total).toFixed(2)} ريال</TableCell>
-                <TableCell><Badge variant={statusVariant[o.status] || "default"}>{statusLabels[o.status] || o.status}</Badge></TableCell>
+                <TableCell>{Number(o.total).toFixed(2)} {t("admin.currency_rial")}</TableCell>
+                <TableCell><Badge variant={statusVariant[o.status] || "default"}>{statusLabel(t, o.status)}</Badge></TableCell>
                 <TableCell>{o.createdAt.toLocaleDateString("ar-SA")}</TableCell>
                 <TableCell><OrderLocationLink shippingAddress={o.shippingAddress} /></TableCell>
                 <TableCell>

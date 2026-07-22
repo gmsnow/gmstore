@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Plus } from "lucide-react";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { T } from "@/components/translate";
 import { getServerTranslations } from "@/lib/i18n/server";
@@ -21,15 +21,13 @@ export default async function AdminProductsPage({
   const page = Math.max(1, parseInt(params.page || "1"));
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [products, totalCount] = await Promise.all([
-    prisma.product.findMany({
-      include: { category: true },
-      orderBy: { createdAt: "desc" },
-      take: PAGE_SIZE,
-      skip,
-    }),
-    prisma.product.count(),
-  ]);
+  const products = await prisma.product.findMany({
+    include: { category: true },
+    orderBy: { createdAt: "desc" },
+    take: PAGE_SIZE,
+    skip,
+  });
+  const totalCount = await prisma.product.count();
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
@@ -63,6 +61,9 @@ export default async function AdminProductsPage({
               <TableCell data-label={t("admin.featured")}>{p.featured ? "Yes" : "No"}</TableCell>
               <TableCell data-label="">
                 <div className="flex gap-1">
+                    <Link href={`/products/${p.slug}`}>
+                    <Button variant="ghost" size="sm"><ExternalLink className="h-4 w-4" /></Button>
+                  </Link>
                   <Link href={`/admin/products/${p.id}/edit`}>
                     <Button variant="outline" size="sm"><T k="admin.edit" /></Button>
                   </Link>

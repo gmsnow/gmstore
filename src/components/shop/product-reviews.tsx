@@ -132,8 +132,8 @@ export function ProductReviews({ productId, sessionUserId }: { productId: string
                         </div>
                         <Textarea value={editComment} onChange={(e) => setEditComment(e.target.value)} />
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleEdit(r.id)}><Check className="h-4 w-4 ml-1" />حفظ</Button>
-                          <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}><X className="h-4 w-4 ml-1" />إلغاء</Button>
+                          <Button size="sm" onClick={() => handleEdit(r.id)}><Check className="h-4 w-4 ml-1" />{t("general.save")}</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}><X className="h-4 w-4 ml-1" />{t("general.cancel")}</Button>
                         </div>
                       </div>
                     ) : (
@@ -142,7 +142,7 @@ export function ProductReviews({ productId, sessionUserId }: { productId: string
                         {r.reply && (
                           <div className="mt-2 rounded-lg bg-primary/5 p-3 text-sm border border-primary/10">
                             <p className="text-xs font-medium text-primary mb-0.5 flex items-center gap-1">
-                              <Reply className="h-3 w-3" />رد
+                              <Reply className="h-3 w-3" />{t("general.reply")}
                             </p>
                             <p className="text-sm">{r.reply}</p>
                           </div>
@@ -156,7 +156,7 @@ export function ProductReviews({ productId, sessionUserId }: { productId: string
                       <button
                         onClick={() => { setEditingId(r.id); setEditRating(r.rating); setEditComment(r.comment || ""); }}
                         className="p-1 text-muted-foreground hover:text-primary transition-colors"
-                        title="تعديل"
+                        title={t("general.edit")}
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
@@ -164,7 +164,7 @@ export function ProductReviews({ productId, sessionUserId }: { productId: string
                         onClick={() => handleDelete(r.id)}
                         disabled={deletingId === r.id}
                         className="p-1 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50"
-                        title="حذف"
+                        title={t("general.delete")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

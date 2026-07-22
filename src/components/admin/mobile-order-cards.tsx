@@ -4,14 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { SwipeableCard } from "@/components/ui/swipeable-card";
 import { OrderLocationLink } from "@/components/admin/order-location-link";
-
-const statusLabels: Record<string, string> = {
-  PENDING: "قيد الانتظار",
-  PROCESSING: "قيد المعالجة",
-  SHIPPED: "تم الشحن",
-  DELIVERED: "تم التوصيل",
-  CANCELLED: "ملغي",
-};
+import { useI18n } from "@/lib/i18n/provider";
 
 const statusVariant: Record<string, "warning" | "success" | "danger" | "default"> = {
   PENDING: "warning",
@@ -23,9 +16,21 @@ const statusVariant: Record<string, "warning" | "success" | "danger" | "default"
 
 export function MobileOrderCards({ orders }: { orders: any[] }) {
   const router = useRouter();
+  const { t } = useI18n();
+
+  function statusLabel(s: string) {
+    switch (s) {
+      case "PENDING": return t("admin.order_status_pending");
+      case "PROCESSING": return t("admin.order_status_processing");
+      case "SHIPPED": return t("admin.order_status_shipped");
+      case "DELIVERED": return t("admin.order_status_delivered");
+      case "CANCELLED": return t("admin.order_status_cancelled");
+      default: return s;
+    }
+  }
 
   if (orders.length === 0) {
-    return <div className="text-center text-muted-foreground py-8">لا توجد طلبات بعد</div>;
+    return <div className="text-center text-muted-foreground py-8">{t("admin.no_orders_yet")}</div>;
   }
 
   return (
@@ -36,7 +41,7 @@ export function MobileOrderCards({ orders }: { orders: any[] }) {
           ? [
               ...(o.status !== "SHIPPED" ? [{
                 key: "next",
-                label: o.status === "PENDING" ? "معالجة" : "شحن",
+                label: o.status === "PENDING" ? t("admin.process") : t("admin.ship"),
                 color: "#eab308",
                 onSwipe: async () => {
                   const next = o.status === "PENDING" ? "PROCESSING" : "SHIPPED";
@@ -50,7 +55,7 @@ export function MobileOrderCards({ orders }: { orders: any[] }) {
               }] : []),
               {
                 key: "deliver",
-                label: "توصيل",
+                label: t("admin.deliver"),
                 color: "#22c55e",
                 onSwipe: async () => {
                   await fetch(`/api/orders/${o.id}/status`, {
@@ -73,7 +78,7 @@ export function MobileOrderCards({ orders }: { orders: any[] }) {
             <div className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
-                <Badge variant={statusVariant[o.status] || "default"}>{statusLabels[o.status] || o.status}</Badge>
+                <Badge variant={statusVariant[o.status] || "default"}>{statusLabel(o.status)}</Badge>
               </div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="flex -space-x-2 rtl:space-x-reverse">
@@ -89,14 +94,14 @@ export function MobileOrderCards({ orders }: { orders: any[] }) {
                   ))}
                   {o.items.length > 4 && <span className="h-8 w-8 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] text-muted-foreground">+{o.items.length - 4}</span>}
                 </div>
-                <span className="text-sm font-medium">{o.items.length} منتج</span>
+                <span className="text-sm font-medium">{o.items.length} {t("admin.items_count")}</span>
               </div>
-              <div className="text-sm mb-1"><span className="text-muted-foreground">العميل: </span>{o.customerName}</div>
+              <div className="text-sm mb-1"><span className="text-muted-foreground">{t("admin.customer")}: </span>{o.customerName}</div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{new Date(o.createdAt).toLocaleDateString("ar-SA")}</span>
                 <div className="flex items-center gap-2">
                   <OrderLocationLink shippingAddress={o.shippingAddress} />
-                  <span className="text-sm font-semibold">{Number(o.total).toFixed(2)} ريال</span>
+                  <span className="text-sm font-semibold">{Number(o.total).toFixed(2)} {t("admin.rial")}</span>
                 </div>
               </div>
             </div>

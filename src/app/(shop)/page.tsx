@@ -9,7 +9,7 @@ import { HeroSlider } from "@/components/shop/hero-slider";
 import { localizedName } from "@/lib/i18n/localized";
 import { getServerLocale } from "@/lib/i18n/server";
 import { DealsSection } from "@/components/shop/deals-section";
-import { getFeaturedProducts, getLatestProducts, getCategories, getBestSellers, getDealProducts, getActiveBanners } from "@/lib/data";
+import { getFeaturedProducts, getLatestProducts, getParentCategories, getBestSellers, getDealProducts, getActiveBanners } from "@/lib/data";
 import type { Locale } from "@/lib/i18n/dictionary";
 
 async function HeroSection() {
@@ -18,14 +18,14 @@ async function HeroSection() {
 }
 
 async function CategoriesSection({ locale }: { locale: Locale }) {
-  const categories = await getCategories();
+  const categories = await getParentCategories();
   if (categories.length === 0) return null;
   return (
     <section className="bg-white rounded-2xl p-4 sm:p-5 dark:bg-card lg:-mx-8 lg:px-8 lg:rounded-none">
-      <h2 className="text-lg font-bold mb-5 lg:mb-8">الفئات</h2>
+      <h2 className="text-lg font-bold mb-5 lg:mb-8"><T k="categories.title" /></h2>
       <div className="grid grid-flow-col grid-rows-3 gap-x-6 gap-y-3 overflow-x-auto pb-1 lg:gap-x-12 lg:gap-y-5" style={{ scrollbarWidth: 'none' }}>
         {(categories as any[]).map((cat: any) => (
-          <Link key={cat.id} href={`/products?category=${cat.slug}`} className="text-center group">
+          <Link key={cat.id} href={`/categories?parent=${cat.slug}`} className="text-center group">
             <div className="w-[70px] h-[70px] rounded-[25px] overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 max-sm:w-[60px] max-sm:h-[60px] relative">
               {cat.image ? (
                 <Image src={cat.image} alt={cat.name} fill className="object-cover" sizes="70px" />
@@ -121,7 +121,7 @@ function SectionSkeleton() {
   );
 }
 
-export default async function HomePage() {
+async function HomePageContent() {
   const session = await auth();
   const sessionUserId = (session?.user as any)?.id;
   const isLoggedIn = !!sessionUserId;
@@ -133,27 +133,35 @@ export default async function HomePage() {
   const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
 
   return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+      <Suspense fallback={<div className="h-[200px] bg-muted animate-pulse rounded-2xl" />}>
+        <CategoriesSection locale={locale} />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
+        <DealsSectionWrapper favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
+        <FeaturedSection favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
+        <BestSellersSection favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
+        <LatestSection favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
+      </Suspense>
+    </div>
+  );
+}
+
+export default async function HomePage() {
+  return (
     <>
       <Suspense fallback={<div className="h-[300px] bg-muted animate-pulse rounded-2xl mx-4 mt-4" />}>
         <HeroSection />
       </Suspense>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
-        <Suspense fallback={<div className="h-[200px] bg-muted animate-pulse rounded-2xl" />}>
-          <CategoriesSection locale={locale} />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <DealsSectionWrapper favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <FeaturedSection favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <BestSellersSection favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <LatestSection favoriteIds={favoriteIds} isLoggedIn={isLoggedIn} />
-        </Suspense>
-      </div>
+      <Suspense fallback={<div className="h-96 bg-muted animate-pulse mx-4 rounded-2xl" />}>
+        <HomePageContent />
+      </Suspense>
     </>
   );
 }

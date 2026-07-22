@@ -69,7 +69,7 @@ export default async function MerchantProductsPage({
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-1 justify-end">
-                    <Link href={`/products/${encodeURIComponent(p.slug)}`}>
+                    <Link href={`/products/${p.slug}`}>
                       <Button variant="ghost" size="sm"><ExternalLink className="h-4 w-4" /></Button>
                     </Link>
                     <Link href={`/merchant/products/${p.id}/edit`}>

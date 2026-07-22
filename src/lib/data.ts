@@ -33,6 +33,26 @@ export async function getCategories() {
   ), 300_000);
 }
 
+export async function getParentCategories() {
+  return withTtl("parentCategories", cache(() =>
+    prisma.category.findMany({ where: { parentId: null }, select: { id: true, name: true, nameEn: true, slug: true, image: true, _count: { select: { products: true, children: true } } }, orderBy: { name: "asc" } })
+  ), 300_000);
+}
+
+export async function getCategoryBySlug(slug: string) {
+  return cache(() =>
+    prisma.category.findUnique({ where: { slug }, select: { id: true, name: true, nameEn: true, slug: true, image: true } })
+  )();
+}
+
+export async function getChildCategories(parentSlug: string) {
+  return cache(async () => {
+    const parent = await prisma.category.findUnique({ where: { slug: parentSlug }, select: { id: true } });
+    if (!parent) return [];
+    return prisma.category.findMany({ where: { parentId: parent.id }, select: { id: true, name: true, nameEn: true, slug: true, image: true, _count: { select: { products: true } } }, orderBy: { name: "asc" } });
+  })();
+}
+
 export async function getBestSellers() {
   return withTtl("bestSellers", cache(async () => {
     const bestRaw = await prisma.orderItem.groupBy({
@@ -76,7 +96,7 @@ const fullProductSelect = {
 
 export async function getProductBySlug(slug: string) {
   return withTtl(`product:${slug}`, cache(() =>
-    prisma.product.findUnique({ where: { slug: slug.normalize("NFC") }, select: fullProductSelect })
+    prisma.product.findUnique({ where: { slug: slug.normalize("NFC").toLowerCase() }, select: fullProductSelect })
   ));
 }
 

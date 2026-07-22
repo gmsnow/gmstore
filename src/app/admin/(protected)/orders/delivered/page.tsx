@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, ArrowLeft } from "lucide-react";
+import { T } from "@/components/translate";
+import { getServerTranslations } from "@/lib/i18n/server";
 
 function OrderThumbs({ items }: { items: any[] }) {
   return (
@@ -24,6 +26,7 @@ function OrderThumbs({ items }: { items: any[] }) {
 }
 
 export default async function AdminDeliveredOrdersPage() {
+  const { t } = await getServerTranslations();
   const orders = await prisma.order.findMany({
     where: { status: "DELIVERED" },
     include: { items: { include: { product: true } } },
@@ -36,8 +39,8 @@ export default async function AdminDeliveredOrdersPage() {
         <Link href="/admin/orders">
           <Button variant="outline" size="sm"><ArrowLeft className="h-4 w-4" /></Button>
         </Link>
-        <h1 className="text-2xl font-bold">الطلبات المكتملة</h1>
-        <Link href="/admin/orders" className="mr-auto inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors">الحالية</Link>
+        <h1 className="text-2xl font-bold"><T k="admin.delivered_orders" /></h1>
+        <Link href="/admin/orders" className="mr-auto inline-flex h-8 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium hover:bg-muted transition-colors"><T k="admin.current_orders" /></Link>
       </div>
 
       {/* Desktop table */}
@@ -45,11 +48,11 @@ export default async function AdminDeliveredOrdersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>رقم الطلب</TableHead>
-              <TableHead>العميل</TableHead>
-              <TableHead>المنتجات</TableHead>
-              <TableHead>المجموع</TableHead>
-              <TableHead>تاريخ التوصيل</TableHead>
+              <TableHead><T k="admin.order_id" /></TableHead>
+              <TableHead><T k="admin.customer" /></TableHead>
+              <TableHead><T k="admin.products" /></TableHead>
+              <TableHead><T k="admin.total" /></TableHead>
+              <TableHead><T k="admin.delivery_date" /></TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -62,7 +65,7 @@ export default async function AdminDeliveredOrdersPage() {
                   <div className="text-xs text-muted-foreground">{o.customerEmail}</div>
                 </TableCell>
                 <TableCell><OrderThumbs items={o.items} /></TableCell>
-                <TableCell>{Number(o.total).toFixed(2)} ريال</TableCell>
+                <TableCell>{Number(o.total).toFixed(2)} {t("admin.currency_rial")}</TableCell>
                 <TableCell>{o.createdAt.toLocaleDateString("ar-SA")}</TableCell>
                 <TableCell>
                   <Link href={`/admin/orders/${o.id}`}>
@@ -74,7 +77,7 @@ export default async function AdminDeliveredOrdersPage() {
             {orders.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  لا توجد طلبات مكتملة بعد
+                  <T k="admin.no_delivered_orders" />
                 </TableCell>
               </TableRow>
             )}
@@ -85,24 +88,24 @@ export default async function AdminDeliveredOrdersPage() {
       {/* Mobile cards */}
       <div className="md:hidden space-y-3">
         {orders.length === 0 && (
-          <div className="text-center text-muted-foreground py-8">لا توجد طلبات مكتملة بعد</div>
+          <div className="text-center text-muted-foreground py-8"><T k="admin.no_delivered_orders" /></div>
         )}
         {orders.map((o) => (
           <Link key={o.id} href={`/admin/orders/${o.id}`} className="block rounded-lg border border-border bg-card p-4 hover:bg-muted/50 transition-colors">
             <div className="flex items-center justify-between mb-2">
               <span className="font-mono text-xs text-muted-foreground">#{o.id.slice(0, 8)}</span>
-              <Badge variant="success">تم التوصيل</Badge>
+              <Badge variant="success">{t("orders.status_DELIVERED")}</Badge>
             </div>
             <div className="flex items-center gap-3 mb-2">
               <OrderThumbs items={o.items} />
-              <span className="text-sm font-medium">{o.items.length} منتج</span>
+              <span className="text-sm font-medium">{o.items.length} {t("admin.products")}</span>
             </div>
             <div className="text-sm mb-1">
-              <span className="text-muted-foreground">العميل: </span>{o.customerName}
+              <span className="text-muted-foreground">{t("admin.customer")}: </span>{o.customerName}
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{o.createdAt.toLocaleDateString("ar-SA")}</span>
-              <span className="text-sm font-semibold">{Number(o.total).toFixed(2)} ريال</span>
+              <span className="text-sm font-semibold">{Number(o.total).toFixed(2)} {t("admin.currency_rial")}</span>
             </div>
           </Link>
         ))}

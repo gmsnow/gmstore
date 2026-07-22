@@ -42,7 +42,7 @@ export default async function StorePage({ params }: { params: Promise<{ slug: st
 
   return (
     <FadeIn>
-      <StoreHeader store={store} locale={locale} />
+      <StoreHeader store={store as any} locale={locale} />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
         <FadeInUp>
           <h2 className="text-xl font-bold mb-6">منتجات المتجر</h2>

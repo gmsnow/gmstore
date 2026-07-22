@@ -30,67 +30,70 @@ enum ItemStatus {
 }
 
 model User {
-  id            String      @id @default(cuid())
-  name          String?
-  email         String      @unique
-  password      String?
-  role          Role        @default(CUSTOMER)
-  image         String?
-  emailVerified DateTime?
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  products      Product[]
-  reviews       Review[]
-  favorites     Favorite[]
-  points        Int         @default(0)
-  referralCode  String?     @unique
-  referredById  String?
-  referredBy    User?       @relation("Referrals", fields: [referredById], references: [id])
-  referrals     User[]      @relation("Referrals")
-  store         Store?
-  withdrawals   Withdrawal[]
-  createdAt     DateTime    @default(now())
+  id                    String         @id @default(cuid())
+  name                  String?
+  email                 String         @unique
+  password              String?
+  role                  Role           @default(CUSTOMER)
+  image                 String?
+  emailVerified         DateTime?
+  accounts              Account[]
+  sessions              Session[]
+  orders                Order[]
+  products              Product[]
+  reviews               Review[]
+  favorites             Favorite[]
+  points                Int            @default(0)
+  referralCode          String?        @unique
+  referredById          String?
+  referredBy            User?          @relation("Referrals", fields: [referredById], references: [id])
+  referrals             User[]         @relation("Referrals")
+  store                 Store?
+  withdrawals           Withdrawal[]
+  customerConversations Conversation[] @relation("CustomerConversations")
+  adminConversations    Conversation[] @relation("AdminConversations")
+  messages              Message[]
+  createdAt             DateTime       @default(now())
 }
 
 model Store {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id])
-  name          String?
-  nameEn        String?
-  slug          String?  @unique
-  description   String?
-  descriptionEn String?
-  logo          String?
-  cover         String?
-  phone         String?
-  email         String?
-  address       String?
-  lat           Decimal? @db.Decimal(10, 7)
-  lng           Decimal? @db.Decimal(10, 7)
-  whatsapp      String?
-  telegram      String?
-  instagram     String?
-  facebook      String?
-  twitter       String?
-  tiktok        String?
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  name            String?
+  nameEn          String?
+  slug            String?  @unique
+  description     String?
+  descriptionEn   String?
+  logo            String?
+  cover           String?
+  phone           String?
+  email           String?
+  address         String?
+  lat             Decimal? @db.Decimal(10, 7)
+  lng             Decimal? @db.Decimal(10, 7)
+  whatsapp        String?
+  telegram        String?
+  instagram       String?
+  facebook        String?
+  twitter         String?
+  tiktok          String?
   shippingAddress String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Withdrawal {
-  id         String        @id @default(cuid())
-  userId     String
-  user       User          @relation(fields: [userId], references: [id])
-  amount     Decimal       @db.Decimal(10, 2)
-  fee        Decimal       @default(0) @db.Decimal(10, 2)
-  status     String        @default("PENDING")
-  method     String?
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Decimal  @db.Decimal(10, 2)
+  fee         Decimal  @default(0) @db.Decimal(10, 2)
+  status      String   @default("PENDING")
+  method      String?
   accountInfo String?
-  notes      String?
-  createdAt  DateTime      @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
 }
 
 model Account {
@@ -142,35 +145,35 @@ model Category {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  nameEn      String?
-  slug        String      @unique
-  description String?
+  id            String      @id @default(cuid())
+  name          String
+  nameEn        String?
+  slug          String      @unique
+  description   String?
   descriptionEn String?
-  price       Decimal     @db.Decimal(10, 2)
-  images      String[]
-  colors      String[]
-  sizes       String[]
-  colorImages Json?
-  colorStock  Json?
-  specs       Json?
-  videoUrl    String?
-  brand       String?
-  brandLogo   String?
-  categoryId  String?
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  userId      String?
-  user        User?       @relation(fields: [userId], references: [id])
-  stock       Int         @default(0)
-  discount    Int         @default(0)
-  dealEnd     DateTime?
-  featured    Boolean     @default(false)
-  orderItems  OrderItem[]
-  reviews     Review[]
-  favorites   Favorite[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  price         Decimal     @db.Decimal(10, 2)
+  images        String[]
+  colors        String[]
+  sizes         String[]
+  colorImages   Json?
+  colorStock    Json?
+  specs         Json?
+  videoUrl      String?
+  brand         String?
+  brandLogo     String?
+  categoryId    String?
+  category      Category?   @relation(fields: [categoryId], references: [id])
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+  stock         Int         @default(0)
+  discount      Int         @default(0)
+  dealEnd       DateTime?
+  featured      Boolean     @default(false)
+  orderItems    OrderItem[]
+  reviews       Review[]
+  favorites     Favorite[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@index([price])
   @@index([brand])
@@ -183,24 +186,24 @@ model Product {
 }
 
 model Order {
-  id              String        @id @default(cuid())
+  id              String      @id @default(cuid())
   userId          String?
-  user            User?         @relation(fields: [userId], references: [id])
+  user            User?       @relation(fields: [userId], references: [id])
   customerName    String
   customerEmail   String
   customerPhone   String
   items           OrderItem[]
-  subtotal        Decimal       @db.Decimal(10, 2) @default(0)
-  shippingCost    Decimal       @db.Decimal(10, 2) @default(0)
-  discount        Decimal       @db.Decimal(10, 2) @default(0)
-  total           Decimal       @db.Decimal(10, 2)
-  status          OrderStatus   @default(PENDING)
+  subtotal        Decimal     @default(0) @db.Decimal(10, 2)
+  shippingCost    Decimal     @default(0) @db.Decimal(10, 2)
+  discount        Decimal     @default(0) @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
   shippingAddress String?
   paymentIntentId String?
   couponId        String?
-  coupon          Coupon?       @relation(fields: [couponId], references: [id])
-  pointsEarned    Int           @default(0)
-  createdAt       DateTime      @default(now())
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  pointsEarned    Int         @default(0)
+  createdAt       DateTime    @default(now())
 
   @@index([userId])
   @@index([customerEmail])
@@ -222,16 +225,16 @@ model OrderItem {
 }
 
 model Review {
-  id        String      @id @default(cuid())
+  id        String   @id @default(cuid())
   productId String
-  product   Product     @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
   userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  rating    Int         @default(5)
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int      @default(5)
   comment   String?
   reply     String?
-  reported  Boolean     @default(false)
-  createdAt DateTime    @default(now())
+  reported  Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   @@unique([productId, userId])
   @@index([reported])
@@ -273,4 +276,35 @@ model Coupon {
   active    Boolean   @default(true)
   orders    Order[]
   createdAt DateTime  @default(now())
+}
+
+model Conversation {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   User      @relation("CustomerConversations", fields: [customerId], references: [id])
+  adminId    String?
+  admin      User?     @relation("AdminConversations", fields: [adminId], references: [id])
+  subject    String?
+  status     String    @default("OPEN")
+  messages   Message[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([customerId])
+  @@index([adminId])
+  @@index([status])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
 }

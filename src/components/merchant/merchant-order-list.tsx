@@ -275,11 +275,11 @@ export function MerchantOrderList({ cancelled = false }: { cancelled?: boolean }
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">{item.product.name}</p>
-                                {item.product.brand && <p className="text-[10px] text-muted-foreground mt-0.5">العلامة: {item.product.brand}</p>}
+                                {item.product.brand && <p className="text-[10px] text-muted-foreground mt-0.5">{t("merchant.brand_label")}: {item.product.brand}</p>}
                                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-muted-foreground">
                                   <span className="font-medium">{item.quantity} × {Number(item.price).toFixed(0)}</span>
-                                  {item.color && <><span className="w-1 h-1 rounded-full bg-muted-foreground/30" /><span>اللون: {item.color}</span></>}
-                                  {item.size && <><span className="w-1 h-1 rounded-full bg-muted-foreground/30" /><span>المقاس: {item.size}</span></>}
+                                  {item.color && <><span className="w-1 h-1 rounded-full bg-muted-foreground/30" /><span>{t("merchant.color_label")}: {item.color}</span></>}
+                                  {item.size && <><span className="w-1 h-1 rounded-full bg-muted-foreground/30" /><span>{t("merchant.size_label")}: {item.size}</span></>}
                                 </div>
                                 {item.product.specs && Object.keys(item.product.specs).length > 0 && (
                                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[10px] text-muted-foreground">
