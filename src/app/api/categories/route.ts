@@ -3,8 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
 export const GET = async () => {
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
-  return NextResponse.json(categories);
+  try {
+    const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+    return NextResponse.json(categories);
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message }, { status: 500 });
+  }
 };
 
 export const POST = auth(async (req) => {
