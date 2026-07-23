@@ -122,15 +122,19 @@ function SectionSkeleton() {
 }
 
 async function HomePageContent() {
-  const session = await auth();
+  let session: any = null;
+  try { session = await auth(); } catch { session = null; }
   const sessionUserId = (session?.user as any)?.id;
   const isLoggedIn = !!sessionUserId;
   const locale = await getServerLocale();
 
-  const userFavs = isLoggedIn
-    ? await prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } })
-    : [];
-  const favoriteIds = new Set(isLoggedIn ? (userFavs as any[]).map((f: any) => f.productId) : []);
+  let favoriteIds = new Set<string>();
+  if (isLoggedIn) {
+    try {
+      const userFavs = await prisma.favorite.findMany({ where: { userId: sessionUserId }, select: { productId: true } });
+      favoriteIds = new Set((userFavs as any[]).map((f: any) => f.productId));
+    } catch { /* ignore */ }
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">

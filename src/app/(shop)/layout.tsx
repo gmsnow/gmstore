@@ -26,7 +26,8 @@ function SignOutForm() {
 }
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+  let session: any = null;
+  try { session = await auth(); } catch { session = null; }
   const role = (session?.user as any)?.role;
   return (
     <CurrencyProvider>

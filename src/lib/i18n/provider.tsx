@@ -22,14 +22,12 @@ const I18nContext = createContext<I18nContext>({
 export function I18nProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>("ar");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("locale") as Locale | null;
     if (stored === "ar" || stored === "en") {
       setLocaleState(stored);
     }
-    setMounted(true);
   }, []);
 
   const setLocale = useCallback((l: Locale) => {
@@ -47,10 +45,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const dict = getDictionary(locale);
   const t = useCallback((key: string) => dict[key] || key, [dict]);
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <I18nContext.Provider value={{ locale, direction: getDirection(locale), t, toggleLocale, setLocale }}>
